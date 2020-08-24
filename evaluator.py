@@ -16,14 +16,16 @@ class Evaluator:
         if type(x) is Segment:
             raise Exception("length not supported yet")
         elif type(x) is Angle:
-            if self.is_180_angle(x):
+            if self.is_180_angle(x): # what about 0 angle?
                 return 180
             else:
                 raise Exception("non-straight angles not supported yet")
 
     def is_180_angle(self,ang):
-        maybeline = Segment(ang.get_start(),ang.get_end())
+        maybeline = Segment(ang.get_start_point(),ang.get_end_point())
+        maybeline.add_midpoints(ang.vertex)
 
+        #"any" function?
         for i in self.all:
             if type(i) is Segment and i.is_subsegment(maybeline):
                 return True
