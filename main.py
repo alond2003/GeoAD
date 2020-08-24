@@ -25,7 +25,7 @@ BCD = Angle(AC.get_subsegment_from(B),C,CE.get_subsegment_to(D))
 ACD = Angle(AC,C,CE.get_subsegment_to(D))
 print(str(geo.get_better_name_angle(BCD)))
 print(str(geo.get_better_name_angle(ACD)))
-
+print([str(i) for i in geo.find_all_180_angles()])
 
 
 print("\nend")

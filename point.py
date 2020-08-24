@@ -16,12 +16,11 @@ class Point:
 
     def __hash__(self):
         return hash(self.id)
-        
+
     def __eq__(self,other):
         return other.id == self.id
 
     @staticmethod
-    # hello
     def createPoints(*point_names):
         res = []
         for i in point_names:

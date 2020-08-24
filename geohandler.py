@@ -54,9 +54,8 @@ class GeoHandler:
                 true_rays.append(ray)
         return Angle(true_rays[0],ang.vertex,true_rays[1])
 
-
-    
-
+    def find_all_180_angles(self):
+        return list(filter(self.is_180_angle,self.get_angles()))
 
     def is_180_angle(self,ang):
         maybeline = Segment(ang.get_start_point(),ang.get_end_point())
