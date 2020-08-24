@@ -34,7 +34,29 @@ class GeoHandler:
                 for r1,r2 in zip(rays,rays[1:]+rays[:1]):
                     res.append(Angle(r1,p,r2))
 
-                return res
+        return res
+
+    def get_better_name_angle(self,ang:Angle):
+        true_rays = []
+        for ray in [ang.ray1,ang.ray2]:
+            tempray = None
+            if ray not in self.segments:
+                for l in self.segments:
+                    if l.is_subsegment(ray):
+                        otherpoint = ray.end if ang.vertex == ray.start else ray.start
+                        if l.get_all_points().index(ang.vertex) < l.get_all_points().index(otherpoint):
+                            tempray = l.get_subsegment_from(ang.vertex)
+                        else:
+                            tempray = l.get_subsegment_to(ang.vertex)
+                        break
+                true_rays.append(tempray)
+            else:
+                true_rays.append(ray)
+        return Angle(true_rays[0],ang.vertex,true_rays[1])
+
+
+    
+
 
     def is_180_angle(self,ang):
         maybeline = Segment(ang.get_start_point(),ang.get_end_point())

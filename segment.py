@@ -24,19 +24,23 @@ class Segment:
         return [self.start] + self.midpoints + [self.end]
     
     def get_subsegment_to(self,point):
-        #what about if point == start or == end?
+        #what about if point == start?
         if point in self.midpoints:
             res = Segment(self.start,point)
             res.add_midpoints(self.midpoints[0:self.midpoints.index(point)])
             return res
+        elif point == self.end:
+            return self
         return None
 
     def get_subsegment_from(self,point):
-        #what about if point == start or == end?
+        #what about if point == end?
         if point in self.midpoints:
             res = Segment(point,self.end)
             res.add_midpoints(self.midpoints[self.midpoints.index(point)+1:])
             return res
+        elif point == self.start:
+            return self
         return None
 
     def is_subsegment(self,seg):
@@ -51,6 +55,11 @@ class Segment:
     def __str__(self):
         return "Segment " + self.start.name+self.end.name + ": " + str([i.name for i in self.midpoints])
 
+    def __hash__(self):
+        return hash(tuple(self.get_all_points()))
+
+    def __eq__(self,other):
+        return other.get_all_points() == self.get_all_points() or other.get_all_points()[::-1] == self.get_all_points()
 
 
 

@@ -14,12 +14,15 @@ class Point:
     def add_linefrom(self,*lines):
         self.lines += list(lines)
 
+    def __hash__(self):
+        return hash(self.id)
+        
     def __eq__(self,other):
         return other.id == self.id
 
     @staticmethod
     # hello
-    def createPoints(len,*point_names):
+    def createPoints(*point_names):
         res = []
         for i in point_names:
             res.append(Point(i))
