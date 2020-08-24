@@ -14,4 +14,4 @@ class Angle:
         return self.ray2.start if self.ray2.end == self.vertex else self.ray2.end
 
     def __str__(self):
-        return "∢" + self.get_start_point() + self.vertex + self.get_end_point()
+        return "∢" + self.get_start_point().name + self.vertex.name + self.get_end_point().name
