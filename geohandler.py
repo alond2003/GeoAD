@@ -12,28 +12,30 @@ class GeoHandler:
                 self.segments.add(l)
         self.segments = list(self.segments)
 
+    def get_angles_around_point(self,p):
+        if len(p.lines) == 0 or (len(p.lines) == 1 and p in (p.lines[0].start,p.lines[0].end)):
+            return []
+        else:
+            rays = []
+            for l in p.lines:
+                if p not in (l.start,l.end):
+                    rays.append(l.get_subsegment_to(p))
+                else:
+                    rays.append(l)
+
+            for l in p.lines:
+                if p not in (l.start,l.end):
+                    rays.append(l.get_subsegment_from(p))
+
+            res = []
+            for r1,r2 in zip(rays,rays[1:]+rays[:1]):
+                res.append(Angle(r1,p,r2))
+            return res
+
     def get_angles(self):
         res = []
         for p in self.points:
-            if len(p.lines) == 0:
-                continue
-            elif len(p.lines) == 1 and p in (p.lines[0].start,p.lines[0].end):
-                continue
-            else:
-                rays = []
-                for l in p.lines:
-                    if p not in (l.start,l.end):
-                        rays.append(l.get_subsegment_to(p))
-                    else:
-                        rays.append(l)
-
-                for l in p.lines:
-                    if p not in (l.start,l.end):
-                        rays.append(l.get_subsegment_from(p))
-
-                for r1,r2 in zip(rays,rays[1:]+rays[:1]):
-                    res.append(Angle(r1,p,r2))
-
+            res += self.get_angles_around_point(p)
         return res
 
     def get_better_name_angle(self,ang:Angle):
@@ -62,4 +64,28 @@ class GeoHandler:
         maybeline.add_midpoints(ang.vertex)
 
         return any(type(i) is Segment and i.is_subsegment(maybeline) for i in self.segments)
+
+
+    def disassemble_angle(self,ang):
+        ang = self.get_better_name_angle(ang)
+        sub_angles = self.get_angles_around_point(ang.vertex)
+        i = 0
+        found = False
+        while i<len(sub_angles):
+            if sub_angles[i].ray1 == ang.ray1:
+                found = True
+                break
+            i += 1
+        
+        if not found:
+            raise Exception(f"didn't found the ray of the given angle ({str(ang)}) around the vertex ({ang.vertex.name})")
+
+        res = []
+        while sub_angles[i].ray1 != ang.ray2:
+            res.append(sub_angles[i])
+            i = (i+1)%len(sub_angles)
+
+        return res 
+
+
 
