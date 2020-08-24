@@ -42,7 +42,10 @@ class Segment:
     def is_subsegment(self,seg):
         idxs = []
         for i in seg.get_all_points():
-            idxs.append(self.get_all_points().index(i))
+            try:
+                idxs.append(self.get_all_points().index(i))
+            except ValueError:
+                return False
         return all(i<j for i,j in zip(idxs,idxs[1:])) or all(i>j for i,j in zip(idxs,idxs[1:]))
 
     def __str__(self):

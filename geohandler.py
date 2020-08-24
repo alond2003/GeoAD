@@ -1,9 +1,16 @@
 from angle import Angle
+from segment import Segment
 
 class GeoHandler:
 
-    def __init__(self,points=[]):
+    def __init__(self,points):
         self.points = points
+
+        self.segments = set()
+        for p in self.points:
+            for l in p.lines:
+                self.segments.add(l)
+        self.segments = list(self.segments)
 
     def get_angles(self):
         res = []
@@ -29,4 +36,9 @@ class GeoHandler:
 
                 return res
 
+    def is_180_angle(self,ang):
+        maybeline = Segment(ang.get_start_point(),ang.get_end_point())
+        maybeline.add_midpoints(ang.vertex)
+
+        return any(type(i) is Segment and i.is_subsegment(maybeline) for i in self.segments)
 

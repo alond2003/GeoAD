@@ -1,6 +1,5 @@
 from segment import Segment
 from angle import Angle
-from evaluator import Evaluator
 from point import Point
 from geohandler import GeoHandler
 
@@ -15,5 +14,14 @@ geo = GeoHandler([A,B,C,D])
 x = geo.get_angles()
 for i in x:
     print(i)
-# ACD = Angle(AB.get_subsegment_to(C),C,CD)
+
+ACD = Angle(AB.get_subsegment_to(C),C,CD)
+ACB = Angle(AB.get_subsegment_to(C),C,AB.get_subsegment_from(C))
+BCA = x[2]
+CBA = Angle(AB.get_subsegment_from(C),B,AB)
+print("ACD",geo.is_180_angle(ACD),False)
+print("ACB",geo.is_180_angle(ACB),True)
+print("BCA",geo.is_180_angle(BCA),True)
+print("CBA",geo.is_180_angle(CBA),False,0)
+
 print("\nend")
