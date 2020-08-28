@@ -5,25 +5,44 @@
 # TODO: make switch for more than 1 var
 # TODO: be careful of types Angle,Int,Float and Degree in switch
 
+from functools import total_ordering
 
+
+@total_ordering
 class Degree:
 
     nextVarIdx = 1
 
-    def __init__(self, newvar=True):
-        """if (newvar == False) self.value is empty"""
-        self.value = {}
+    def __init__(self, newvar=True, d={}):
+        """Create Degree object based on dict,int,float or empty (w/ or w/o newvar)"""
+        if isinstance(d, dict):
+            self.value = d
+        elif isinstance(d, (int, float)):
+            self.value = {0: d}
+            self.clean_zeros()
+        else:
+            raise TypeError(f"d as a {type(d)} is not supported")
         if newvar:
             self.value[Degree.nextVarIdx] = 1
             Degree.nextVarIdx += 1
 
-    def copy(self):
+    def new_copy(self):
+        """Return a new_copy of this object"""
         res = Degree(False)
         for i, j in self.value.items():
             res.value[i] = j
         return res
 
+    def copy(self, other):
+        """Copy other dict to this object"""
+        del self.value
+        self.value = {}
+        for i, j in other.value.items():
+            self.value[i] = j
+        self.clean_zeros()
+
     def switch(self, key, switchdeg):
+        """switch every instance of this key to swithdeg"""
         if key not in self.value:
             return
         else:
@@ -32,94 +51,72 @@ class Degree:
             self += switchdeg * times
 
     def clean_zeros(self):
+        """clean keys that have a zero value"""
         for key in [key for key in self.value if self.value[key] == 0]:
             del self.value[key]
 
     def __add__(self, other):
         """Add the values for the same key and add the missing keys with dict/Degree/int/float"""
-        res = Degree(False)
-        for i, j in self.value.items():
-            res.value[i] = j
+        res = self.new_copy()
         if isinstance(other, Degree):
             for idx, val in other.value.items():
                 if idx in res.value:
                     res.value[idx] += val
                 else:
                     res.value[idx] = val
-        elif isinstance(other, dict):
-            for idx, val in other.items():
-                if idx in res.value:
-                    res.value[idx] += val
-                else:
-                    res.value[idx] = val
-        elif isinstance(other, (int, float)):
-            if 0 not in res.value:
-                res.value[0] = 0
-            res.value[0] += other
+        elif isinstance(other, (dict, int, float)):
+            return self + Degree(newvar=False, d=other)
         else:
             return NotImplemented
 
         res.clean_zeros()
         return res
 
+    def __radd__(self, other):
+        return self + other
+
     def __iadd__(self, other):
-        if isinstance(other, Degree):
-            for idx, val in other.value.items():
-                if idx in self.value:
-                    self.value[idx] += val
-                else:
-                    self.value[idx] = val
-        elif isinstance(other, dict):
-            for idx, val in other.items():
-                if idx in self.value:
-                    self.value[idx] += val
-                else:
-                    self.value[idx] = val
-        elif isinstance(other, (int, float)):
-            if 0 not in self.value:
-                self.value[0] = 0
-            self.value[0] += other
-        else:
-            return NotImplemented
-        self.clean_zeros()
+        self.copy(self + other)
 
     def __sub__(self, other):
-        """Call add for the negtive other of type dict/Degree/int/float"""
-        minus_other = Degree(False)
-        if isinstance(other, Degree):
-            for i, j in other.value.items():
-                minus_other.value[i] = -j
-            return self + minus_other
+        if isinstance(other, (Degree, int, float)):
+            return self + (-other)
         elif isinstance(other, dict):
-            for i, j in other.items():
-                minus_other.value[i] = -j
-            return self + minus_other
-        elif isinstance(other, (int, float)):
-            minus_other.value[0] = -other
-            return self + minus_other
+            return self + (-(Degree(newvar=False, d=other)))
         else:
             return NotImplemented
 
     def __rsub__(self, other):
-        if isinstance(other, (int, float)):
-            minus_self = Degree(False)
-            for i, j in self.value.items():
-                minus_self.value[i] = -j
-            return minus_self + other
-        return NotImplemented
+        return other + (-self)
+
+    def __isub__(self, other):
+        self.copy(self - other)
 
     def __mul__(self, other):
         if isinstance(other, (int, float)):
-            res = self.copy()
+            res = self.new_copy()
             for i in res.value.keys():
                 res.value[i] *= other
+            res.clean_zeros()
             return res
         return NotImplemented
+
+    def __rmul__(self, other):
+        return self * other
+
+    def __imul__(self, other):
+        self.copy(self * other)
 
     def __truediv__(self, other):
         if isinstance(other, (int, float)):
             return self * (1 / other)
         return NotImplemented
+
+    def __itruediv__(self, other):
+        self.copy(self / other)
+
+    def __neg__(self):
+        return self * (-1)
 
     def __str__(self):
         """Returns a greek letter or A{idx} polynomial"""
@@ -145,7 +142,11 @@ class Degree:
         """Do lexicographic compare between the objects' sorted keys"""
         if other is None:
             raise TypeError("NoneType compared to Degree")
-        return sorted(list(self.value.keys())) < sorted(list(other.value.keys()))
+        if isinstance(other, (int, float, dict)):
+            return self < Degree(False, other)
+        if isinstance(other, Degree):
+            return sorted(list(self.value.keys())) < sorted(list(other.value.keys()))
+        return NotImplemented
 
     def __eq__(self, other):
         if isinstance(other, (int, float)):
@@ -157,14 +158,3 @@ class Degree:
         else:
             return NotImplemented
 
-
-"""
-print(Degree.nextVarIdx)
-alpha = Degree(True)
-print(Degree.nextVarIdx)
-print(alpha)
-alpha += {0:180,1:0.5,2:-3}
-print(Degree.nextVarIdx)
-print(alpha)
-
-"""

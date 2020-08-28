@@ -50,4 +50,4 @@ class Dog:
 # da = Degree()
 # da += 1
 # print(da)
-# ba = da.copy()
+# ba = da.new_copy()

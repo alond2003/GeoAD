@@ -1,13 +1,13 @@
 class Segment:
     def __init__(self, pointstart, pointend, isnew=False):
-        """ if isnew add this line to the start & end points"""
+        """ if isnew: add this line to the start & end points"""
         self.start = pointstart
         self.end = pointend
         self.midpoints = []
         self.isnew = isnew
         if self.isnew:
-            self.start.add_linefrom(self)
-            self.end.add_linefrom(self)
+            self.start.add_line(self)
+            self.end.add_line(self)
 
     def add_midpoints(self, x):
         """add a list of midpoints or one midpoint"""
@@ -15,11 +15,11 @@ class Segment:
             self.midpoints = x
             if self.isnew:
                 for i in x:
-                    i.add_linefrom(self)
+                    i.add_line(self)
         else:
             self.midpoints.append(x)
             if self.isnew:
-                x.add_linefrom(self)
+                x.add_line(self)
 
     def get_all_points(self):
         """Return a list containing startpoint, midpoints and endpoint"""
@@ -80,10 +80,3 @@ class Segment:
             or other.get_all_points()[::-1] == self.get_all_points()
         )
 
-
-"""
-t = Segment("A","B")
-print("hello " +str(t))
-t.add_midpoints(["C","D"])
-print(t)
-"""

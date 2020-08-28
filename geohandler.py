@@ -9,11 +9,7 @@ class GeoHandler:
         """Create a GeoHandler object, keep all Points and collect all Segments"""
         self.points = points
 
-        self.segments = set()
-        for p in self.points:
-            for l in p.lines:
-                self.segments.add(l)
-        self.segments = list(self.segments)
+        self.segments = list(set([l for p in self.points for l in p.lines]))
 
     def angles_calc(self):
         """init values for each elementary angle and try to minimize the unknown variables"""
@@ -25,22 +21,12 @@ class GeoHandler:
                 ang.set_value()
 
         for ang180 in self.find_all_180_angles():
-            # print(ang180, "=>", [str(i) for i in self.disassemble_angle(ang180)])
             parts = self.get_same(self.disassemble_angle(ang180))
-            # print(ang180, "->", [str(i) for i in parts])
-            # print(0 + parts[0])
-            # print(sum(parts))
-            # print(max(parts))
-            # print(type(sum(parts)))
-            # print(type(max(parts)))
-            # print(180 - (sum(parts) - max(parts)))
-            # max(parts).set_value(180 - (sum(parts) - max(parts)))
             self.ang_is_equal(max(parts), 180 - (sum(parts) - max(parts)))
-            # print(sum(parts))
-            # print(max(parts).deg)
-            print([str(i) for i in self.angles])
+            # print([str(i) for i in self.angles])
 
     def ang_is_equal(self, ang, deg):
+        """minimize variables if can by data ang == deg"""
         if ang.deg is None:
             ang.deg = deg
         else:
@@ -58,7 +44,7 @@ class GeoHandler:
         """Return list of angles from self.angles that are the same as ang_list"""
         return [i for i in self.angles if any(i.same(j) for j in ang_list)]
 
-    def get_angles_around_point(self, p: Point):
+    def get_angles_around_point(self, p):
         """Return a list of all the elementary angles around a point"""
         if len(p.lines) == 0:
             return []

@@ -9,13 +9,13 @@ class Point:
         Point.nextId += 1
         self.lines = []
 
+    def add_line(self, *lines):
+        """Add line or lines that the point is on"""
+        self.lines += list(lines)
+
     def __str__(self):
         """Return the point's name and id"""
         return self.name + f"({self.id})"
-
-    def add_linefrom(self, *lines):
-        """Add line or lines that the point is on"""
-        self.lines += list(lines)
 
     def __hash__(self):
         """Used for hashing Segment and set(Point)"""
