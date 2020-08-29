@@ -1,4 +1,7 @@
-# TODO: make a proves.py page with function that are exampke of proves from axyoms
+# TODO: fix -alpha in th1,th2
+# TODO: add 360 th3
+# TODO: implement th1-3 in handler
+
 from point import Point
 from segment import Segment
 from realangle import RealAngle

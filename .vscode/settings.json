@@ -1,4 +1,6 @@
 {
     "python.pythonPath": "C:\\Users\\alond\\AppData\\Local\\Programs\\Python\\Python37\\python.exe",
-    "python.formatting.provider": "black"
+    "python.formatting.provider": "black",
+    "clockify.tracking.workspaceId": "5f4aaecae00d4d7267c78534",
+    "clockify.tracking.projectId": "5f4aaef0d23b5f1fed5d97f7"
 }
