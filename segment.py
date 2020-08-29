@@ -63,15 +63,20 @@ class Segment:
         """Check if (self is subsegment of other) or (other is subsegment of self)"""
         return self.is_subsegment(other) or other.is_subsegment(self)
 
-    def __str__(self):
-        """Return str containing the Segment's name and midpoints"""
+    def __repr__(self):
+        """Return Segment's name and midpoints"""
         return (
-            "Segment "
+            "<"
             + self.start.name
             + self.end.name
-            + ": "
-            + str([i.name for i in self.midpoints])
+            + ":"
+            + str([str(i) for i in self.midpoints])
+            + ">"
         )
+
+    def __str__(self):
+        """Return Segment's name"""
+        return self.start.name + self.end.name
 
     def __hash__(self):
         """Used for set(Segment)"""

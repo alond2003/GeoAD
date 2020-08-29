@@ -17,7 +17,22 @@ class AbsAngle:
         """Return the endpoint of ray2"""
         return self.ray2.start if self.ray2.end == self.vertex else self.ray2.end
 
-    def same(self, other):
+    def get_minimized_absangle(self):
+        """Return an AbsAngle with the smallest rays possible (common for all same angles)"""
+        mr = []
+        for r in [self.ray1, self.ray2]:
+            if r.start == self.vertex:
+                mr.append(r.get_subsegment_to(r.get_all_points()[1]))
+            else:
+                mr.append(r.get_subsegment_from(r.get_all_points()[-2]))
+        return AbsAngle(mr[0], self.vertex, mr[1])
+
+    def __hash__(self):
+        """custom hash function such that every same angle gets the same hash"""
+        ang = self.get_minimized_absangle()
+        return hash((ang.get_start_point(), ang.vertex, ang.get_end_point()))
+
+    def __eq__(self, other):
         """Check if the angles are the same abstruct angle"""
         return (
             self.ray1.are_inclusive(other.ray1)
@@ -33,4 +48,8 @@ class AbsAngle:
             + self.vertex.name
             + self.get_end_point().name
         )
+
+    def __repr__(self):
+        """Return str(self)"""
+        return str(self)
 

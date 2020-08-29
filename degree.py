@@ -12,12 +12,12 @@ class Degree:
             self.value = dict(d)
         elif isinstance(d, (int, float)):
             self.value = {0: d}
-            self.clean_zeros()
         else:
             raise TypeError(f"d as a {type(d)} is not supported")
         if newvar:
             self.value[Degree.nextVarIdx] = 1
             Degree.nextVarIdx += 1
+        self.clean()
 
     def new_copy(self):
         """Return a new_copy of this object"""
@@ -32,7 +32,7 @@ class Degree:
         self.value = {}
         for i, j in other.value.items():
             self.value[i] = j
-        self.clean_zeros()
+        self.clean()
 
     def switch(self, key, switchdeg):
         """switch every instance of this key to swithdeg"""
@@ -42,11 +42,15 @@ class Degree:
             times = self.value[key]
             del self.value[key]
             self += switchdeg * times
+            self.clean()
 
-    def clean_zeros(self):
-        """clean keys that have a zero value"""
+    def clean(self):
+        """clean keys that have a zero value or float to int"""
         for key in [key for key in self.value if self.value[key] == 0]:
             del self.value[key]
+        for key in self.value:
+            if isinstance(self.value[key], float) and self.value[key].is_integer():
+                self.value[key] = int(self.value[key])
 
     def __add__(self, other):
         """Add the values for the same key and add the missing keys with dict/Degree/int/float"""
@@ -62,7 +66,7 @@ class Degree:
         else:
             return NotImplemented
 
-        res.clean_zeros()
+        res.clean()
         return res
 
     def __radd__(self, other):
@@ -70,6 +74,7 @@ class Degree:
 
     def __iadd__(self, other):
         self.copy(self + other)
+        return self
 
     def __sub__(self, other):
         if isinstance(other, (Degree, int, float)):
@@ -84,13 +89,14 @@ class Degree:
 
     def __isub__(self, other):
         self.copy(self - other)
+        return self
 
     def __mul__(self, other):
         if isinstance(other, (int, float)):
             res = self.new_copy()
             for i in res.value.keys():
                 res.value[i] *= other
-            res.clean_zeros()
+            res.clean()
             return res
         return NotImplemented
 
@@ -99,6 +105,7 @@ class Degree:
 
     def __imul__(self, other):
         self.copy(self * other)
+        return self
 
     def __truediv__(self, other):
         if isinstance(other, (int, float)):
@@ -107,6 +114,7 @@ class Degree:
 
     def __itruediv__(self, other):
         self.copy(self / other)
+        return self
 
     def __neg__(self):
         return self * (-1)
@@ -115,7 +123,7 @@ class Degree:
         """Returns a greek letter or A{idx} polynomial"""
         GA = "\u03B1\u03B2\u03B3\u03B4\u03B5\u03B6\u03B7\u03B8\u03B9\u03Ba\u03Bb\u03Bc\u03Bd\u03Be\u03Bf\u03C0\u03C1\u03C2\u03C3\u03C4\u03C5\u03C6\u03C7\u03C8\u03C9"
         res = ""
-        for idx, val in sorted(self.value.items()):
+        for idx, val in sorted(self.value.items())[::-1]:
             str_var = ""
             if idx == 0:
                 pass
@@ -128,8 +136,14 @@ class Degree:
             else:
                 if res != "":
                     res += " +" if val > 0 else " -"
-                res += str(abs(val)) + str_var
+                if val != 1 or idx == 0:
+                    res += str(abs(val))
+                res += str_var
         return res
+
+    def __repr__(self):
+        """Return <str(self)>"""
+        return f"<{str(self)}>"
 
     def __lt__(self, other):
         """Do lexicographic compare between the objects' sorted keys"""

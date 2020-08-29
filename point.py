@@ -14,8 +14,12 @@ class Point:
         self.lines += list(lines)
 
     def __str__(self):
+        """Return the point's name"""
+        return self.name
+
+    def __repr__(self):
         """Return the point's name and id"""
-        return self.name + f"({self.id})"
+        return "<" + self.name + f"({self.id})>"
 
     def __hash__(self):
         """Used for hashing Segment and set(Point)"""

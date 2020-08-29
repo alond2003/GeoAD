@@ -1,4 +1,5 @@
-from angle import Angle
+from absangle import AbsAngle
+from realangle import RealAngle
 from segment import Segment
 from degree import Degree
 from point import Point
@@ -13,15 +14,16 @@ class GeoHandler:
 
     def angles_calc(self):
         """init values for each elementary angle and try to minimize the unknown variables"""
-        self.angles = self.get_angles()
-        for ang in self.angles:
-            if self.is_180_angle(ang):
-                self.angles.remove(ang)
+        # TODO: add better documentation
+        self.angles = dict(((i, None) for i in self.get_angles()))
+        for abs_ang in self.angles.keys():
+            if self.is_180_angle(abs_ang):
+                self.angles[abs_ang] = RealAngle.fromAbsAngle(abs_ang, Degree(d=180))
             else:
-                ang.set_value()
+                self.angles[abs_ang] = RealAngle.fromAbsAngle(abs_ang, Degree())
 
         for ang180 in self.find_all_180_angles():
-            parts = self.get_same(self.disassemble_angle(ang180))
+            parts = [self.angles[i] for i in self.disassemble_angle(ang180)]
             self.ang_is_equal(max(parts), 180 - (sum(parts) - max(parts)))
             # print([str(i) for i in self.angles])
 
@@ -37,15 +39,11 @@ class GeoHandler:
             switchval = switchval / (-switchval.value[maxkey])
             del switchval.value[maxkey]
             # that means every (1 maxkey = switchval)
-            for ang in self.angles:
+            for ang in self.angles.values():
                 ang.deg.switch(maxkey, switchval)
 
-    def get_same(self, ang_list):
-        """Return list of angles from self.angles that are the same as ang_list"""
-        return [i for i in self.angles if any(i.same(j) for j in ang_list)]
-
     def get_angles_around_point(self, p):
-        """Return a list of all the elementary angles around a point"""
+        """Return a list of all the elementary AbsAngles around a point"""
         if len(p.lines) == 0:
             return []
         elif len(p.lines) == 1 and p in (p.lines[0].start, p.lines[0].end):
@@ -62,43 +60,43 @@ class GeoHandler:
                 if p not in (l.start, l.end):
                     rays.append(l.get_subsegment_from(p))
 
-            return [Angle(r1, p, r2) for r1, r2 in zip(rays, rays[1:] + rays[:1])]
+            return [AbsAngle(r1, p, r2) for r1, r2 in zip(rays, rays[1:] + rays[:1])]
 
     def get_angles(self):
-        """Return a list of all the elementary angles"""
+        """Return a list of all the elementary AbsAngles"""
         res = []
         for p in self.points:
             res += self.get_angles_around_point(p)
         return res
 
     def get_better_name_angle(self, ang):
-        """Find a better representation for the Angle and return it"""
+        """Find a better representation for the AbsAngle and return it"""
         true_rays = []
         for ray in [ang.ray1, ang.ray2]:
-            tempray = None
-            if ray not in self.segments:
-                for l in self.segments:
-                    if l.is_subsegment(ray):
-                        otherpoint = ray.end if ang.vertex == ray.start else ray.start
-                        if l.get_all_points().index(
-                            ang.vertex
-                        ) < l.get_all_points().index(otherpoint):
-                            tempray = l.get_subsegment_from(ang.vertex)
-                        else:
-                            tempray = l.get_subsegment_to(ang.vertex)
-                        break
-                true_rays.append(tempray)
-            else:
+            if ray in self.segments:
                 true_rays.append(ray)
-        return Angle(true_rays[0], ang.vertex, true_rays[1])
+            else:
+                l = [l for l in self.segments if l.is_subsegment(ray)][0]
+                otherpoint = ray.end if ang.vertex == ray.start else ray.start
+                if l.get_all_points().index(ang.vertex) < l.get_all_points().index(
+                    otherpoint
+                ):
+                    true_rays.append(l.get_subsegment_from(ang.vertex))
+                else:
+                    true_rays.append(l.get_subsegment_to(ang.vertex))
+        return AbsAngle(true_rays[0], ang.vertex, true_rays[1])
 
     def find_all_180_angles(self):
-        """Return a list of all the 180° angles"""
+        """Return a list of all the 180° AbsAngles"""
         res = []
         for l in self.segments:
             for p in l.midpoints:
-                res.append(Angle(l.get_subsegment_to(p), p, l.get_subsegment_from(p)))
-                res.append(Angle(l.get_subsegment_from(p), p, l.get_subsegment_to(p)))
+                res.append(
+                    AbsAngle(l.get_subsegment_to(p), p, l.get_subsegment_from(p))
+                )
+                res.append(
+                    AbsAngle(l.get_subsegment_from(p), p, l.get_subsegment_to(p))
+                )
         return res
 
     def is_180_angle(self, ang):
@@ -106,12 +104,10 @@ class GeoHandler:
         maybeline = Segment(ang.get_start_point(), ang.get_end_point())
         maybeline.add_midpoints(ang.vertex)
 
-        return any(
-            isinstance(i, Segment) and i.is_subsegment(maybeline) for i in self.segments
-        )
+        return any(i.is_subsegment(maybeline) for i in self.segments)
 
     def disassemble_angle(self, ang):
-        """Return a list of all the elementary angles that are included in ang"""
+        """Return a list of all the elementary AbsAngles that are included in ang"""
         ang = self.get_better_name_angle(ang)
         sub_angles = self.get_angles_around_point(ang.vertex)
         i = 0

@@ -1,5 +1,5 @@
 from segment import Segment
-from angle import Angle
+from realangle import Angle
 
 
 class Evaluator:
