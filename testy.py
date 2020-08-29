@@ -1,3 +1,5 @@
+from point import Point
+from segment import Segment
 from enum import Enum
 from typing import List
 from degree import Degree
@@ -51,3 +53,4 @@ class Dog:
 # da += 1
 # print(da)
 # ba = da.new_copy()
+

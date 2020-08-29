@@ -1,10 +1,3 @@
-# TODO: figure out sub,rsub,add, radd and return NotImplemented properaly
-# TODO: do a method for -Degree
-# TODO: make a simpler way to cast int/float to Degree other then Degree.value[0] = int
-# TODO: make switch more sense
-# TODO: make switch for more than 1 var
-# TODO: be careful of types Angle,Int,Float and Degree in switch
-
 from functools import total_ordering
 
 
@@ -16,7 +9,7 @@ class Degree:
     def __init__(self, newvar=True, d={}):
         """Create Degree object based on dict,int,float or empty (w/ or w/o newvar)"""
         if isinstance(d, dict):
-            self.value = d
+            self.value = dict(d)
         elif isinstance(d, (int, float)):
             self.value = {0: d}
             self.clean_zeros()

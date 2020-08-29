@@ -47,10 +47,10 @@ class Segment:
             return self
         return None
 
-    def is_subsegment(self, seg):
-        """Check if seg is a subsegment of this Segment"""
+    def is_subsegment(self, other):
+        """Check if other is a subsegment of this Segment"""
         idxs = []
-        for i in seg.get_all_points():
+        for i in other.get_all_points():
             try:
                 idxs.append(self.get_all_points().index(i))
             except ValueError:
@@ -58,6 +58,10 @@ class Segment:
         return all(i < j for i, j in zip(idxs, idxs[1:])) or all(
             i > j for i, j in zip(idxs, idxs[1:])
         )
+
+    def are_inclusive(self, other):
+        """Check if (self is subsegment of other) or (other is subsegment of self)"""
+        return self.is_subsegment(other) or other.is_subsegment(self)
 
     def __str__(self):
         """Return str containing the Segment's name and midpoints"""
