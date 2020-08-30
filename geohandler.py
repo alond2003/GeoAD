@@ -1,3 +1,4 @@
+import itertools
 from absangle import AbsAngle
 from realangle import RealAngle
 from segment import Segment
@@ -25,6 +26,32 @@ class GeoHandler:
             if len(parts) != 0:
                 self.ang_is_equal(max(parts), 360 - (sum(parts) - max(parts)))
 
+    def angles_on_parallel_lines(self):
+        """@ax3: 2 alternate interior angles between 2 parallel lines and a transversal are equal"""
+        if len(self.segments) < 3:
+            return
+        parallels_transversal = [
+            (p1, p2, t)
+            for p1, p2 in itertools.combinations(self.segments, 2)
+            if p1.is_parallel(p2) and p1 != p2
+            for t in self.segments
+            if t.get_intersection_point(p1) is not None
+            and t.get_intersection_point(p2) is not None
+        ]
+        for p1, p2, t in parallels_transversal:
+            tp1 = t.get_intersection_point(p1)
+            tp2 = t.get_intersection_point(p2)
+            if t.get_all_points().index(tp1) > t.get_all_points().index(tp2):
+                p1, p2 = p2, p1
+                tp1, tp2 = tp2, tp1
+            ang1 = AbsAngle(p1.get_subsegment_to(tp1), tp1, t.get_subsegment_from(tp1))
+            if ang1 not in self.angles:
+                ang1.reverse()
+            ang2 = AbsAngle(t.get_subsegment_to(tp2), tp2, p2.get_subsegment_from(tp2))
+            if ang2 not in self.angles:
+                ang2.reverse()
+            self.ang_is_equal(self.angles[ang1], self.angles[ang2].deg)
+
     def angles_calc(self):
         """init values for each elementary angle and try to minimize the unknown variables"""
         # TODO: add better documentation
@@ -36,13 +63,14 @@ class GeoHandler:
                 self.angles[abs_ang] = RealAngle.fromAbsAngle(abs_ang, Degree())
 
         # print(self.angles)
+        self.angles_on_parallel_lines()
         self.angle_sum_on_line()
         self.angle_sum_around_point()
         Degree.variable_reduction(*[i.deg for i in self.angles.values()])
         # print([str(i) for i in self.angles])
 
     def ang_is_equal(self, ang, deg):
-        """minimize variables if can by data ang == deg"""
+        """minimize variables if can by data realang == deg"""
         if ang.deg is None:
             ang.deg = deg
         else:

@@ -12,15 +12,16 @@ Axioms:
 
 @ax1: All straight angles are congruent (180°).
 @ax2: The whole is equal to the sum of its parts.
-
+@ax3: A pair of alternate interior angles between 2 parallel lines and a transversal are equal
 """
 
 """
 Theorems:
 
 @th1: the sum of 2 angles on a line is 180° (adjacent supplementary angles / linear pair)
-@th2: 2 vertical angles are equal
+*@th2: 2 vertical angles are equal
 @th3: all angles around a point sum up to 360°
+@th4: Corresponding angles are equal and the sum of two consecutive interior angles is 180° (2pl&t)
 """
 
 
@@ -104,7 +105,41 @@ def th3(debug=False):
         print(geo.angles)
 
 
-for i, j in enumerate([th1, th2, th3]):
+def th4(debug=False):
+    """@th1 & @ax3 -> @th4"""
+    # Create AB||CD, GFEH transversal: E ∈ AB, F ∈ CD
+    A, B, C, D, E, F, G, H = Point.createPoints(8)
+    AB = Segment(A, B, True)
+    AB.add_midpoints(E)
+    CD = Segment(C, D, True)
+    CD.add_midpoints(F)
+    GH = Segment(G, H, True)
+    GH.add_midpoints([F, E])
+    AB.set_parallel(CD)
+    # Corresponding [מתאימות] angles example (AEG & CFG)
+    AE = AB.get_subsegment_to(E)
+    GE = GH.get_subsegment_to(E)
+    AEG = AbsAngle(AE, E, GE)
+    CF = CD.get_subsegment_to(F)
+    GF = GH.get_subsegment_to(F)
+    CFG = AbsAngle(CF, F, GF)
+    # Consecutive interior [חד צדדיות] angles example (GEB & DFH)
+    EB = AB.get_subsegment_from(E)
+    GEB = AbsAngle(GE, E, EB)
+    FD = CD.get_subsegment_from(F)
+    FH = GH.get_subsegment_from(F)
+    DFH = AbsAngle(FD, F, FH)
+    geo = GeoHandler(A, B, C, D, E, F, G, H)
+    geo.angles_calc()
+    # Prove that corresponding angles are equal
+    print(geo.angles[AEG], "=", geo.angles[CFG], end=", ")
+    # Prove that the sum of 2 consecutive interior angles is 180°
+    print(geo.angles[GEB], "+", geo.angles[DFH], "=", geo.angles[GEB] + geo.angles[DFH])
+    if debug:
+        print(geo.angles)
+
+
+for i, j in enumerate([th1, th2, th3, th4]):
     print(f"th{i+1}:", end=" ")
     j()
     Degree.reset()

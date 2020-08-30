@@ -27,6 +27,10 @@ class AbsAngle:
                 mr.append(r.get_subsegment_from(r.get_all_points()[-2]))
         return AbsAngle(mr[0], self.vertex, mr[1])
 
+    def reverse(self):
+        """Switch ray1 & ray2"""
+        self.ray1, self.ray2 = self.ray2, self.ray1
+
     def __hash__(self):
         """custom hash function such that every same angle gets the same hash"""
         ang = self.get_minimized_absangle()

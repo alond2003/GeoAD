@@ -1,7 +1,8 @@
 # TODO: make degree str better looking (180 - alpha, 180 + alpha - beta)
-# TODO: make variable reduction to better names
+# TODO: maybe seperate th4 to th4&5
+# TODO: make subsegment easier with string AB.get("AE")
+# TODO: possible angle problem with reverse()
 # TODO: add_midpoint -> *args, set_midpoints
-# TODO: make ax3 in geo
 # TODO: make @ax3 in proofs
 from point import Point
 from segment import Segment
@@ -26,6 +27,7 @@ CD = Segment(C, D, True)
 CD.add_midpoints(F)
 GH = Segment(G, H, True)
 GH.add_midpoints([F, E])
+AB.set_parallel(CD)
 geo = GeoHandler(A, B, C, D, E, F, G, H)
 geo.angles_calc()
 print(geo.angles)

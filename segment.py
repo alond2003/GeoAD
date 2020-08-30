@@ -77,6 +77,14 @@ class Segment:
         """Set that self is parallel to other"""
         self.parallel.union(other.parallel)
 
+    def get_intersection_point(self, other):
+        """Return the intersection point or None if parallel"""
+        if self.is_parallel(other):
+            return None
+        return list(
+            set(self.get_all_points()).intersection(set(other.get_all_points()))
+        )[0]
+
     def __repr__(self):
         """Return Segment's name and midpoints"""
         return (
