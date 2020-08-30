@@ -1,9 +1,13 @@
+from unionfind import UnionFind
+
+
 class Segment:
     def __init__(self, pointstart, pointend, isnew=False):
         """ if isnew: add this line to the start & end points"""
         self.start = pointstart
         self.end = pointend
         self.midpoints = []
+        self.parallel = UnionFind()
         self.isnew = isnew
         if self.isnew:
             self.start.add_line(self)
@@ -31,6 +35,7 @@ class Segment:
         if point in self.midpoints:
             res = Segment(self.start, point)
             res.add_midpoints(self.midpoints[0 : self.midpoints.index(point)])
+            res.parallel = self.parallel
             return res
         elif point == self.end:
             return self
@@ -42,6 +47,7 @@ class Segment:
         if point in self.midpoints:
             res = Segment(point, self.end)
             res.add_midpoints(self.midpoints[self.midpoints.index(point) + 1 :])
+            res.parallel = self.parallel
             return res
         elif point == self.start:
             return self
@@ -62,6 +68,14 @@ class Segment:
     def are_inclusive(self, other):
         """Check if (self is subsegment of other) or (other is subsegment of self)"""
         return self.is_subsegment(other) or other.is_subsegment(self)
+
+    def is_parallel(self, other):
+        """Check if self is paraller to other"""
+        return self.parallel.is_same(other.parallel)
+
+    def set_parallel(self, other):
+        """Set that self is parallel to other"""
+        self.parallel.union(other.parallel)
 
     def __repr__(self):
         """Return Segment's name and midpoints"""

@@ -1,5 +1,8 @@
 # TODO: make degree str better looking (180 - alpha, 180 + alpha - beta)
-
+# TODO: make variable reduction to better names
+# TODO: add_midpoint -> *args, set_midpoints
+# TODO: make ax3 in geo
+# TODO: make @ax3 in proofs
 from point import Point
 from segment import Segment
 from realangle import RealAngle
@@ -16,11 +19,14 @@ AB.add_midpoints(C)
 CD = Segment(C, D, True)
 """
 
-A, B, C, D = Point.createPoints(4)
+A, B, C, D, E, F, G, H = Point.createPoints(8)
 AB = Segment(A, B, True)
-BC = Segment(B, C, True)
-BD = Segment(B, D, True)
-geo = GeoHandler(A, B, C, D)
+AB.add_midpoints(E)
+CD = Segment(C, D, True)
+CD.add_midpoints(F)
+GH = Segment(G, H, True)
+GH.add_midpoints([F, E])
+geo = GeoHandler(A, B, C, D, E, F, G, H)
 geo.angles_calc()
 print(geo.angles)
 

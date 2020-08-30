@@ -175,5 +175,5 @@ class Degree:
 
     @classmethod
     def reset(cls):
+        """Resets the variable count to start over from alpha"""
         Degree.nextVarIdx = 1
-
