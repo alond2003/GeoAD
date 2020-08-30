@@ -132,7 +132,7 @@ class Degree:
         GA = "\u03B1\u03B2\u03B3\u03B4\u03B5\u03B6\u03B7\u03B8\u03B9\u03Ba\u03Bb\u03Bc\u03Bd\u03Be\u03Bf\u03C0\u03C1\u03C2\u03C3\u03C4\u03C5\u03C6\u03C7\u03C8\u03C9"
         str_var = GA[idx - 1] if 0 < idx < len(GA) + 1 else f"A{idx-1}"
         if val == 1 or val == -1:
-            sgn = "-" if val > 0 else "+"
+            sgn = "-" if val < 0 else "+"
             return sgn + str_var
         return str(val) + str_var
 
@@ -172,4 +172,8 @@ class Degree:
             return self - other == 0
         else:
             return NotImplemented
+
+    @classmethod
+    def reset(cls):
+        Degree.nextVarIdx = 1
 

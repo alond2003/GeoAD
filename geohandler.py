@@ -6,9 +6,9 @@ from point import Point
 
 
 class GeoHandler:
-    def __init__(self, points):
+    def __init__(self, *points):
         """Create a GeoHandler object, keep all Points and collect all Segments"""
-        self.points = points
+        self.points = list(points)
 
         self.segments = list(set([l for p in self.points for l in p.lines]))
 
