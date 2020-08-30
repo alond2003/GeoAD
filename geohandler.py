@@ -12,6 +12,19 @@ class GeoHandler:
 
         self.segments = list(set([l for p in self.points for l in p.lines]))
 
+    def angle_sum_on_line(self):
+        """@th1: the sum of 2 angles on a line is 180°"""
+        for ang180 in self.find_all_180_angles():
+            parts = [self.angles[i] for i in self.disassemble_angle(ang180)]
+            self.ang_is_equal(max(parts), 180 - (sum(parts) - max(parts)))
+
+    def angle_sum_around_point(self):
+        """@th3: all angles around a point sum up to 360°"""
+        for p in self.points:
+            parts = [self.angles[i] for i in self.get_angles_around_point(p)]
+            if len(parts) != 0:
+                self.ang_is_equal(max(parts), 360 - (sum(parts) - max(parts)))
+
     def angles_calc(self):
         """init values for each elementary angle and try to minimize the unknown variables"""
         # TODO: add better documentation
@@ -22,10 +35,10 @@ class GeoHandler:
             else:
                 self.angles[abs_ang] = RealAngle.fromAbsAngle(abs_ang, Degree())
 
-        for ang180 in self.find_all_180_angles():
-            parts = [self.angles[i] for i in self.disassemble_angle(ang180)]
-            self.ang_is_equal(max(parts), 180 - (sum(parts) - max(parts)))
-            # print([str(i) for i in self.angles])
+        # print(self.angles)
+        self.angle_sum_on_line()
+        self.angle_sum_around_point()
+        # print([str(i) for i in self.angles])
 
     def ang_is_equal(self, ang, deg):
         """minimize variables if can by data ang == deg"""

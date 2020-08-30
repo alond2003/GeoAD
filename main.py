@@ -1,4 +1,3 @@
-# TODO: implement th1-3 in handler
 # TODO: make degree str better looking (180 - alpha, 180 + alpha - beta)
 
 from point import Point
@@ -17,13 +16,11 @@ AB.add_midpoints(C)
 CD = Segment(C, D, True)
 """
 
-A, B, C, D, E = Point.createPoints("A", "B", "C", "D", "E")
+A, B, C, D = Point.createPoints(4)
 AB = Segment(A, B, True)
-AB.add_midpoints(C)
-CD = Segment(C, D, True)
-CE = Segment(C, E, True)
-ECB = AbsAngle(CE, C, AB.get_subsegment_from(C))
-geo = GeoHandler(A, B, C, D, E)
+BC = Segment(B, C, True)
+BD = Segment(B, D, True)
+geo = GeoHandler(A, B, C, D)
 geo.angles_calc()
 print(geo.angles)
 

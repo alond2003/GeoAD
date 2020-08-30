@@ -30,6 +30,16 @@ class Point:
         return other.id == self.id
 
     @staticmethod
+    def numtoname(n):
+        ans = ""
+        while n > 0:
+            ans = chr(65 + (n - 1) % 26) + ans
+            n = (n - 1) // 26
+        return ans
+
+    @staticmethod
     def createPoints(*point_names):
-        """Return a tuple of Points according to point_names"""
+        """Return a tuple of Points according to point_names or number of points"""
+        if len(point_names) == 1 and isinstance(point_names[0], int):
+            return tuple([Point(Point.numtoname(i + 1)) for i in range(point_names[0])])
         return tuple([Point(i) for i in point_names])
