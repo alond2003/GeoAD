@@ -38,6 +38,7 @@ class GeoHandler:
         # print(self.angles)
         self.angle_sum_on_line()
         self.angle_sum_around_point()
+        Degree.variable_reduction(*[i.deg for i in self.angles.values()])
         # print([str(i) for i in self.angles])
 
     def ang_is_equal(self, ang, deg):

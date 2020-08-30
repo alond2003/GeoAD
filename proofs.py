@@ -24,7 +24,7 @@ Theorems:
 """
 
 
-def th1():
+def th1(debug=False):
     """@ax1 & @ax2 -> @th1"""
     # Create line AB, C point on AB, CD line from C
     A, B, C, D = Point.createPoints("A", "B", "C", "D")
@@ -41,10 +41,11 @@ def th1():
     geo = GeoHandler(A, B, C, D)
     geo.angles_calc()
     print(geo.angles[ACD], "+", geo.angles[DCB], "=", geo.angles[ACD] + geo.angles[DCB])
-    # print(geo.angles)
+    if debug:
+        print(geo.angles)
 
 
-def th2():
+def th2(debug=False):
     """@th1 -> @th2"""
     # Create lines AB and CD, E is their intersection point
     A, B, C, D, E = Point.createPoints("A", "B", "C", "D", "E")
@@ -64,10 +65,11 @@ def th2():
     geo = GeoHandler(A, B, C, D, E)
     geo.angles_calc()
     print(geo.angles[AEC], "=", geo.angles[BED])
-    # print(geo.angles)
+    if debug:
+        print(geo.angles)
 
 
-def th3():
+def th3(debug=False):
     """@th1 -> @th3"""
     # Create lines AB and CD, E is their intersection point
     A, B, C, D, E = Point.createPoints("A", "B", "C", "D", "E")
@@ -98,10 +100,11 @@ def th3():
         "=",
         geo.angles[AEC] + geo.angles[CEB] + geo.angles[BED] + geo.angles[DEA],
     )
-    # print(geo.angles)
+    if debug:
+        print(geo.angles)
 
 
 for i, j in enumerate([th1, th2, th3]):
-    print(f"th{i}:", end=" ")
+    print(f"th{i+1}:", end=" ")
     j()
     Degree.reset()

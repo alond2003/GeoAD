@@ -177,3 +177,18 @@ class Degree:
     def reset(cls):
         """Resets the variable count to start over from alpha"""
         Degree.nextVarIdx = 1
+
+    @classmethod
+    def variable_reduction(cls, *all_deg):
+        """Replaces variables' names to fill the GA from the beginning"""
+        existing_keys = set(sum([list(i.value.keys()) for i in all_deg], []))
+        if 0 in existing_keys:
+            existing_keys.remove(0)
+        xchg = 1
+        for i in list(existing_keys)[::-1]:
+            if i > len(existing_keys):
+                while xchg in existing_keys:
+                    xchg += 1
+                for deg in all_deg:
+                    deg.switch(i, Degree(False, {xchg: 1}))
+

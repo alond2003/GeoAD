@@ -30,5 +30,4 @@ geo = GeoHandler(A, B, C, D, E, F, G, H)
 geo.angles_calc()
 print(geo.angles)
 
-
 print("\nend")
