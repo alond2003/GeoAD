@@ -17,14 +17,14 @@ class GeoHandler:
         """@th1: the sum of 2 angles on a line is 180°"""
         for ang180 in self.find_all_180_angles():
             parts = [self.angles[i] for i in self.disassemble_angle(ang180)]
-            self.ang_is_equal(max(parts), 180 - (sum(parts) - max(parts)))
+            self.angs_are_equal(parts, Degree(False, 180))
 
     def angle_sum_around_point(self):
         """@th3: all angles around a point sum up to 360°"""
         for p in self.points:
             parts = [self.angles[i] for i in self.get_angles_around_point(p)]
             if len(parts) != 0:
-                self.ang_is_equal(max(parts), 360 - (sum(parts) - max(parts)))
+                self.angs_are_equal(parts, Degree(False, 360))
 
     def angles_on_parallel_lines(self):
         """@ax3: 2 alternate interior angles between 2 parallel lines and a transversal are equal"""
@@ -49,26 +49,28 @@ class GeoHandler:
             res = []
             for a in (ang1, ang2):
                 if a not in self.angles:
-                    a = self.disassemble_angle(a)
+                    a = [self.angles[i] for i in self.disassemble_angle(a)]
                 else:
-                    a = [a]
+                    a = [self.angles[a]]
                 res.append(a)
-            print(res)
-            self.ang_is_equal(
-                self.angles[max(res[0])],
-                sum([self.angles[i] for i in (res[0] + res[1])])
-                - self.angles[max(res[0])],
-            )
+            self.angs_are_equal(res[0], sum(res[1]))
 
-    def angles_calc(self):
-        """init values for each elementary angle and try to minimize the unknown variables"""
-        # TODO: add better documentation
+    def init_angles(self):
+        """Init angles with 180 or variable"""
         self.angles = dict(((i, None) for i in self.get_angles()))
         for abs_ang in self.angles.keys():
             if self.is_180_angle(abs_ang):
-                self.angles[abs_ang] = RealAngle.fromAbsAngle(abs_ang, Degree(d=180))
+                self.angles[abs_ang] = RealAngle.fromAbsAngle(
+                    abs_ang, Degree(False, d=180)
+                )
             else:
                 self.angles[abs_ang] = RealAngle.fromAbsAngle(abs_ang, Degree())
+
+    def angles_calc(self, init=True):
+        """Try to minimize the unknown variables"""
+        # TODO: add better documentation
+        if init:
+            self.init_angles()
 
         # print(self.angles)
         self.angles_on_parallel_lines()
@@ -76,6 +78,10 @@ class GeoHandler:
         self.angle_sum_around_point()
         Degree.variable_reduction(*[i.deg for i in self.angles.values()])
         # print([str(i) for i in self.angles])
+
+    def angs_are_equal(self, angs, deg):
+        """"Set the sum of all RealAngles to be equal to deg"""
+        self.ang_is_equal(max(angs), deg - (sum(angs) - max(angs)))
 
     def ang_is_equal(self, ang, deg):
         """minimize variables if can by data realang == deg"""

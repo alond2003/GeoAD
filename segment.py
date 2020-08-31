@@ -60,6 +60,25 @@ class Segment:
             i > j for i, j in zip(idxs, idxs[1:])
         )
 
+    def get_subsegment(self, name):
+        """Get subsegment based on name"""
+        p = [
+            list(filter(lambda x: x.name == name[i], self.get_all_points()))[0]
+            for i in range(2)
+        ]
+        if p[0] == self.start:
+            return self.get_subsegment_to(p[1])
+        elif p[0] == self.end:
+            return self.get_subsegment_from(p[1])
+        elif p[1] == self.end or p[1] == self.start:
+            return self.get_subsegment(name[::-1])
+        else:
+            furthest = p[0]
+            if self.get_all_points().index(p[0]) < self.get_all_points().index(p[1]):
+                furthest = p[1]
+            closest = p[1] if furthest == p[0] else p[0]
+            return self.get_subsegment_to(furthest).get_subsegment_from(closest)
+
     def are_inclusive(self, other):
         """Check if (self is subsegment of other) or (other is subsegment of self)"""
         return self.is_subsegment(other) or other.is_subsegment(self)
