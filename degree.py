@@ -134,7 +134,8 @@ class Degree:
         if val == 1 or val == -1:
             sgn = "-" if val < 0 else "+"
             return sgn + str_var
-        return str(val) + str_var
+        sgn = "" if val < 0 else "+"
+        return sgn + str(val) + str_var
 
     def __str__(self):
         """Returns a greek letter or A{idx} polynomial"""
