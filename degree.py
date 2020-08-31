@@ -5,6 +5,8 @@ from functools import total_ordering
 class Degree:
 
     nextVarIdx = 1
+    watched = []
+    switched = []
 
     def __init__(self, newvar=True, d={}):
         """Create Degree object based on dict,int,float or empty (w/ or w/o newvar)"""
@@ -36,6 +38,7 @@ class Degree:
 
     def switch(self, key, switchdeg):
         """switch every instance of this key to swithdeg"""
+        Degree.switchWatched(key, switchdeg)
         if key not in self.value:
             return
         else:
@@ -192,4 +195,17 @@ class Degree:
                     xchg += 1
                 for deg in all_deg:
                     deg.switch(i, Degree(False, {xchg: 1}))
+
+    def watch(self):
+        """Set watch on this degree (update its value when can)"""
+        Degree.watched.append(self)
+
+    @classmethod
+    def switchWatched(cls, key, deg):
+        """Switch key for deg in every Degree in watched if it hasn't been done before"""
+        if (key, deg) in Degree.switched:
+            return
+        Degree.switched.append((key, deg.new_copy()))
+        for w in Degree.watched:
+            w.switch(key, deg)
 

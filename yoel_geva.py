@@ -13,11 +13,12 @@ def p349_e1():
     h.s("CED")
     h.g().init_angles()
     x = Degree()
+    x.watch()
     h.g().angles[h.a("BED")].set_value(x + 90)
     h.g().angles[h.a("AEC")].set_value(2 * x + 40)
     h.g().angles_calc(False)
     # print(h.g().angles)
-    return h.g().angles[h.a("BED")] - 90
+    return x
 
 
 def p349_e2():
@@ -102,12 +103,15 @@ def p352_e23():
     h.s("AFB", "CGD", "EFGH")
     x = Degree()
     y = Degree()
+    x.watch()
+    y.watch()
     h.seta("HFA", x + y)
     h.seta("BFH", 4 * x - 2 * y)
     h.seta("EGD", 60)
     h.paras("AB", "CD")
     h.calca()
-    print(h.g().angles)
+    # print(h.g().angles)
+    return x, y
 
 
-print(p352_e23())
+print(p349_e1())
