@@ -23,7 +23,7 @@ class Evaluator:
 
     def is_180_angle(self, ang):
         maybeline = Segment(ang.get_start_point(), ang.get_end_point())
-        maybeline.add_midpoints(ang.vertex)
+        maybeline.set_midpoints(ang.vertex)
 
         # "any" function?
         for i in self.all:

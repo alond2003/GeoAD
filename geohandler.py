@@ -44,13 +44,21 @@ class GeoHandler:
             if t.get_all_points().index(tp1) > t.get_all_points().index(tp2):
                 p1, p2 = p2, p1
                 tp1, tp2 = tp2, tp1
-            ang1 = AbsAngle(p1.get_subsegment_to(tp1), tp1, t.get_subsegment_from(tp1))
-            if ang1 not in self.angles:
-                ang1.reverse()
+            ang1 = AbsAngle(t.get_subsegment_from(tp1), tp1, p1.get_subsegment_to(tp1))
             ang2 = AbsAngle(t.get_subsegment_to(tp2), tp2, p2.get_subsegment_from(tp2))
-            if ang2 not in self.angles:
-                ang2.reverse()
-            self.ang_is_equal(self.angles[ang1], self.angles[ang2].deg)
+            res = []
+            for a in (ang1, ang2):
+                if a not in self.angles:
+                    a = self.disassemble_angle(a)
+                else:
+                    a = [a]
+                res.append(a)
+            print(res)
+            self.ang_is_equal(
+                self.angles[max(res[0])],
+                sum([self.angles[i] for i in (res[0] + res[1])])
+                - self.angles[max(res[0])],
+            )
 
     def angles_calc(self):
         """init values for each elementary angle and try to minimize the unknown variables"""
@@ -144,7 +152,7 @@ class GeoHandler:
     def is_180_angle(self, ang):
         """Check if an angle is 180°"""
         maybeline = Segment(ang.get_start_point(), ang.get_end_point())
-        maybeline.add_midpoints(ang.vertex)
+        maybeline.set_midpoints(ang.vertex)
 
         return any(i.is_subsegment(maybeline) for i in self.segments)
 

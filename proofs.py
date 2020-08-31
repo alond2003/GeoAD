@@ -30,7 +30,7 @@ def th1(debug=False):
     # Create line AB, C point on AB, CD line from C
     A, B, C, D = Point.createPoints("A", "B", "C", "D")
     AB = Segment(A, B, True)
-    AB.add_midpoints(C)
+    AB.set_midpoints(C)
     CD = Segment(C, D, True)
     # Create Angle ACD
     AC = AB.get_subsegment_to(C)
@@ -51,9 +51,9 @@ def th2(debug=False):
     # Create lines AB and CD, E is their intersection point
     A, B, C, D, E = Point.createPoints("A", "B", "C", "D", "E")
     AB = Segment(A, B, True)
-    AB.add_midpoints(E)
+    AB.set_midpoints(E)
     CD = Segment(C, D, True)
-    CD.add_midpoints(E)
+    CD.set_midpoints(E)
     # Create Angle AEC
     AE = AB.get_subsegment_to(E)
     CE = CD.get_subsegment_to(E)
@@ -75,9 +75,9 @@ def th3(debug=False):
     # Create lines AB and CD, E is their intersection point
     A, B, C, D, E = Point.createPoints("A", "B", "C", "D", "E")
     AB = Segment(A, B, True)
-    AB.add_midpoints(E)
+    AB.set_midpoints(E)
     CD = Segment(C, D, True)
-    CD.add_midpoints(E)
+    CD.set_midpoints(E)
     # Create the 4 angles around point E
     AE = AB.get_subsegment_to(E)
     CE = CD.get_subsegment_to(E)
@@ -110,11 +110,11 @@ def th4(debug=False):
     # Create AB||CD, GFEH transversal: E ∈ AB, F ∈ CD
     A, B, C, D, E, F, G, H = Point.createPoints(8)
     AB = Segment(A, B, True)
-    AB.add_midpoints(E)
+    AB.set_midpoints(E)
     CD = Segment(C, D, True)
-    CD.add_midpoints(F)
+    CD.set_midpoints(F)
     GH = Segment(G, H, True)
-    GH.add_midpoints([F, E])
+    GH.set_midpoints(F, E)
     AB.set_parallel(CD)
     # Corresponding [מתאימות] angles example (AEG & CFG)
     AE = AB.get_subsegment_to(E)

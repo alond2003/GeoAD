@@ -13,17 +13,12 @@ class Segment:
             self.start.add_line(self)
             self.end.add_line(self)
 
-    def add_midpoints(self, x):
-        """add a list of midpoints or one midpoint"""
-        if isinstance(x, list):
-            self.midpoints = x
-            if self.isnew:
-                for i in x:
-                    i.add_line(self)
-        else:
-            self.midpoints.append(x)
-            if self.isnew:
-                x.add_line(self)
+    def set_midpoints(self, *x):
+        """add a midpoints"""
+        self.midpoints = list(x)
+        if self.isnew:
+            for i in x:
+                i.add_line(self)
 
     def get_all_points(self):
         """Return a list containing startpoint, midpoints and endpoint"""
@@ -34,7 +29,7 @@ class Segment:
         # TODO: what about if point == start?
         if point in self.midpoints:
             res = Segment(self.start, point)
-            res.add_midpoints(self.midpoints[0 : self.midpoints.index(point)])
+            res.set_midpoints(*self.midpoints[0 : self.midpoints.index(point)])
             res.parallel = self.parallel
             return res
         elif point == self.end:
@@ -46,7 +41,7 @@ class Segment:
         # TODO: what about if point == end?
         if point in self.midpoints:
             res = Segment(point, self.end)
-            res.add_midpoints(self.midpoints[self.midpoints.index(point) + 1 :])
+            res.set_midpoints(*self.midpoints[self.midpoints.index(point) + 1 :])
             res.parallel = self.parallel
             return res
         elif point == self.start:
