@@ -23,6 +23,10 @@ class RealAngle(AbsAngle):
         else:
             raise TypeError(f"cannot set angle value to {type(val)}")
 
+    def isknown(self):
+        """Check if the angles's degree is known or has variables in it"""
+        return (self.deg is not None) and self.deg.isknown()
+
     def __str__(self):
         """Return Angle's name and degree"""
         return (
@@ -41,6 +45,12 @@ class RealAngle(AbsAngle):
     def __eq__(self, other):
         if isinstance(other, RealAngle):
             return self.deg == other.deg
+        elif isinstance(other, AbsAngle):
+            return (
+                self.get_end_point() == other.get_end_point()
+                and self.vertex == other.vertex
+                and self.get_start_point() == other.get_start_point()
+            )
         else:
             return self.deg < other
 

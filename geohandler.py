@@ -13,21 +13,36 @@ class GeoHandler:
 
         self.segments = list(set([l for p in self.points for l in p.lines]))
 
+    # def vertical_angles(self):
+    #     lines_intersection = [
+    #         (p, l1, l2)
+    #         for p in self.points
+    #         for l1, l2 in itertools.combinations(p.lines, 2)
+    #         if p in l1.midpoints and p in l2.midpoints
+    #     ]
+    #     for p,l1,l2 in lines_intersection:
+    #         self.angs_are_equal()
+
     def angle_sum_on_line(self):
         """@th1: the sum of 2 angles on a line is 180°"""
-        for ang180 in self.find_all_180_angles():
-            parts = [self.angles[i] for i in self.disassemble_angle(ang180)]
-            self.angs_are_equal(parts, Degree(False, 180))
+        for ang180, seg in self.find_all_180_angles():
+            self.aang_equal_deg(
+                ang180, Degree(False, 180), f"angle upon line {seg} is 180"
+            )
 
     def angle_sum_around_point(self):
         """@th3: all angles around a point sum up to 360°"""
         for p in self.points:
-            parts = [self.angles[i] for i in self.get_angles_around_point(p)]
+            parts = self.get_angles_around_point(p)
             if len(parts) != 0:
-                self.angs_are_equal(parts, Degree(False, 360))
+                self.aang_equal_deg(
+                    parts, Degree(False, 360), f"sum of angles around point {p}"
+                )
 
     def angles_on_parallel_lines(self):
         """@ax3: 2 alternate interior angles between 2 parallel lines and a transversal are equal"""
+        return
+        """
         if len(self.segments) < 3:
             return
         parallels_transversal = [
@@ -53,7 +68,12 @@ class GeoHandler:
                 else:
                     a = [self.angles[a]]
                 res.append(a)
-            self.angs_are_equal(res[0], sum(res[1]))
+            self.angs_are_equal(
+                res[0],
+                sum(res[1]),
+                f"corresponding angles between {str(p1)} || {str(p2)} and {str(t)}",
+            )
+        """
 
     def init_angles(self):
         """Init angles with 180 or variable"""
@@ -79,24 +99,117 @@ class GeoHandler:
         Degree.variable_reduction(*[i.deg for i in self.angles.values()])
         # print([str(i) for i in self.angles])
 
-    def angs_are_equal(self, angs, deg):
-        """"Set the sum of all RealAngles to be equal to deg"""
-        self.ang_is_equal(max(angs), deg - (sum(angs) - max(angs)))
+    def aang_equal_aang(self, aang1, aang2, reason):
+        """Assume AbsAngle1 = AbsAngle2 and act apon it"""
+        pass
 
-    def ang_is_equal(self, ang, deg):
-        """minimize variables if can by data realang == deg"""
+    def aang_equal_deg(self, aang, deg, reason):
+        """Assume (AbsAngle = deg) and act apon it"""
+        print("---")
+        if isinstance(aang, list):
+            rangs = [self.angles[i] for i in aang]
+            if all([i.isknown() for i in rangs]):
+                return
+            print(" + ".join(aang), "=", deg, f"({reason})")
+            print(
+                AbsAngle.__str__(max(rangs)),
+                "=",
+                deg,
+                "-",
+                "(",
+                " + ".join([AbsAngle.__str__(i) for i in rangs if i != max(rangs)]),
+                ")",
+                f"(same)",  #  העברת אגפים וכלל המעבר
+            )
+            res = self.rang_equal_deg(max(rangs), deg - (sum(rangs) - max(rangs)))
+
+            for pre, aang in res:
+                print(aang, "=", pre, "(proven) ->", aang, "=", self.angles[aang].deg)
+        else:
+            res = []
+            # print(aang, self.angles.keys, type(self.angles.keys()))
+            if aang in self.angles.keys():
+                if self.angles[aang].isknown():
+                    return
+                res = self.rang_equal_deg(self.angles[aang], deg)
+                print(aang, "=", deg, f"({reason})")
+            else:
+                rangs = [self.angles[i] for i in self.disassemble_angle(aang)]
+                if all([i.isknown() for i in rangs]):
+                    return
+                print(
+                    deg,
+                    "=",
+                    aang,
+                    "=",
+                    " + ".join([AbsAngle.__str__(i) for i in rangs]),
+                    f"({reason}, the whole is the sum of its parts)",
+                )
+                print(
+                    AbsAngle.__str__(max(rangs)),
+                    "=",
+                    deg,
+                    "-",
+                    "("
+                    + " + ".join(
+                        [AbsAngle.__str__(i) for i in rangs if i != max(rangs)]
+                    )
+                    + ")"
+                    if len(rangs) > 2
+                    else AbsAngle.__str__(min(rangs)),
+                    f"(same)",
+                )  #  העברת אגפים וכלל המעבר
+                res = self.rang_equal_deg(max(rangs), deg - (sum(rangs) - max(rangs)))
+
+            if len(res) >= 1:
+                print(
+                    AbsAngle.__str__(max(rangs)),
+                    "=",
+                    deg,
+                    "-",
+                    "("
+                    + " + ".join([str(i.deg) for i in rangs if i != max(rangs)])
+                    + ")",
+                    "(evaluation) -> ",  # הצבה
+                    AbsAngle.__str__(max(rangs)),
+                    "=",
+                    max(rangs).deg,
+                    "(calc)",  # חישוב
+                )
+                for pre, aang in res:
+                    if aang != max(rangs):
+                        print(
+                            aang,
+                            "=",
+                            pre,
+                            "(proven) ->",
+                            aang,
+                            "=",
+                            self.angles[aang].deg,
+                        )
+
+    def rang_equal_deg(self, ang, deg):
+        """Set ang to be deg, Return list of (preDeg,affected aangs)"""
         if ang.deg is None:
             ang.deg = deg
+            return []
         else:
             switchval = deg - ang.deg
             if switchval == 0:
-                return
+                return []
             maxkey = max(switchval.value.keys())
             switchval = switchval / (-switchval.value[maxkey])
             del switchval.value[maxkey]
             # that means every (1 maxkey = switchval)
+            res = []
             for ang in self.angles.values():
+                pre = ang.deg.new_copy()
                 ang.deg.switch(maxkey, switchval)
+                if pre != ang.deg:
+                    res.append(
+                        (pre, list(filter(lambda x: ang == x, self.angles.keys()))[0])
+                    )
+            return res
 
     def get_angles_around_point(self, p):
         """Return a list of all the elementary AbsAngles around a point"""
@@ -143,15 +256,15 @@ class GeoHandler:
         return AbsAngle(true_rays[0], ang.vertex, true_rays[1])
 
     def find_all_180_angles(self):
-        """Return a list of all the 180° AbsAngles"""
+        """Return a list of (180° AbsAngles,segment on)"""
         res = []
         for l in self.segments:
             for p in l.midpoints:
                 res.append(
-                    AbsAngle(l.get_subsegment_to(p), p, l.get_subsegment_from(p))
+                    (AbsAngle(l.get_subsegment_to(p), p, l.get_subsegment_from(p)), l)
                 )
                 res.append(
-                    AbsAngle(l.get_subsegment_from(p), p, l.get_subsegment_to(p))
+                    (AbsAngle(l.get_subsegment_from(p), p, l.get_subsegment_to(p)), l)
                 )
         return res
 

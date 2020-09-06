@@ -62,9 +62,11 @@ class Helper:
         """Set value of angle in geo to deg"""
         if not self.did_inita:
             self.inita()
-        self.g().angs_are_equal(
-            [self.g().angles[x] for x in self.g().disassemble_angle(self.a(name))], deg
-        )
+        if self.a(name) not in self.g().angles:
+            self.g().aang_equal_deg(self.a(name), deg, "given")
+        else:
+            self.g().angles[self.a(name)].set_value(deg)
+            print(self.a(name), "=", deg, "(given)")
 
     def calca(self):
         """Call self.geo.calc_angles"""

@@ -11,12 +11,12 @@ def p349_e1():
     h = Helper()
     h.s("AEB")
     h.s("CED")
-    h.g().init_angles()
-    x = Degree()
+    h.inita()
+    x = Degree.given("x")
     x.watch()
-    h.g().angles[h.a("BED")].set_value(x + 90)
-    h.g().angles[h.a("AEC")].set_value(2 * x + 40)
-    h.g().angles_calc(False)
+    h.seta("BED", x + 90)
+    h.seta("AEC", 2 * x + 40)
+    h.calca()
     # print(h.g().angles)
     return x
 
