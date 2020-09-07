@@ -62,13 +62,16 @@ class Helper:
         """Set value of angle in geo to deg"""
         if not self.did_inita:
             self.inita()
-        self.g().angs_are_equal(
-            [self.g().angles[x] for x in self.g().disassemble_angle(self.a(name))], deg
-        )
+        if self.a(name) not in self.g().angles:
+            self.g().aang_equal_deg(self.a(name), deg, "given")
+        else:
+            self.g().angles[self.a(name)].set_value(deg)
+            print(self.a(name), "=", deg, "(given)")
 
     def calca(self):
         """Call self.geo.calc_angles"""
         self.g().angles_calc(not self.did_inita)
+        self.did_calca = True
 
     def geta(self, name):
         """Get angle value from geo by name"""
@@ -83,12 +86,9 @@ class Helper:
 
     def equala(self, name1, name2):
         """Set angle name1 to be equal to name2"""
-        if not self.did_calca:
-            self.calca()
-        self.g().angs_are_equal(
-            [self.g().angles[x] for x in self.g().disassemble_angle(self.a(name1))],
-            self.geta(name2),
-        )
+        if not self.did_inita:
+            self.inita()
+        self.g().aang_equal_aang(self.a(name1), self.a(name2), "given")
 
     def g(self):
         """Create new GeoHandler (if needed) and return it"""

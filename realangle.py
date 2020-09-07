@@ -9,7 +9,7 @@ from functools import total_ordering
 class RealAngle(AbsAngle):
     def __init__(self, ray1, vertex, ray2, deg=None):
         """Create an Angle with value"""
-        self.deg = deg
+        self.deg = deg.new_copy() if deg is not None else None
         AbsAngle.__init__(self, ray1, vertex, ray2)
 
     def set_value(self, val=None):
@@ -17,11 +17,24 @@ class RealAngle(AbsAngle):
         if isinstance(val, (int, float, dict)):
             self.deg = Degree(False, val)
         elif isinstance(val, Degree):
-            self.deg = val
+            self.deg = val.new_copy()
         elif val is None:
             self.deg = Degree()
         else:
             raise TypeError(f"cannot set angle value to {type(val)}")
+
+    def new_copy(self):
+        """Return a new copy of this object"""
+        return RealAngle(
+            self.ray1,
+            self.vertex,
+            self.ray2,
+            self.deg.new_copy() if self.deg is not None else None,
+        )
+
+    def isknown(self):
+        """Check if the angles's degree is known or has variables in it"""
+        return (self.deg is not None) and self.deg.isknown()
 
     def __str__(self):
         """Return Angle's name and degree"""
@@ -41,8 +54,14 @@ class RealAngle(AbsAngle):
     def __eq__(self, other):
         if isinstance(other, RealAngle):
             return self.deg == other.deg
+        elif isinstance(other, AbsAngle):
+            return (
+                self.get_end_point() == other.get_end_point()
+                and self.vertex == other.vertex
+                and self.get_start_point() == other.get_start_point()
+            )
         else:
-            return self.deg < other
+            return self.deg == other
 
     def __add__(self, other):
         """Return Degree of sum"""
@@ -62,6 +81,10 @@ class RealAngle(AbsAngle):
 
     def __rsub__(self, other):
         return other - self.deg
+
+    def __abs__(self):
+        """Return AbsAngle from this RealAngle"""
+        return AbsAngle(self.ray1, self.vertex, self.ray2)
 
     @classmethod
     def fromAbsAngle(cls, absang, deg=None):

@@ -4,9 +4,11 @@ from functools import total_ordering
 @total_ordering
 class Degree:
 
+    nextGivenIdx = 2
     nextVarIdx = 1
     watched = []
     switched = []
+    givenSymbols = {}
 
     def __init__(self, newvar=True, d={}):
         """Create Degree object based on dict,int,float or empty (w/ or w/o newvar)"""
@@ -54,6 +56,14 @@ class Degree:
         for key in self.value:
             if isinstance(self.value[key], float) and self.value[key].is_integer():
                 self.value[key] = int(self.value[key])
+
+    def isknown(self):
+        """Check if the degree is known or has variables in it"""
+        self.clean()
+        for i in self.value:
+            if i != 0:
+                return False
+        return True
 
     def __add__(self, other):
         """Add the values for the same key and add the missing keys with dict/Degree/int/float"""
@@ -123,7 +133,7 @@ class Degree:
         return self * (-1)
 
     @staticmethod
-    def str_term(tup):
+    def str_term(tup, custom):
         idx, val = tup
         if val == 0:
             return ""
@@ -133,24 +143,37 @@ class Degree:
             return str(val)
 
         GA = "\u03B1\u03B2\u03B3\u03B4\u03B5\u03B6\u03B7\u03B8\u03B9\u03Ba\u03Bb\u03Bc\u03Bd\u03Be\u03Bf\u03C0\u03C1\u03C2\u03C3\u03C4\u03C5\u03C6\u03C7\u03C8\u03C9"
-        str_var = GA[idx - 1] if 0 < idx < len(GA) + 1 else f"A{idx-1}"
+        if isinstance(idx, int):
+            str_var = GA[idx - 1] if 0 < idx < len(GA) + 1 else f"A{idx-1}"
+        else:
+            str_var = Degree.givenSymbols[idx]
+        if idx in custom:
+            str_var = custom[idx]
         if val == 1 or val == -1:
             sgn = "-" if val < 0 else "+"
             return sgn + str_var
         sgn = "" if val < 0 else "+"
         return sgn + str(val) + str_var
 
-    def __str__(self):
+    def __str__(self, *custom):
         """Returns a greek letter or A{idx} polynomial"""
+        if len(custom) % 2 != 0:
+            raise "problem!!!"
+        else:
+            d = {}
+            for i in range(0, len(custom), 2):
+                d[custom[i]] = custom[i + 1]
+            custom = d
+
         res = ""
         for i in sorted(self.value.items())[::-1]:
             if res == "":
-                if Degree.str_term(i)[0] == "+":
-                    res = Degree.str_term(i)[1:]
+                if Degree.str_term(i, custom)[0] == "+":
+                    res = Degree.str_term(i, custom)[1:]
                 else:
-                    res = Degree.str_term(i)
+                    res = Degree.str_term(i, custom)
             else:
-                res += " " + Degree.str_term(i)
+                res += " " + Degree.str_term(i, custom)
         return res
 
     def __repr__(self):
@@ -208,4 +231,13 @@ class Degree:
         Degree.switched.append((key, deg.new_copy()))
         for w in Degree.watched:
             w.switch(key, deg)
+
+    @classmethod
+    def given(cls, symbol):
+        d = Degree(False, {})
+        d.value[1 / Degree.nextGivenIdx] = 1
+        Degree.givenSymbols[1 / Degree.nextGivenIdx] = symbol
+        Degree.nextGivenIdx += 1
+        d.watch()
+        return d
 
