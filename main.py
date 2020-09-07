@@ -1,7 +1,7 @@
 # TODO: make @th4 in geo
 # TODO: make degree str better looking (180 - alpha, 180 + alpha - beta)
 # TODO: if angle is 180 -> it is a segment
-# TODO: when given angle (BED = x), make option to give actual name to var (speciel var/switch)
+# TODO: abs(ang) = absAng(realangle)
 from point import Point
 from segment import Segment
 from realangle import RealAngle

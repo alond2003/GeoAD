@@ -11,9 +11,7 @@ def p349_e1():
     h = Helper()
     h.s("AEB")
     h.s("CED")
-    h.inita()
     x = Degree.given("x")
-    x.watch()
     h.seta("BED", x + 90)
     h.seta("AEC", 2 * x + 40)
     h.calca()
@@ -25,8 +23,7 @@ def p349_e2():
     h = Helper()
     h.s("ACB")
     h.s("CD")
-    h.inita()
-    x = Degree()
+    x = Degree().given("x")
     h.seta("DCB", x)
     h.seta("ACD", 3 * x)
     h.calca()
@@ -39,7 +36,7 @@ def p349_e3():
     h.s("ACB")
     h.s("CD")
     h.inita()
-    x = Degree()
+    x = Degree().given("x")
     h.seta("DCB", x)
     h.seta("ACD", x + 48)
     h.calca()
@@ -52,8 +49,7 @@ def p349_e4():
     h.s("BE")
     h.s("ABC")
     h.s("BD")
-    h.inita()
-    x = Degree()
+    x = Degree().given("x")
     h.seta("EBA", x)
     h.seta("DBC", x)
     h.calca()
@@ -62,16 +58,18 @@ def p349_e4():
 
 
 def p349_e5():
+    # print("hello\n" * 1882)
     h = Helper()
     h.s("AEB")
     h.s("FEG")
     h.s("CED")
-    h.inita()
-    x = Degree()
-    h.seta("AEF", x)
-    h.seta("FEC", x)
-    h.calca()
-    # print(h.g().angles)
+    # print("yo", h.g().angles)
+    h.equala("AEF", "FEC")
+    # h.calca()
+    # h.inita()
+    # print("yo", h.g().angles)
+    # print(h.geta("BEG") == h.geta("GED"))
+    # print("yo", h.g().angles)
     return h.geta("BEG") == h.geta("GED")
 
 
@@ -81,10 +79,8 @@ def p352_e20():
     h.s("CE")
     h.s("DC")
     h.s("FC")
-    h.inita()
     h.equala("ACE", "ECD")
     h.equala("DCF", "FCB")
-    h.calca()
     # print(h.g().angles)
     return h.geta("ECF")
 
@@ -95,16 +91,14 @@ def p352_e21():
     h.seta("ABC", 90)
     h.equala("EBA", "DBC")
     # print(h.g().angles)
-    return h.geta("EBD") == Degree(False, 90)
+    return h.geta("EBD") == 90
 
 
 def p352_e23():
     h = Helper()
     h.s("AFB", "CGD", "EFGH")
-    x = Degree()
-    y = Degree()
-    x.watch()
-    y.watch()
+    x = Degree().given("x")
+    y = Degree().given("y")
     h.seta("HFA", x + y)
     h.seta("BFH", 4 * x - 2 * y)
     h.seta("EGD", 60)
@@ -114,4 +108,4 @@ def p352_e23():
     return x, y
 
 
-print(p349_e1())
+print(p352_e23())

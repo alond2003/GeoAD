@@ -41,8 +41,6 @@ class GeoHandler:
 
     def angles_on_parallel_lines(self):
         """@ax3: 2 alternate interior angles between 2 parallel lines and a transversal are equal"""
-        return
-        """
         if len(self.segments) < 3:
             return
         parallels_transversal = [
@@ -61,19 +59,11 @@ class GeoHandler:
                 tp1, tp2 = tp2, tp1
             ang1 = AbsAngle(t.get_subsegment_from(tp1), tp1, p1.get_subsegment_to(tp1))
             ang2 = AbsAngle(t.get_subsegment_to(tp2), tp2, p2.get_subsegment_from(tp2))
-            res = []
-            for a in (ang1, ang2):
-                if a not in self.angles:
-                    a = [self.angles[i] for i in self.disassemble_angle(a)]
-                else:
-                    a = [self.angles[a]]
-                res.append(a)
-            self.angs_are_equal(
-                res[0],
-                sum(res[1]),
+            self.aang_equal_aang(
+                ang1,
+                ang2,
                 f"corresponding angles between {str(p1)} || {str(p2)} and {str(t)}",
             )
-        """
 
     def init_angles(self):
         """Init angles with 180 or variable"""
@@ -101,114 +91,289 @@ class GeoHandler:
 
     def aang_equal_aang(self, aang1, aang2, reason):
         """Assume AbsAngle1 = AbsAngle2 and act apon it"""
-        pass
+        aangs = [self.disassemble_angle(a) for a in [aang1, aang2]]
+        rangs = [[self.angles[a] for a in l] for l in aangs]
+        if all(r.isknown() for r in rangs[0] + rangs[1]):
+            return
+
+        mes = "---\n"
+        # print("---")
+        mes += f"{aang1} = {aang2} ({reason})\n"
+        # print(aang1, "=", aang2)
+        if len(aangs[0]) + len(aangs[1]) > 2:
+            mes += " + ".join(aangs[0]) + " = " + " + ".join(aangs[1]) + "\n"
+            # print(" + ".join(aangs[0]), "=", " + ".join(aangs[1]))
+        max_rang = max(*rangs[0], *rangs[1])
+        minus_group, plus_group = rangs
+        if abs(max_rang) in aangs[1]:
+            minus_group, plus_group = plus_group, minus_group
+        minus_group = [i for i in minus_group if abs(i) != max_rang]
+        if not (len(rangs[0]) == 1 and rangs[0][0] == abs(max_rang)):
+
+            mes += (
+                str(abs(max_rang))
+                + " = "
+                + " + ".join([str(abs(i)) for i in plus_group])
+                + (
+                    "- "
+                    + (
+                        f"({' + '.join([str(abs(i)) for i in minus_group])})"
+                        if len(minus_group) > 1
+                        else str(abs(minus_group[0]))
+                    )
+                    if len(minus_group) > 0
+                    else ""
+                )
+                + "\n"
+            )
+            # print(abs(max_rang), "=", " + ".join([str(abs(i)) for i in plus_group]), ("- " + (f"({' + '.join([str(abs(i)) for i in minus_group])})" if len(minus_group) > 1 else str(abs(minus_group[0]))) if len(minus_group) > 0 else ""))
+
+        # pre_calc_rangs = [i.new_copy() for i in rangs]
+        unchanged_max_rang = max_rang.new_copy()
+        plus_group = [i.new_copy() for i in plus_group]
+        minus_group = [i.new_copy() for i in minus_group]
+        res = self.rang_equal_deg(max_rang, sum(plus_group) - sum(minus_group))
+        if len(res) <= 1:
+            # print("*", end="")
+            return
+        print(mes, end="")
+        if len(res) == 2 and max_rang == sum(plus_group) - sum(minus_group):
+            # print הצבה and final value
+            print(
+                abs(max_rang),
+                "=",
+                " + ".join([str(i.deg) for i in plus_group]),
+                (
+                    "- "
+                    + (
+                        f"({' + '.join([str(i.deg) for i in minus_group])})"
+                        if len(minus_group) > 1
+                        else str(minus_group[0].deg)
+                    )
+                    if len(minus_group) > 0
+                    else ""
+                ),
+                "(eval)",
+                end=" ",
+            )
+            print("->", abs(max_rang), "=", max_rang.deg, "(calc)")
+        else:
+
+            # print הצבה and צמצום and find var
+            print(
+                unchanged_max_rang.deg,
+                "=",
+                " + ".join([str(i.deg) for i in plus_group]),
+                (
+                    "- "
+                    + (
+                        f"({' + '.join([str(i.deg) for i in minus_group])})"
+                        if len(minus_group) > 1
+                        else str(minus_group[0].deg)
+                    )
+                    if len(minus_group) > 0
+                    else ""
+                ),
+                "(eval)",
+            )
+            print(
+                unchanged_max_rang.deg,
+                "=",
+                sum(plus_group) - sum(minus_group),
+                f"(same)",
+            )
+            print(
+                Degree(False, {res[0][0]: 1}),
+                "=",
+                res[0][1],
+                f"(found var {str(Degree(False, {res[0][0]: 1}))})",
+            )
+
+            rem = []
+            for pre, aa in res[1:]:
+                if aa in aangs[0] or aa in aangs[1]:
+                    res.insert(1, (pre, aa))
+                    rem.append((pre, aa))
+            for x, y in rem:
+                for k in range(len(res) - 1, 0, -1):
+                    if res[k] == (x, y):
+                        res.pop(k)
+                        break
+
+            # for all angles affected:
+            for preval, aa in res[1:]:
+                # print: abs(ang) = proven = הצבה -> abs(ang) = ang
+                print(
+                    aa,
+                    "=",
+                    preval,
+                    "=",
+                    preval.__str__(res[0][0], f"({str(res[0][1])})"),
+                    "->",
+                    aa,
+                    "=",
+                    self.angles[aa].deg,
+                )
 
     def aang_equal_deg(self, aang, deg, reason):
         """Assume (AbsAngle = deg) and act apon it"""
-        print("---")
+        mes = "---\n"
+        # print("---")
         if isinstance(aang, list):
             rangs = [self.angles[i] for i in aang]
-            if all([i.isknown() for i in rangs]):
-                return
-            print(" + ".join(aang), "=", deg, f"({reason})")
+            mes += (
+                " + ".join([str(i) for i in aang]) + " = " + str(deg) + f" ({reason})\n"
+            )
+            # print(" + ".join([str(i) for i in aang]), "=", deg, f"({reason})")
+        else:
+            if aang in self.angles:
+                rangs = [self.angles[aang]]
+                mes += str(aang) + " = " + str(deg) + f" ({reason})\n"
+                # print(aang, "=", deg, f"({reason})")
+            else:
+                rangs = [self.angles[i] for i in self.disassemble_angle(aang)]
+                mes += (
+                    str(deg)
+                    + " = "
+                    + str(aang)
+                    + " = "
+                    + " + ".join([str(abs(i)) for i in rangs])
+                    + f" ({reason}, the whole is the sum of its parts)\n"
+                )
+                # print(deg, "=", aang, "=", " + ".join([str(abs(i)) for i in rangs]), f"({reason}, the whole is the sum of its parts)")
+        if all([i.isknown() for i in rangs]):
+            # print("*", end="")
+            return
+        if len(rangs) > 1:
+            mes += (
+                str(abs(max(rangs)))
+                + " = "
+                + str(deg)
+                + " - "
+                + (
+                    "("
+                    + " + ".join([str(abs(i)) for i in rangs if abs(i) != max(rangs)])
+                    + ")"
+                    if len(rangs) > 2
+                    else str(abs(min(rangs)))
+                )
+                + f" (same)\n"
+            )
+            # print(str(abs(max(rangs))), "=", deg, "-", "(" + " + ".join([str(abs(i)) for i in rangs if i != max(rangs)]) + ")" if len(rangs) > 2 else str(abs(min(rangs))), f"(same)")
+
+        pre_calc_rangs = [i.new_copy() for i in rangs]
+        changed_rang = max(rangs)
+        unchanged_rang = changed_rang.new_copy()
+        res = self.rang_equal_deg(max(rangs), deg - (sum(rangs) - max(rangs)))
+        if len(res) <= 1:
+            # print("*", resend="")
+            return
+        print(mes, end="")
+        if len(res) == 2 and changed_rang == deg - (
+            sum(pre_calc_rangs) - unchanged_rang
+        ):
+            # print הצבה and final value
             print(
-                AbsAngle.__str__(max(rangs)),
+                str(abs(changed_rang)),
                 "=",
                 deg,
                 "-",
-                "(",
-                " + ".join([AbsAngle.__str__(i) for i in rangs if i != max(rangs)]),
-                ")",
-                f"(same)",  #  העברת אגפים וכלל המעבר
+                "("
+                + " + ".join(
+                    [str(i.deg) for i in pre_calc_rangs if abs(i) != unchanged_rang]
+                )
+                + ")"
+                if len(rangs) > 2 or len(min(pre_calc_rangs).deg.value.keys()) > 1
+                else str(min(pre_calc_rangs).deg),
+                f"(eval)",
+                end=" ",
             )
-            res = self.rang_equal_deg(max(rangs), deg - (sum(rangs) - max(rangs)))
-
-            for pre, aang in res:
-                print(aang, "=", pre, "(proven) ->", aang, "=", self.angles[aang].deg)
+            print("->", str(abs(changed_rang)), "=", changed_rang.deg, "(calc)")
         else:
-            res = []
-            # print(aang, self.angles.keys, type(self.angles.keys()))
-            if aang in self.angles.keys():
-                if self.angles[aang].isknown():
-                    return
-                res = self.rang_equal_deg(self.angles[aang], deg)
-                print(aang, "=", deg, f"({reason})")
-            else:
-                rangs = [self.angles[i] for i in self.disassemble_angle(aang)]
-                if all([i.isknown() for i in rangs]):
-                    return
-                print(
-                    deg,
-                    "=",
-                    aang,
-                    "=",
-                    " + ".join([AbsAngle.__str__(i) for i in rangs]),
-                    f"({reason}, the whole is the sum of its parts)",
-                )
-                print(
-                    AbsAngle.__str__(max(rangs)),
-                    "=",
-                    deg,
-                    "-",
-                    "("
-                    + " + ".join(
-                        [AbsAngle.__str__(i) for i in rangs if i != max(rangs)]
-                    )
-                    + ")"
-                    if len(rangs) > 2
-                    else AbsAngle.__str__(min(rangs)),
-                    f"(same)",
-                )  #  העברת אגפים וכלל המעבר
-                res = self.rang_equal_deg(max(rangs), deg - (sum(rangs) - max(rangs)))
 
-            if len(res) >= 1:
-                print(
-                    AbsAngle.__str__(max(rangs)),
-                    "=",
-                    deg,
-                    "-",
-                    "("
-                    + " + ".join([str(i.deg) for i in rangs if i != max(rangs)])
-                    + ")",
-                    "(evaluation) -> ",  # הצבה
-                    AbsAngle.__str__(max(rangs)),
-                    "=",
-                    max(rangs).deg,
-                    "(calc)",  # חישוב
+            # print הצבה and צמצום and find var
+            print(
+                unchanged_rang.deg,
+                "=",
+                deg,
+                "-",
+                "("
+                + " + ".join(
+                    [str(i.deg) for i in pre_calc_rangs if abs(i) != unchanged_rang]
                 )
-                for pre, aang in res:
-                    if aang != max(rangs):
-                        print(
-                            aang,
-                            "=",
-                            pre,
-                            "(proven) ->",
-                            aang,
-                            "=",
-                            self.angles[aang].deg,
-                        )
+                + ")"
+                if len(rangs) > 2 or len(min(pre_calc_rangs).deg.value.keys()) > 1
+                else str(min(pre_calc_rangs).deg),
+                f"(eval)",
+            )
+            print(
+                unchanged_rang.deg,
+                "=",
+                deg - sum((i for i in pre_calc_rangs if abs(i) != unchanged_rang)),
+                f"(same)",
+            )
+            print(
+                Degree(False, {res[0][0]: 1}),
+                "=",
+                res[0][1],
+                f"(found var {str(Degree(False, {res[0][0]: 1}))})",
+            )
 
-    def rang_equal_deg(self, ang, deg):
-        """Set ang to be deg, Return list of (preDeg,affected aangs)"""
-        if ang.deg is None:
-            ang.deg = deg
+            # for all angles affected:
+            for preval, aa in res[1:]:
+                # print: abs(ang) = proven = הצבה -> abs(ang) = ang
+                print(
+                    aa,
+                    "=",
+                    preval,
+                    "=",
+                    preval.__str__(res[0][0], f"({str(res[0][1])})"),
+                    "->",
+                    aa,
+                    "=",
+                    self.angles[aa].deg,
+                )
+
+    def rang_equal_deg(self, rang, deg):
+        """Set ang to be deg, Return list of (preDeg,affected Aangs), list[0] = (varswitched.key,switchval)"""
+        if rang.deg is None:
+            rang.deg = deg
             return []
         else:
-            switchval = deg - ang.deg
+            switchval = deg - rang.deg
             if switchval == 0:
                 return []
             maxkey = max(switchval.value.keys())
             switchval = switchval / (-switchval.value[maxkey])
             del switchval.value[maxkey]
             # that means every (1 maxkey = switchval)
-            res = []
+            res = [(maxkey, switchval)]
             for ang in self.angles.values():
                 pre = ang.deg.new_copy()
                 ang.deg.switch(maxkey, switchval)
                 if pre != ang.deg:
-                    res.append(
-                        (pre, list(filter(lambda x: ang == x, self.angles.keys()))[0])
-                    )
+                    if (
+                        rang
+                        == list(filter(lambda x: abs(ang) == x, self.angles.keys()))[0]
+                    ):
+                        res.insert(
+                            1,
+                            (
+                                pre,
+                                list(
+                                    filter(lambda x: abs(ang) == x, self.angles.keys())
+                                )[0],
+                            ),
+                        )
+                    else:
+                        res.append(
+                            (
+                                pre,
+                                list(
+                                    filter(lambda x: abs(ang) == x, self.angles.keys())
+                                )[0],
+                            )
+                        )
             return res
 
     def get_angles_around_point(self, p):
