@@ -1,4 +1,6 @@
 import itertools
+
+
 from absangle import AbsAngle
 from realangle import RealAngle
 from segment import Segment
@@ -46,6 +48,7 @@ class GeoHandler:
         """@ax3: 2 alternate interior angles between 2 parallel lines and a transversal are equal"""
         if len(self.segments) < 3:
             return
+
         parallels_transversal = [
             (p1, p2, t)
             for p1, p2 in itertools.combinations(self.segments, 2)
@@ -54,19 +57,88 @@ class GeoHandler:
             if t.get_intersection_point(p1) is not None
             and t.get_intersection_point(p2) is not None
         ]
-        for p1, p2, t in parallels_transversal:
-            tp1 = t.get_intersection_point(p1)
-            tp2 = t.get_intersection_point(p2)
-            if t.get_all_points().index(tp1) > t.get_all_points().index(tp2):
-                p1, p2 = p2, p1
-                tp1, tp2 = tp2, tp1
-            ang1 = AbsAngle(t.get_subsegment_from(tp1), tp1, p1.get_subsegment_to(tp1))
-            ang2 = AbsAngle(t.get_subsegment_to(tp2), tp2, p2.get_subsegment_from(tp2))
-            self.aang_equal_aang(
-                ang1,
-                ang2,
-                f"corresponding angles between {str(p1)} || {str(p2)} and {str(t)}",
-            )
+        for *p, t in parallels_transversal:
+            tp = [t.get_intersection_point(p[0]), t.get_intersection_point(p[1])]
+            if t.get_all_points().index(tp[0]) > t.get_all_points().index(tp[1]):
+                p[0], p[1] = p[1], p[0]
+                tp[0], tp[1] = tp[1], tp[0]
+            aangs = [[[] for i in range(4)] for j in range(2)]
+            for i in range(2):
+                j = 0
+                for a in self.get_angles_around_point(tp[i]):
+                    aangs[i][j].append(a)
+                    if t.is_subsegment(a.ray2) or p[i].is_subsegment(a.ray2):
+                        j = (j + 1) % 4
+
+            to_t_start, to_t_end, from_t_start, from_t_end = [], [], [], []
+            for i in range(2):
+                for l in aangs[i]:
+                    if len(l) == 0:
+                        continue
+                    if t.is_subsegment(l[-1].ray2) and (
+                        l[-1].ray2.start == t.start or l[-1].ray2.end == t.start
+                    ):
+                        to_t_start.append((i, l))
+                    elif t.is_subsegment(l[-1].ray2) and (
+                        l[-1].ray2.start == t.end or l[-1].ray2.end == t.end
+                    ):
+                        to_t_end.append((i, l))
+                    elif t.is_subsegment(l[0].ray1) and (
+                        l[0].ray1.start == t.start or l[0].ray1.end == t.start
+                    ):
+                        from_t_start.append((i, l))
+                    elif t.is_subsegment(l[0].ray1) and (
+                        l[0].ray1.start == t.end or l[0].ray1.end == t.end
+                    ):
+                        from_t_end.append((i, l))
+            groups = [to_t_start, from_t_start, to_t_end, from_t_end]
+            for i in range(4):
+                g = groups[i]
+                if len(g) == 0:
+                    continue
+                if len(g) == 2:
+                    # זוויות מתאימות
+                    # Corresponding angles
+                    self.aang_equal_aang(
+                        AbsAngle(g[0][1][0].ray1, g[0][1][0].vertex, g[0][1][-1].ray2),
+                        AbsAngle(g[1][1][0].ray1, g[1][1][0].vertex, g[1][1][-1].ray2),
+                        f"Corresponding angles are equal between {str(p[0])} || {str(p[1])} and {str(t)}",
+                    )
+                for single in g:
+                    # זוויות מתחלפות
+                    # alternate angles
+                    alt_g = groups[i + (1 if i % 2 == 0 else -1)]
+                    for gg in alt_g:
+                        if gg[0] != single[0]:
+                            self.aang_equal_aang(
+                                AbsAngle(
+                                    gg[1][0].ray1, gg[1][0].vertex, gg[1][-1].ray2
+                                ),
+                                AbsAngle(
+                                    single[1][0].ray1,
+                                    single[1][0].vertex,
+                                    single[1][-1].ray2,
+                                ),
+                                f"alteranting angles are equal between {str(p[0])} || {str(p[1])} and {str(t)}",
+                            )
+                    # זוויות חד צדדיות
+                    # consecutive angles
+                    alt_g = groups[3 - i]
+                    for gg in alt_g:
+                        self.aang_equal_deg(
+                            [
+                                AbsAngle(
+                                    gg[1][0].ray1, gg[1][0].vertex, gg[1][-1].ray2
+                                ),
+                                AbsAngle(
+                                    single[1][0].ray1,
+                                    single[1][0].vertex,
+                                    single[1][-1].ray2,
+                                ),
+                            ],
+                            Degree(False, 180),
+                            f"sum of consecutive angles between {str(p[0])} || {str(p[1])} and {str(t)}",
+                        )
 
     def init_angles(self):
         """Init angles with 180 or variable"""
