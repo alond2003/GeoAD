@@ -13,15 +13,18 @@ class GeoHandler:
 
         self.segments = list(set([l for p in self.points for l in p.lines]))
 
-    # def vertical_angles(self):
-    #     lines_intersection = [
-    #         (p, l1, l2)
-    #         for p in self.points
-    #         for l1, l2 in itertools.combinations(p.lines, 2)
-    #         if p in l1.midpoints and p in l2.midpoints
-    #     ]
-    #     for p,l1,l2 in lines_intersection:
-    #         self.angs_are_equal()
+    def vertical_angles(self):
+        """@th2: 2 vertical angles are equal"""
+        for p in self.points:
+            for a1, a2 in itertools.combinations(self.get_angles_around_point(p), 2):
+                if (
+                    self.is_180_angle(AbsAngle(a1.ray1, p, a2.ray1))
+                    or self.is_180_angle(AbsAngle(a2.ray1, p, a1.ray1))
+                ) and (
+                    self.is_180_angle(AbsAngle(a1.ray2, p, a2.ray2))
+                    or self.is_180_angle(AbsAngle(a2.ray2, p, a1.ray2))
+                ):
+                    self.aang_equal_aang(a1, a2, "vertical angles")
 
     def angle_sum_on_line(self):
         """@th1: the sum of 2 angles on a line is 180°"""
@@ -83,6 +86,7 @@ class GeoHandler:
             self.init_angles()
 
         # print(self.angles)
+        self.vertical_angles()
         self.angles_on_parallel_lines()
         self.angle_sum_on_line()
         self.angle_sum_around_point()
@@ -435,6 +439,9 @@ class GeoHandler:
 
     def is_180_angle(self, ang):
         """Check if an angle is 180°"""
+        if isinstance(ang, RealAngle):
+            if ang == 180:
+                return True
         maybeline = Segment(ang.get_start_point(), ang.get_end_point())
         maybeline.set_midpoints(ang.vertex)
 

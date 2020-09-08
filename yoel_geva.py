@@ -108,4 +108,8 @@ def p352_e23():
     return x, y
 
 
-print(p352_e23())
+arr = [p349_e1, p349_e2, p349_e3, p349_e4, p349_e5, p352_e20, p352_e21, p352_e23]
+
+f = arr[7]
+print(f())
+

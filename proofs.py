@@ -19,7 +19,7 @@ Axioms:
 Theorems:
 
 @th1: the sum of 2 angles on a line is 180° (adjacent supplementary angles / linear pair)
-*@th2: 2 vertical angles are equal
+@th2: 2 vertical angles are equal
 @th3: all angles around a point sum up to 360°
 @th4: Corresponding angles are equal and the sum of two consecutive interior angles is 180° (2pl&t)
 """
