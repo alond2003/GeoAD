@@ -38,12 +38,14 @@ CD = Segment(C, D, True)
 # geo.angles_calc()
 # print(geo.angles)
 
-"""
+# """
 h = Helper()
-h.s("HGFE", "CDG", "AFB")
+h.s("HGFE", "CGD", "AFB")
 h.paras("AB", "CD")
-h.calca()
-print(h.g().angles)
-"""
+# h.calca()
+# print(h.g().angles)
+h.g().init_segments()
+print(h.g().rsegments)
+# """
 
 print("\nend")

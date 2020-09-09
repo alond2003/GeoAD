@@ -1,6 +1,7 @@
 import itertools
 
-
+from length import Length
+from realsegment import RealSegment
 from absangle import AbsAngle
 from realangle import RealAngle
 from segment import Segment
@@ -113,7 +114,20 @@ class GeoHandler:
                     f"sum of consecutive angles between {str(p[0])} || {str(p[1])} and {str(t)}",
                 )
 
-    """ BASIC ANGLES_CALC_METHODS """
+    """ BASIC SEGMENT_CALC METHODS"""
+
+    def init_segments(self):
+        self.rsegments = sum(
+            [RealSegment.fromSegment(i).get_all_subsegments() for i in self.segments],
+            [],
+        )
+        for i in self.rsegments:
+            i.set_value()
+            print(i)
+
+        # print(self.rsegments)
+
+    """ BASIC ANGLES_CALC METHODS """
 
     def init_angles(self):
         """Init angles with 180 or variable"""
