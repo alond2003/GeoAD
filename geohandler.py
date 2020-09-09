@@ -15,6 +15,8 @@ class GeoHandler:
 
         self.segments = list(set([l for p in self.points for l in p.lines]))
 
+    """ THEOREMS """
+
     def vertical_angles(self):
         """@th2: 2 vertical angles are equal"""
         for p in self.points:
@@ -110,6 +112,8 @@ class GeoHandler:
                     Degree(False, 180),
                     f"sum of consecutive angles between {str(p[0])} || {str(p[1])} and {str(t)}",
                 )
+
+    """ BASIC ANGLES_CALC_METHODS """
 
     def init_angles(self):
         """Init angles with 180 or variable"""
@@ -429,6 +433,8 @@ class GeoHandler:
                             )
                         )
             return res
+
+    """ BASIC ABS_ANGLE METOHDS """
 
     def get_angles_around_point(self, p):
         """Return a list of all the elementary AbsAngles around a point"""

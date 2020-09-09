@@ -90,12 +90,13 @@ class Segment:
         self.parallel.union(other.parallel)
 
     def get_intersection_point(self, other):
-        """Return the intersection point or None if parallel"""
+        """Return the intersection point or None if there isn't any"""
         if self.is_parallel(other):
             return None
-        return list(
-            set(self.get_all_points()).intersection(set(other.get_all_points()))
-        )[0]
+        lst = list(set(self.get_all_points()).intersection(set(other.get_all_points())))
+        if len(lst) == 0:
+            return None
+        return lst[0]
 
     def __repr__(self):
         """Return Segment's name and midpoints"""
