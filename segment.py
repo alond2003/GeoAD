@@ -26,7 +26,6 @@ class Segment:
 
     def get_subsegment_to(self, point):
         """Return subsegment to point (containing all the midpoints in between)"""
-        # TODO: what about if point == start?
         if point in self.midpoints:
             res = Segment(self.start, point)
             res.set_midpoints(*self.midpoints[0 : self.midpoints.index(point)])
@@ -38,7 +37,6 @@ class Segment:
 
     def get_subsegment_from(self, point):
         """Return subsegment from point (containing all the midpoints in between)"""
-        # TODO: what about if point == end?
         if point in self.midpoints:
             res = Segment(point, self.end)
             res.set_midpoints(*self.midpoints[self.midpoints.index(point) + 1 :])

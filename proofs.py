@@ -4,6 +4,7 @@ from realangle import RealAngle
 from degree import Degree
 from geohandler import GeoHandler
 from point import Point
+from helper import Helper
 
 # http://mathbitsnotebook.com/JuniorMath/Geometry/GEORules.html
 
@@ -17,11 +18,11 @@ Axioms:
 
 """
 Theorems:
-
 @th1: the sum of 2 angles on a line is 180° (adjacent supplementary angles / linear pair)
 @th2: 2 vertical angles are equal
 @th3: all angles around a point sum up to 360°
 @th4: Corresponding angles are equal and the sum of two consecutive interior angles is 180° (2pl&t)
+@th5: The sum of the measures of the interior angles of a triangle is 180°.
 """
 
 
@@ -139,7 +140,24 @@ def th4(debug=False):
         print(geo.angles)
 
 
-for i, j in enumerate([th1, th2, th3, th4]):
-    print(f"th{i+1}:", end=" ")
-    j()
-    Degree.reset()
+def th5(debug=False):
+    """@ax3 + @th1 -> @th5"""
+    h = Helper()
+    h.s("CA", "CB", "ECD", "BA")
+    # h.inita()
+    # print(h.g().angles)
+    # h.g().
+    # h.s("DCE", "CB", "CA", "AB")
+    h.paras("DCE", "AB")
+    if debug:
+        h.calca()
+        print(h.g().angles)
+    return h.geta("BAC") + h.geta("ACB") + h.geta("CBA") == 180
+
+
+# for i, j in enumerate([th1, th2, th3, th4]):
+#     print(f"th{i+1}:", end=" ")
+#     j()
+#     Degree.reset()
+
+print(th5(True))
