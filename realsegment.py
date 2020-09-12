@@ -8,7 +8,6 @@ class RealSegment(Segment):
     def __init__(self, *points, leng=None):
         """Create an Segment with length"""
         self.leng = leng.new_copy() if leng is not None else None
-        print(points)
         Segment.__init__(self, points[0], points[-1])
         self.set_midpoints(*points[1:-1])
 
@@ -37,7 +36,6 @@ class RealSegment(Segment):
     def get_all_subsegments(self):
         """Return a list of all Realsubsegments"""
         points = self.get_all_points()
-        print(points)
         return [RealSegment(*points[i : i + 2]) for i in range(len(points) - 1)]
 
     def __str__(self):

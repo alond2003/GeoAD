@@ -1,12 +1,13 @@
 import itertools
-
-from length import Length
 from realsegment import RealSegment
-from absangle import AbsAngle
 from realangle import RealAngle
+from absangle import AbsAngle
 from segment import Segment
 from degree import Degree
 from point import Point
+from length import Length
+from triangle import Triangle
+from convertor import Convertor
 
 
 class GeoHandler:
@@ -48,7 +49,7 @@ class GeoHandler:
                 )
 
     def angles_on_parallel_lines(self):
-        """@ax3: 2 alternate interior angles between 2 parallel lines and a transversal are equal"""
+        """@ax3 + @th4: corresponding,alteranting and consecutive angles between 2 parallel lines and a transversal are equal"""
         if len(self.segments) < 3:
             return
 
@@ -114,18 +115,97 @@ class GeoHandler:
                     f"sum of consecutive angles between {str(p[0])} || {str(p[1])} and {str(t)}",
                 )
 
+    def angle_sum_in_triangle(self):
+        """@th5: The sum of the measures of the interior angles of a triangle is 180°"""
+        triangles = self.find_all_triangles()
+        for t in triangles:
+            self.aang_equal_deg(
+                t.aangs,
+                Degree(False, 180),
+                f"the sum of the interior angles of △{str(t)} is 180°",
+            )
+
+    """ CALC """
+
+    def calc(self, inita=True, inits=True):
+        """Get information through theroms and given data"""
+        if inita:
+            self.init_angles()
+        if inits:
+            self.init_segments()
+
+        # print(self.angles)
+        self.vertical_angles()
+        self.angle_sum_on_line()
+        self.angle_sum_in_triangle()
+        self.angles_on_parallel_lines()
+        self.angle_sum_around_point()
+        # Degree.variable_reduction(*[i.deg for i in self.angles.values()])
+        # print([str(i) for i in self.angles])
+
     """ BASIC SEGMENT_CALC METHODS"""
 
+    def get_full_seg(self, startpoint, endpoint):
+        """Return Segment from 2 points"""
+        maybeline = Segment(startpoint, endpoint)
+        for i in self.segments:
+            if i.is_subsegment(maybeline):
+                return i.get_subsegment(startpoint.name + endpoint.name)
+        return None
+
     def init_segments(self):
+        """Init segments with length value"""
         self.rsegments = sum(
             [RealSegment.fromSegment(i).get_all_subsegments() for i in self.segments],
             [],
         )
         for i in self.rsegments:
             i.set_value()
-            print(i)
 
-        # print(self.rsegments)
+    def disassemble_segment(self, seg):
+        """Return list of all SubSegments"""
+        points = seg.get_all_points()
+        return [Segment(*points[i : i + 2]) for i in range(len(points) - 1)]
+
+    def get_rseg(self, seg):
+        """Return RealSegment from elementry Segment"""
+        lst = [i for i in self.rsegments if seg == i]
+        if len(lst) == 0:
+            return KeyError
+        return lst[0]
+
+    def get_rang(self, aang):
+        """Return RealAngle from elementry AbsAngle"""
+        return self.angles[aang]
+
+    def find_all_triangles(self):
+        """Return list of all triangles (point's order doesn't matter)"""
+        res = []
+        for i, j, k in itertools.combinations(self.points, 3):
+            sides = [Segment(i, j), Segment(j, k), Segment(k, i)]
+            if all(
+                [
+                    any([seg.is_subsegment(side) for seg in self.segments])
+                    for side in sides
+                ]
+            ) and not any(
+                [
+                    i in seg.get_all_points()
+                    and j in seg.get_all_points()
+                    and k in seg.get_all_points()
+                    for seg in self.segments
+                ]
+            ):
+                # create triangle
+                points = [i, j, k]
+                sides = [self.get_full_seg(s.start, s.end) for s in sides]
+                aangs = [
+                    self.get_acute_angle(*(points[n:] + points[:n])) for n in range(3)
+                ]
+                aconv = Convertor(self.disassemble_angle, self.get_rang)
+                sconv = Convertor(self.disassemble_segment, self.get_rseg)
+                res.append(Triangle(points, sides, aangs, aconv, sconv))
+        return res
 
     """ BASIC ANGLES_CALC METHODS """
 
@@ -449,6 +529,20 @@ class GeoHandler:
             return res
 
     """ BASIC ABS_ANGLE METOHDS """
+
+    def get_acute_angle(self, pfrom, vertex, pto):
+        """Return acute angle based on 3 points"""
+        res = AbsAngle(None, vertex, None)
+        for aang in self.get_angles_around_point(vertex):
+            if res.ray1 is None and (
+                aang.get_start_point() == pfrom or aang.get_start_point() == pto
+            ):
+                res.ray1 = aang.ray1
+            if res.ray1 is not None and aang.get_end_point() == (
+                pfrom if aang.get_start_point() == pto else pto
+            ):
+                res.ray2 = aang.ray2
+                return res
 
     def get_angles_around_point(self, p):
         """Return a list of all the elementary AbsAngles around a point"""

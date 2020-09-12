@@ -14,7 +14,7 @@ def p349_e1():
     x = Degree.given("x")
     h.seta("BED", x + 90)
     h.seta("AEC", 2 * x + 40)
-    h.calca()
+    h.calc()
     # print(h.g().angles)
     return x
 
@@ -26,7 +26,7 @@ def p349_e2():
     x = Degree().given("x")
     h.seta("DCB", x)
     h.seta("ACD", 3 * x)
-    h.calca()
+    h.calc()
     # print(h.g().angles)
     return h.geta("DCB"), h.geta("ACD")
 
@@ -39,7 +39,7 @@ def p349_e3():
     x = Degree().given("x")
     h.seta("DCB", x)
     h.seta("ACD", x + 48)
-    h.calca()
+    h.calc()
     # print(h.g().angles)
     return h.geta("DCB"), h.geta("ACD")
 
@@ -52,7 +52,7 @@ def p349_e4():
     x = Degree().given("x")
     h.seta("EBA", x)
     h.seta("DBC", x)
-    h.calca()
+    h.calc()
     # print(h.g().angles)
     return h.geta("EBD")
 
@@ -103,13 +103,34 @@ def p352_e23():
     h.seta("BFH", 4 * x - 2 * y)
     h.seta("EGD", 60)
     h.paras("AB", "CD")
-    h.calca()
+    h.calc()
     # print(h.g().angles)
     return x, y
 
 
-arr = [p349_e1, p349_e2, p349_e3, p349_e4, p349_e5, p352_e20, p352_e21, p352_e23]
+def p349_e6():
+    h = Helper()
+    h.tri("BAC")
+    x = Degree.given("x")
+    h.seta("CAB", 7 * x)
+    h.seta("ABC", 5 * x)
+    h.seta("BCA", 3 * x)
+    # print(h.g().angles)
+    return h.geta("CAB"), h.geta("ABC"), h.geta("BCA")
+
+
+arr = [
+    p349_e1,
+    p349_e2,
+    p349_e3,
+    p349_e4,
+    p349_e5,
+    p352_e20,
+    p352_e21,
+    p352_e23,
+    p349_e6,
+]
 # print(len(arr))
-f = arr[7]
+f = arr[8]
 print(f())
 

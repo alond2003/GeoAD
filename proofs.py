@@ -152,6 +152,7 @@ def th5(debug=False):
     if debug:
         h.calca()
         print(h.g().angles)
+        print([str(i) for i in h.g().find_all_triangles()])
     return h.geta("BAC") + h.geta("ACB") + h.geta("CBA") == 180
 
 

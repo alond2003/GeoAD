@@ -11,7 +11,10 @@ class Helper:
         self.segments = []
         self.geo = None
         self.did_inita = False
-        self.did_calca = False
+        self.did_inits = False
+        self.did_calc = False
+
+    """Create new or retrive present"""
 
     def p(self, name):
         """Create new Point (if needed) and return it"""
@@ -39,6 +42,49 @@ class Helper:
             return res[0]
         return tuple(res)
 
+    def a(self, name):
+        """Create new AbsAngle and return it"""
+        return self.g().get_better_name_angle(
+            AbsAngle(self.s(name[:-1]), self.p(name[1]), self.s(name[1:]))
+        )
+
+    def g(self):
+        """Create new GeoHandler (if needed) and return it"""
+        if self.geo is None or len(self.geo.points) < len(self.points):
+            self.geo = GeoHandler(*self.points)
+        return self.geo
+
+    def tri(self, name):
+        """Create new triangle by name"""
+        pp = [self.p(i) for i in name[:3]]
+        for i in range(3):
+            self.s(str(pp[i]) + str(pp[(i + 1) % 3]))
+        # angles a (bac)
+        # fix angle b (abc -> cba)
+        ab_idx = pp[1].lines.index(self.s(str(pp[0]) + str(pp[1])))
+        bc_idx = pp[1].lines.index(self.s(str(pp[1]) + str(pp[2])))
+        pp[1].lines[ab_idx], pp[1].lines[bc_idx] = (
+            pp[1].lines[bc_idx],
+            pp[1].lines[ab_idx],
+        )
+        # fix angle c (bca -> acb)
+        bc_idx = pp[2].lines.index(self.s(str(pp[1]) + str(pp[2])))
+        ca_idx = pp[2].lines.index(self.s(str(pp[2]) + str(pp[0])))
+        pp[2].lines[bc_idx], pp[2].lines[ca_idx] = (
+            pp[2].lines[ca_idx],
+            pp[2].lines[bc_idx],
+        )
+
+    """~~~~~~~~"""
+
+    def calc(self):
+        self.g().calc(not self.did_inita, not self.did_inits)
+        self.did_calc = True
+
+    def inits(self):
+        self.g().init_segments()
+        self.did_inits = True
+
     def paras(self, *names):
         """Set segments to be parallel by their names"""
         if len(names) < 2:
@@ -47,11 +93,7 @@ class Helper:
         for name in names[1:]:
             first.set_parallel(self.s(name))
 
-    def a(self, name):
-        """Create new AbsAngle and return it"""
-        return self.g().get_better_name_angle(
-            AbsAngle(self.s(name[:-1]), self.p(name[1]), self.s(name[1:]))
-        )
+    """Angles"""
 
     def inita(self):
         """Call self.geo.init_angles"""
@@ -68,15 +110,10 @@ class Helper:
             self.g().angles[self.a(name)].set_value(deg)
             print(self.a(name), "=", deg, "(given)")
 
-    def calca(self):
-        """Call self.geo.calc_angles"""
-        self.g().angles_calc(not self.did_inita)
-        self.did_calca = True
-
     def geta(self, name):
         """Get angle value from geo by name"""
-        if not self.did_calca:
-            self.calca()
+        if not self.did_calc:
+            self.calc()
         try:
             return self.g().angles[self.a(name)]
         except KeyError:
@@ -90,8 +127,3 @@ class Helper:
             self.inita()
         self.g().aang_equal_aang(self.a(name1), self.a(name2), "given")
 
-    def g(self):
-        """Create new GeoHandler (if needed) and return it"""
-        if self.geo is None or len(self.geo.points) < len(self.points):
-            self.geo = GeoHandler(*self.points)
-        return self.geo
