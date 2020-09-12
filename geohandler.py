@@ -200,7 +200,8 @@ class GeoHandler:
                 points = [i, j, k]
                 sides = [self.get_full_seg(s.start, s.end) for s in sides]
                 aangs = [
-                    self.get_acute_angle(*(points[n:] + points[:n])) for n in range(3)
+                    self.get_non_reflex_angle(*(points[n:] + points[:n]))
+                    for n in range(3)
                 ]
                 aconv = Convertor(self.disassemble_angle, self.get_rang)
                 sconv = Convertor(self.disassemble_segment, self.get_rseg)
@@ -530,18 +531,50 @@ class GeoHandler:
 
     """ BASIC ABS_ANGLE METOHDS """
 
-    def get_acute_angle(self, pfrom, vertex, pto):
+    def get_non_reflex_angle(self, pfrom, vertex, pto):
         """Return acute angle based on 3 points"""
+        ans1 = AbsAngle(
+            self.get_full_seg(pfrom, vertex), vertex, self.get_full_seg(vertex, pto)
+        )
+        ans2 = AbsAngle(ans1.ray2, vertex, ans1.ray1)
+        for i in range(2):
+            a = ans1 if i == 0 else ans2
+            arr = self.disassemble_angle(a)
+            if (
+                sum([self.angles[aa] for aa in arr]).isknown()
+                and sum([self.angles[aa] for aa in arr]) < 180
+            ):
+                return a
+            for i in range(len(arr)):
+                for j in range(i, len(arr)):
+                    if sum([self.angles[aa] for aa in arr[i : (j + 1)]]) == 180 or all(
+                        [
+                            val > 0
+                            for key, val in (
+                                sum([self.angles[aa] for aa in arr[i : (j + 1)]]) - 180
+                            ).value.items()
+                        ]
+                    ):
+                        return ans1 if a == ans2 else ans2
+
         res = AbsAngle(None, vertex, None)
         for aang in self.get_angles_around_point(vertex):
             if res.ray1 is None and (
-                aang.get_start_point() == pfrom or aang.get_start_point() == pto
+                pfrom in aang.ray1.get_all_points() or pto in aang.ray1.get_all_points()
             ):
-                res.ray1 = aang.ray1
-            if res.ray1 is not None and aang.get_end_point() == (
-                pfrom if aang.get_start_point() == pto else pto
+                res.ray1 = aang.ray1.get_subsegment(
+                    str(vertex)
+                    + str(pto if pto in aang.ray1.get_all_points() else pfrom)
+                )
+            if (
+                res.ray1 is not None
+                and (pfrom if pto in res.ray1.get_all_points() else pto)
+                in aang.ray2.get_all_points()
             ):
-                res.ray2 = aang.ray2
+                res.ray2 = aang.ray2.get_subsegment(
+                    str(vertex) + str(pto if res.get_start_point() == pfrom else pfrom)
+                )
+
                 return res
 
     def get_angles_around_point(self, p):

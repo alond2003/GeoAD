@@ -119,6 +119,31 @@ def p349_e6():
     return h.geta("CAB"), h.geta("ABC"), h.geta("BCA")
 
 
+def p349_e7():
+    h = Helper()
+    h.tri("BAC")
+    h.seta("ABC", 90)
+    x = Degree.given("x")
+    h.seta("CAB", x)
+    h.seta("BCA", x + 40)
+    return h.geta("CAB"), h.geta("BCA")
+
+
+def p350_e8():
+    h = Helper()
+    # A
+    h.s("DOC", "AC", "DB", "AOB")
+    h.seta("DCA", 34)
+    h.seta("CAB", 70)
+    h.seta("DBA", 47)
+    return h.geta("CDB")
+    # B
+    # h.s("DOC", "AC", "DB", "AOB")
+    # h.calc()
+    # return h.geta("DCA") + h.geta("CAB") == h.geta("DBA") + h.geta("CDB")
+    # return h.geta("DCA"), h.geta("CAB"), h.geta("DBA"), h.geta("CDB")
+
+
 arr = [
     p349_e1,
     p349_e2,
@@ -132,5 +157,5 @@ arr = [
 ]
 # print(len(arr))
 f = arr[8]
-print(f())
+print(p350_e8())
 
