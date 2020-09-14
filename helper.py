@@ -93,6 +93,27 @@ class Helper:
         for name in names[1:]:
             first.set_parallel(self.s(name))
 
+    def conts(self, og, new):
+        og = self.s(og)
+        old_p = og.get_all_points()
+        new_p = [self.p(i) for i in new]
+        if old_p == new_p or old_p == new_p[::-1]:
+            return
+        new = Segment(new_p[0], new_p[-1])
+        new.set_midpoints(*new_p[1:-1])
+        for i in new.get_all_points():
+            if i in old_p:
+                for j in range(len(i.lines)):
+                    if i.lines[j] == og:
+                        i.lines[j] = new
+                        break
+            else:
+                i.add_line(new)
+
+        for i in range(len(self.segments)):
+            if self.segments[i] == og:
+                self.segments[i] = new
+
     """Angles"""
 
     def inita(self):

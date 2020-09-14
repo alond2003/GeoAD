@@ -23,6 +23,7 @@ Theorems:
 @th3: all angles around a point sum up to 360°
 @th4: Corresponding angles are equal and the sum of two consecutive interior angles is 180° (2pl&t)
 @th5: The sum of the measures of the interior angles of a triangle is 180°.
+*@th6: the size of an exterior angle at a vertex of a triangle equals the sum of the sizes of the interior angles at the other two vertices of the triangle
 """
 
 
@@ -156,9 +157,22 @@ def th5(debug=False):
     return h.geta("BAC") + h.geta("ACB") + h.geta("CBA") == 180
 
 
+def th6(debug=False):
+    """@th1 + @th5 -> @th6"""
+    h = Helper()
+    # h.s("BC", "AB", "ACD")
+    h.tri("ABC")
+    h.conts("AC", "ACD")
+    if debug:
+        h.calc()
+        print(h.g().segments)
+        print(h.g().angles)
+    return h.geta("BAC"), h.geta("CBA"), h.geta("BCD")
+
+
 # for i, j in enumerate([th1, th2, th3, th4]):
 #     print(f"th{i+1}:", end=" ")
 #     j()
 #     Degree.reset()
 
-print(th5(True))
+print(th6(False))
