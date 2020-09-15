@@ -23,7 +23,7 @@ Theorems:
 @th3: all angles around a point sum up to 360°
 @th4: Corresponding angles are equal and the sum of two consecutive interior angles is 180° (2pl&t)
 @th5: The sum of the measures of the interior angles of a triangle is 180°.
-*@th6: the size of an exterior angle at a vertex of a triangle equals the sum of the sizes of the interior angles at the other two vertices of the triangle
+@th6: the size of an exterior angle at a vertex of a triangle equals the sum of the sizes of the interior angles at the other two vertices of the triangle
 """
 
 

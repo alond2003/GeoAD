@@ -125,6 +125,64 @@ class GeoHandler:
                 f"the sum of the interior angles of △{str(t)} is 180°",
             )
 
+    def exterior_angle_in_triangle(self):
+        """@th6: the size of an exterior angle at a vertex of a triangle equals the sum of the sizes of the interior angles at the other two vertices of the triangle"""
+        for tri in self.find_all_triangles():
+            for side in tri.sides:
+                for seg in self.segments:
+                    if seg.is_subsegment(side) and not (
+                        (seg.start == side.start or seg.start == side.end)
+                        and (seg.end == side.start or seg.end == side.end)
+                    ):
+                        # side is subsegment of seg
+                        start = (seg.get_all_points().index(side.start), side.start)
+                        end = (seg.get_all_points().index(side.end), side.end)
+                        if start[0] > end[0]:
+                            start, end = end, start
+                        if start[0] != 0:
+                            external_angle = self.get_non_reflex_angle(
+                                seg.start,
+                                start[1],
+                                [
+                                    p
+                                    for p in tri.points
+                                    if p not in side.get_all_points()
+                                ][0],
+                            )
+                            # add list support for aang=aang
+                            # write tri.get_angle_from_point
+                            self.aang_equal_aang(
+                                external_angle,
+                                [
+                                    tri.get_angle_from_point(p)
+                                    for p in tri.points
+                                    if p != start[1]
+                                ],
+                                f"external angle to {str(tri.get_angle_from_point(start[1]))} in △{str(tri)}",
+                            )
+                        if end[0] != len(seg.get_all_points()) - 1:
+                            external_angle = self.get_non_reflex_angle(
+                                seg.end,
+                                end[1],
+                                [
+                                    p
+                                    for p in tri.points
+                                    if p not in side.get_all_points()
+                                ][0],
+                            )
+                            # add list support for aang=aang
+                            # write tri.get_angle_from_point
+                            self.aang_equal_aang(
+                                external_angle,
+                                [
+                                    tri.get_angle_from_point(p)
+                                    for p in tri.points
+                                    if p != end[1]
+                                ],
+                                f"external angle to {str(tri.get_angle_from_point(end[1]))} in △{str(tri)}",
+                            )
+                        break
+
     """ CALC """
 
     def calc(self, inita=True, inits=True):
@@ -136,8 +194,9 @@ class GeoHandler:
 
         # print(self.angles)
         self.vertical_angles()
-        self.angle_sum_on_line()
+        self.exterior_angle_in_triangle()
         self.angle_sum_in_triangle()
+        self.angle_sum_on_line()
         self.angles_on_parallel_lines()
         self.angle_sum_around_point()
         # Degree.variable_reduction(*[i.deg for i in self.angles.values()])
@@ -237,16 +296,31 @@ class GeoHandler:
 
     def aang_equal_aang(self, aang1, aang2, reason):
         """Assume AbsAngle1 = AbsAngle2 and act apon it"""
-        aangs = [self.disassemble_angle(a) for a in [aang1, aang2]]
+        mes = "---\n"
+        # print("---")
+        if not (isinstance(aang1, list) or isinstance(aang2, list)):
+            aangs = [self.disassemble_angle(a) for a in [aang1, aang2]]
+            mes += f"{aang1} = {aang2} ({reason})\n"
+            # print(aang1, "=", aang2)
+        else:
+            if not isinstance(aang1, list):
+                aang1 = [aang1]
+            if not isinstance(aang2, list):
+                aang2 = [aang2]
+            mes += f"{' + '.join(map(str,aang1))} = {' + '.join(map(str,aang2))} ({reason})\n"
+            aangs = [
+                sum([self.disassemble_angle(a) for a in aang], [])
+                for aang in [aang1, aang2]
+            ]
         rangs = [[self.angles[a] for a in l] for l in aangs]
         if all(r.isknown() for r in rangs[0] + rangs[1]):
             return
 
-        mes = "---\n"
-        # print("---")
-        mes += f"{aang1} = {aang2} ({reason})\n"
-        # print(aang1, "=", aang2)
-        if len(aangs[0]) + len(aangs[1]) > 2:
+        if (
+            len(aangs[0]) + len(aangs[1]) > 2
+            and (not isinstance(aang1, list) or len(aang1) != len(aangs[0]))
+            and (not isinstance(aang2, list) or len(aang2) != len(aangs[1]))
+        ):
             mes += (
                 " + ".join(map(str, aangs[0]))
                 + " = "
