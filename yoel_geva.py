@@ -144,18 +144,153 @@ def p350_e8():
     # return h.geta("DCA"), h.geta("CAB"), h.geta("DBA"), h.geta("CDB")
 
 
-arr = [
-    p349_e1,
-    p349_e2,
-    p349_e3,
-    p349_e4,
-    p349_e5,
-    p352_e20,
-    p352_e21,
-    p352_e23,
-    p349_e6,
-]
-# print(len(arr))
-f = arr[8]
-print(p350_e8())
+def p350_e9():
+    h = Helper()
+    h.tri("BAC")
+    h.conts("BC", "BCD")
+    h.seta("ACD", 144)
+    h.seta("CAB", 88)
+    return h.geta("ABC")
+
+
+def p350_e10():
+    h = Helper()
+    h.tri("BAC")
+    h.conts("BC", "BCD")
+    h.seta("ACD", 105)
+    x = Degree.given("x")
+    h.seta("CAB", 2 * x)
+    h.seta("ABC", x)
+    return h.geta("CAB"), h.geta("ABC")
+
+
+def p350_e11():
+    h = Helper()
+    h.tri("BAC")
+    h.conts("AC", "AEC")
+    h.tri_angbi("BAC", "BE")
+    h.conts("BC", "BDC")
+    h.tri_med("BAC", "AD")
+    h.sets("BC", 12)
+    h.seta("ABE", 36)
+    return h.gets("DC"), h.geta("ABC")
+
+
+def p350_e12():
+    h = Helper()
+    h.tri("ABC")
+    h.conts("BC", "BDC")
+    h.tri_angbi("ABC", "AD")
+    h.seta("ACB", 44)
+    h.seta("CBA", 80)
+    return h.geta("ADB"), h.geta("CDA")
+
+
+def p350_e13():
+    h = Helper()
+    h.tri("BAC")
+    h.conts("BC", "BDCE")
+    h.tri_angbi("BAC", "AD")
+    x, y, z = Degree.given("x", "y", "z")
+    h.seta("ABC", x)
+    h.seta("ADC", y)
+    h.seta("ACE", z)
+    h.calc()
+    return 2 * y, x + z, 2 * y == x + z, (x, y, z)
+
+
+def p351_e14():
+    h = Helper()
+    h.tri("ABC")
+    h.conts("BC", "BDC")
+    h.tri_angbi("ABC", "AD")
+    h.equala("BAD", "ACB")
+    h.seta("CBA", 81)
+    return h.geta("ACB")
+
+
+def p351_e15():
+    h = Helper()
+    h.tri("CAB")
+    h.conts("AB", "ADEB")
+    h.tri_alt("CAB", "CD")
+    h.tri_angbi("CAB", "CE")
+    h.seta("ACB", 90)
+    h.seta("CBA", 26)
+    return h.geta("DCE")
+
+
+def p351_e16():
+    # CH proof
+    h = Helper()
+    h.tri("BAC")
+    h.conts("AC", "AEC")
+    h.tri_alt("BAC", "BE")
+    h.conts("BC", "BDC")
+    h.tri_angbi("BAC", "AD")
+    h.conts("BE", "BFE")
+    h.conts("AD", "AFD")
+    h.seta("ABC", 90)
+    return h.geta("BDF"), h.geta("DFB"), h.geta("BDF") == h.geta("DFB")
+
+
+def p251_e17():
+    # CH proof
+    h = Helper()
+    h.tri("CAB")
+    h.conts("AB", "AEB")
+    h.tri_alt("CAB", "CE")
+    h.conts("CB", "CDB")
+    h.tri_angbi("CAB", "AD")
+    h.conts("CE", "CNE")
+    h.conts("AD", "AND")
+    h.seta("ACB", 90)
+    h.seta("BAC", 34)
+    return h.geta("DNC")
+
+
+def p351_e18():
+    # CH proof
+    h = Helper()
+    h.tri("CAB")
+    h.conts("CB", "CDB")
+    h.tri_alt("CAB", "AD")
+    h.conts("AC", "AEC")
+    h.tri_alt("CAB", "BE")
+    h.seta("BAD", 38)
+    h.seta("ACB", 48)
+    return h.geta("EBA")
+
+
+def p352_e19():
+    h = Helper()
+    h.tri("BAC")
+    h.conts("AC", "AEC")
+    h.tri_segbi("BAC", "EO", "AC")
+    h.tri_innerline("BAC", "CO")
+    h.conts("BC", "BDC")
+    h.tri_segbi("BAC", "DO", "BC")
+    # other data
+    h.sets("BD", 6)
+    h.sets("AC", 8)
+
+    return h.gets("CE"), h.gets("BC"), h.geta("BCA"), h.geta("EOD")
+
+
+# arr = [
+#     p349_e1,
+#     p349_e2,
+#     p349_e3,
+#     p349_e4,
+#     p349_e5,
+#     p352_e20,
+#     p352_e21,
+#     p352_e23,
+#     p349_e6,
+# ]
+# # print(len(arr))
+# f = arr[8]
+# print(p350_e8())
+
+print(p352_e19())
 

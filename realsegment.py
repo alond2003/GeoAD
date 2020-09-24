@@ -25,8 +25,8 @@ class RealSegment(Segment):
     def new_copy(self):
         """Return a new copy of this object"""
         return RealSegment(
-            self.get_all_points(),
-            self.leng.new_copy() if self.leng is not None else None,
+            *self.get_all_points(),
+            leng=self.leng.new_copy() if self.leng is not None else None,
         )
 
     def isknown(self):
@@ -61,7 +61,7 @@ class RealSegment(Segment):
         if isinstance(other, RealSegment):
             return self.leng == other.leng
         elif isinstance(other, Segment):
-            return other == self
+            return other == abs(self)
         else:
             return self.leng == other
 
@@ -87,7 +87,8 @@ class RealSegment(Segment):
     def __abs__(self):
         """Return Segment from this RealSegemnt"""
         res = Segment(self.start, self.end)
-        res.set_midpoints(self.midpoints)
+        res.set_midpoints(*self.midpoints)
+        return res
 
     @classmethod
     def fromSegment(cls, seg, leng=None):

@@ -233,11 +233,16 @@ class Degree:
             w.switch(key, deg)
 
     @classmethod
-    def given(cls, symbol):
-        d = Degree(False, {})
-        d.value[1 / Degree.nextGivenIdx] = 1
-        Degree.givenSymbols[1 / Degree.nextGivenIdx] = symbol
-        Degree.nextGivenIdx += 1
-        d.watch()
-        return d
+    def given(cls, *symbols):
+        res = []
+        for symbol in symbols:
+            d = Degree(False, {})
+            d.value[1 / Degree.nextGivenIdx] = 1
+            Degree.givenSymbols[1 / Degree.nextGivenIdx] = symbol
+            Degree.nextGivenIdx += 1
+            d.watch()
+            res.append(d)
+        if len(res) == 1:
+            return res[0]
+        return tuple(res)
 

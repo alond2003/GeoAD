@@ -194,9 +194,9 @@ class GeoHandler:
 
         # print(self.angles)
         self.vertical_angles()
-        self.exterior_angle_in_triangle()
-        self.angle_sum_in_triangle()
         self.angle_sum_on_line()
+        self.angle_sum_in_triangle()
+        self.exterior_angle_in_triangle()
         self.angles_on_parallel_lines()
         self.angle_sum_around_point()
         # Degree.variable_reduction(*[i.deg for i in self.angles.values()])
@@ -223,14 +223,18 @@ class GeoHandler:
 
     def disassemble_segment(self, seg):
         """Return list of all SubSegments"""
+        seg = self.get_full_seg(seg.start, seg.end)
         points = seg.get_all_points()
         return [Segment(*points[i : i + 2]) for i in range(len(points) - 1)]
 
+    def is_elementry_seg(self, seg):
+        return len(self.disassemble_segment(seg)) == 1
+
     def get_rseg(self, seg):
         """Return RealSegment from elementry Segment"""
-        lst = [i for i in self.rsegments if seg == i]
+        lst = [i for i in self.rsegments if seg == abs(i)]
         if len(lst) == 0:
-            return KeyError
+            raise KeyError
         return lst[0]
 
     def get_rang(self, aang):
@@ -294,6 +298,8 @@ class GeoHandler:
         Degree.variable_reduction(*[i.deg for i in self.angles.values()])
         # print([str(i) for i in self.angles])
 
+    ####### make these function work for segment also
+
     def aang_equal_aang(self, aang1, aang2, reason):
         """Assume AbsAngle1 = AbsAngle2 and act apon it"""
         mes = "---\n"
@@ -316,10 +322,9 @@ class GeoHandler:
         if all(r.isknown() for r in rangs[0] + rangs[1]):
             return
 
-        if (
-            len(aangs[0]) + len(aangs[1]) > 2
-            and (not isinstance(aang1, list) or len(aang1) != len(aangs[0]))
-            and (not isinstance(aang2, list) or len(aang2) != len(aangs[1]))
+        if len(aangs[0]) + len(aangs[1]) > 2 or (
+            (isinstance(aang1, list) and len(aang1) != len(aangs[0]))
+            or (isinstance(aang2, list) and len(aang2) != len(aangs[1]))
         ):
             mes += (
                 " + ".join(map(str, aangs[0]))
@@ -344,6 +349,7 @@ class GeoHandler:
                     + (
                         f"({' + '.join([str(abs(i)) for i in minus_group])})"
                         if len(minus_group) > 1
+                        or len(minus_group[0].deg.value.keys()) > 1
                         else str(abs(minus_group[0]))
                     )
                     if len(minus_group) > 0
@@ -373,6 +379,7 @@ class GeoHandler:
                     + (
                         f"({' + '.join([str(i.deg) for i in minus_group])})"
                         if len(minus_group) > 1
+                        or len(minus_group[0].deg.value.keys()) > 1
                         else str(minus_group[0].deg)
                     )
                     if len(minus_group) > 0
@@ -394,6 +401,7 @@ class GeoHandler:
                     + (
                         f"({' + '.join([str(i.deg) for i in minus_group])})"
                         if len(minus_group) > 1
+                        or len(minus_group[0].deg.value.keys()) > 1
                         else str(minus_group[0].deg)
                     )
                     if len(minus_group) > 0
@@ -438,6 +446,155 @@ class GeoHandler:
                     aa,
                     "=",
                     self.angles[aa].deg,
+                )
+
+    def seg_equal_seg(self, seg1, seg2, reason):
+        """Assume Segment1 = Segment2 and act apon it"""
+        mes = "---\n"
+        # print("---")
+        if not (isinstance(seg1, list) or isinstance(seg2, list)):
+            segs = [self.disassemble_segment(s) for s in [seg1, seg2]]
+            mes += f"{seg1} = {seg2} ({reason})\n"
+            # print(aang1, "=", aang2)
+        else:
+            if not isinstance(seg1, list):
+                seg1 = [seg1]
+            if not isinstance(seg2, list):
+                seg2 = [seg2]
+            mes += f"{' + '.join(map(str,seg1))} = {' + '.join(map(str,seg2))} ({reason})\n"
+            segs = [
+                sum([self.disassemble_segment(a) for a in seg], [])
+                for seg in [seg1, seg2]
+            ]
+        rsegs = [[self.get_rseg(s) for s in l] for l in segs]
+        if all(r.isknown() for r in rsegs[0] + rsegs[1]):
+            return
+
+        if (
+            len(segs[0]) + len(segs[1]) > 2
+            and (not isinstance(seg1, list) or len(seg1) != len(segs[0]))
+            and (not isinstance(seg2, list) or len(seg2) != len(segs[1]))
+        ):
+            mes += (
+                " + ".join(map(str, segs[0]))
+                + " = "
+                + " + ".join(map(str, segs[1]))
+                + "\n"
+            )
+            # print(" + ".join(aangs[0]), "=", " + ".join(aangs[1]))
+        max_rseg = max(*rsegs[0], *rsegs[1])
+        minus_group, plus_group = rsegs
+        if abs(max_rseg) in segs[1]:
+            minus_group, plus_group = plus_group, minus_group
+        minus_group = [i for i in minus_group if abs(i) != max_rseg]
+        if not (len(rsegs[0]) == 1 and rsegs[0][0] == abs(max_rseg)):
+
+            mes += (
+                str(abs(max_rseg))
+                + " = "
+                + " + ".join([str(abs(i)) for i in plus_group])
+                + (
+                    "- "
+                    + (
+                        f"({' + '.join([str(abs(i)) for i in minus_group])})"
+                        if len(minus_group) > 1
+                        or len(minus_group[0].deg.value.keys()) > 1
+                        else str(abs(minus_group[0]))
+                    )
+                    if len(minus_group) > 0
+                    else ""
+                )
+                + "\n"
+            )
+            # print(abs(max_rang), "=", " + ".join([str(abs(i)) for i in plus_group]), ("- " + (f"({' + '.join([str(abs(i)) for i in minus_group])})" if len(minus_group) > 1 else str(abs(minus_group[0]))) if len(minus_group) > 0 else ""))
+
+        # pre_calc_rangs = [i.new_copy() for i in rangs]
+        unchanged_max_rseg = max_rseg.new_copy()
+        plus_group = [i.new_copy() for i in plus_group]
+        minus_group = [i.new_copy() for i in minus_group]
+        res = self.rseg_equal_leng(max_rseg, sum(plus_group) - sum(minus_group))
+        if len(res) <= 1:
+            # print("*", end="")
+            return
+        print(mes, end="")
+        if len(res) == 2 and max_rseg == sum(plus_group) - sum(minus_group):
+            # print הצבה and final value
+            print(
+                abs(max_rseg),
+                "=",
+                " + ".join([str(i.leng) for i in plus_group]),
+                (
+                    "- "
+                    + (
+                        f"({' + '.join([str(i.leng) for i in minus_group])})"
+                        if len(minus_group) > 1
+                        or len(minus_group[0].deg.value.keys()) > 1
+                        else str(minus_group[0].leng)
+                    )
+                    if len(minus_group) > 0
+                    else ""
+                ),
+                "(eval)",
+                end=" ",
+            )
+            print("->", abs(max_rseg), "=", max_rseg.leng, "(calc)")
+        else:
+
+            # print הצבה and צמצום and find var
+            print(
+                unchanged_max_rseg.leng,
+                "=",
+                " + ".join([str(i.leng) for i in plus_group]),
+                (
+                    "- "
+                    + (
+                        f"({' + '.join([str(i.leng) for i in minus_group])})"
+                        if len(minus_group) > 1
+                        or len(minus_group[0].deg.value.keys()) > 1
+                        else str(minus_group[0].leng)
+                    )
+                    if len(minus_group) > 0
+                    else ""
+                ),
+                "(eval)",
+            )
+            print(
+                unchanged_max_rseg.leng,
+                "=",
+                sum(plus_group) - sum(minus_group),
+                f"(same)",
+            )
+            print(
+                Length(False, {res[0][0]: 1}),
+                "=",
+                res[0][1],
+                f"(found var {str(Length(False, {res[0][0]: 1}))})",
+            )
+
+            rem = []
+            for pre, ss in res[1:]:
+                if ss in segs[0] or ss in segs[1]:
+                    res.insert(1, (pre, ss))
+                    rem.append((pre, ss))
+            for x, y in rem:
+                for k in range(len(res) - 1, 0, -1):
+                    if res[k] == (x, y):
+                        res.pop(k)
+                        break
+
+            # for all segments affected:
+            for preval, ss in res[1:]:
+                # print: abs(ang) = proven = הצבה -> abs(ang) = ang
+                print(
+                    ss,
+                    "=",
+                    preval,
+                    "=",
+                    preval.__str__(res[0][0], f"({str(res[0][1])})"),
+                    "->",
+                    ss,
+                    "=",
+                    self.angles[ss].leng,
                 )
 
     def aang_equal_deg(self, aang, deg, reason):
@@ -496,6 +653,9 @@ class GeoHandler:
             # print("*", resend="")
             return
         print(mes, end="")
+        # trying to exterminate unnecesory printing (eval same as calc same as reason)
+        if len(res) == 2 and len(rangs) == 1:
+            return
         if len(res) == 2 and changed_rang == deg - (
             sum(pre_calc_rangs) - unchanged_rang
         ):
@@ -504,14 +664,13 @@ class GeoHandler:
                 str(abs(changed_rang)),
                 "=",
                 deg,
-                "-",
-                "("
+                "- ("
                 + " + ".join(
                     [str(i.deg) for i in pre_calc_rangs if abs(i) != unchanged_rang]
                 )
                 + ")"
                 if len(rangs) > 2 or len(min(pre_calc_rangs).deg.value.keys()) > 1
-                else str(min(pre_calc_rangs).deg),
+                else ("-" + str(min(pre_calc_rangs).deg) if len(rangs) == 2 else ""),
                 f"(eval)",
                 end=" ",
             )
@@ -523,14 +682,13 @@ class GeoHandler:
                 unchanged_rang.deg,
                 "=",
                 deg,
-                "-",
-                "("
+                "- ("
                 + " + ".join(
                     [str(i.deg) for i in pre_calc_rangs if abs(i) != unchanged_rang]
                 )
                 + ")"
                 if len(rangs) > 2 or len(min(pre_calc_rangs).deg.value.keys()) > 1
-                else str(min(pre_calc_rangs).deg),
+                else ("-" + str(min(pre_calc_rangs).deg) if len(rangs) == 2 else ""),
                 f"(eval)",
             )
             print(
@@ -561,6 +719,125 @@ class GeoHandler:
                     self.angles[aa].deg,
                 )
 
+    def seg_equal_leng(self, seg, leng, reason):
+        """Assume (Segment = leng) and act apon it"""
+        mes = "---\n"
+        # print("---")
+        if isinstance(seg, list):
+            mes += (
+                " + ".join([str(i) for i in seg]) + " = " + str(leng) + f" ({reason})\n"
+            )
+            if not all([self.is_elementry_seg(i) for i in seg]):
+                seg = sum([self.disassemble_segment(i) for i in seg], [])
+            rsegs = [self.get_rseg(i) for i in seg]
+            # print(" + ".join([str(i) for i in aang]), "=", deg, f"({reason})")
+        else:
+            if self.is_elementry_seg(seg):
+                rsegs = [self.get_rseg(seg)]
+                mes += str(seg) + " = " + str(leng) + f" ({reason})\n"
+                # print(aang, "=", deg, f"({reason})")
+            else:
+                rsegs = [self.get_rseg(i) for i in self.disassemble_segment(seg)]
+                mes += (
+                    str(leng)
+                    + " = "
+                    + str(seg)
+                    + " = "
+                    + " + ".join([str(abs(i)) for i in rsegs])
+                    + f" ({reason}, the whole is the sum of its parts)\n"
+                )
+                # print(deg, "=", aang, "=", " + ".join([str(abs(i)) for i in rangs]), f"({reason}, the whole is the sum of its parts)")
+        if all([i.isknown() for i in rsegs]):
+            # print("*", end="")
+            return
+        if len(rsegs) > 1:
+            mes += (
+                str(abs(max(rsegs)))
+                + " = "
+                + str(leng)
+                + " - "
+                + (
+                    "("
+                    + " + ".join([str(abs(i)) for i in rsegs if abs(i) != max(rsegs)])
+                    + ")"
+                    if len(rsegs) > 2
+                    else str(abs(min(rsegs)))
+                )
+                + f" (same)\n"
+            )
+            # print(str(abs(max(rangs))), "=", deg, "-", "(" + " + ".join([str(abs(i)) for i in rangs if i != max(rangs)]) + ")" if len(rangs) > 2 else str(abs(min(rangs))), f"(same)")
+
+        pre_calc_rsegs = [i.new_copy() for i in rsegs]
+        changed_rseg = max(rsegs)
+        unchanged_rseg = changed_rseg.new_copy()
+        res = self.rseg_equal_leng(max(rsegs), leng - (sum(rsegs) - max(rsegs)))
+        if len(res) <= 1:
+            # print("*", resend="")
+            return
+        print(mes, end="")
+        if len(res) == 2 and changed_rseg == leng - (
+            sum(pre_calc_rsegs) - unchanged_rseg
+        ):
+            # print הצבה and final value
+            print(
+                str(abs(changed_rseg)),
+                "=",
+                leng,
+                "- ("
+                + " + ".join(
+                    [str(i.leng) for i in pre_calc_rsegs if abs(i) != unchanged_rseg]
+                )
+                + ")"
+                if len(rsegs) > 2 or len(min(pre_calc_rsegs).leng.value.keys()) > 1
+                else ("-" + str(min(pre_calc_rsegs).leng) if len(rsegs) == 2 else ""),
+                f"(eval)",
+                end=" ",
+            )
+            print("->", str(abs(changed_rseg)), "=", changed_rseg.leng, "(calc)")
+        else:
+
+            # print הצבה and צמצום and find var
+            print(
+                unchanged_rseg.leng,
+                "=",
+                leng,
+                "- ("
+                + " + ".join(
+                    [str(i.leng) for i in pre_calc_rsegs if abs(i) != unchanged_rseg]
+                )
+                + ")"
+                if len(rsegs) > 2 or len(min(pre_calc_rsegs).leng.value.keys()) > 1
+                else ("-" + str(min(pre_calc_rsegs).leng) if len(rsegs) == 2 else ""),
+                f"(eval)",
+            )
+            print(
+                unchanged_rseg.leng,
+                "=",
+                leng - sum((i for i in pre_calc_rsegs if abs(i) != unchanged_rseg)),
+                f"(same)",
+            )
+            print(
+                Length(False, {res[0][0]: 1}),
+                "=",
+                res[0][1],
+                f"(found var {str(Length(False, {res[0][0]: 1}))})",
+            )
+
+            # for all angles affected:
+            for preval, ss in res[1:]:
+                # print: abs(ang) = proven = הצבה -> abs(ang) = ang
+                print(
+                    ss,
+                    "=",
+                    preval,
+                    "=",
+                    preval.__str__(res[0][0], f"({str(res[0][1])})"),
+                    "->",
+                    ss,
+                    "=",
+                    self.get_rseg(ss).leng,
+                )
+
     def rang_equal_deg(self, rang, deg):
         """Set ang to be deg, Return list of (preDeg,affected Aangs), list[0] = (varswitched.key,switchval)"""
         if rang.deg is None:
@@ -578,11 +855,11 @@ class GeoHandler:
             for ang in self.angles.values():
                 pre = ang.deg.new_copy()
                 ang.deg.switch(maxkey, switchval)
-                if pre != ang.deg:
+                if pre != ang.deg:  # if value did change
                     if (
                         rang
                         == list(filter(lambda x: abs(ang) == x, self.angles.keys()))[0]
-                    ):
+                    ):  # if this is the main rang
                         res.insert(
                             1,
                             (
@@ -591,7 +868,7 @@ class GeoHandler:
                                     filter(lambda x: abs(ang) == x, self.angles.keys())
                                 )[0],
                             ),
-                        )
+                        )  # insert it first to res
                     else:
                         res.append(
                             (
@@ -602,6 +879,32 @@ class GeoHandler:
                             )
                         )
             return res
+
+    def rseg_equal_leng(self, rseg, leng):
+        """Set rseg to be length, Return list of (preLen, affected Segs), list[0] = (varswitched.key,switchval)"""
+        if rseg.leng is None:
+            rseg.leng = leng
+            return []
+        else:
+            switchval = leng - rseg.leng
+            if switchval == 0:
+                return []
+            maxkey = max(switchval.value.keys())
+            switchval = switchval / (-switchval.value[maxkey])
+            del switchval.value[maxkey]
+            # that means every (1 maxkey = switchval)
+            res = [(maxkey, switchval)]
+            for seg in self.rsegments:
+                pre = seg.leng.new_copy()
+                seg.leng.switch(maxkey, switchval)
+                if pre != seg.leng:
+                    if abs(rseg) == abs(seg):
+                        res.insert(1, (pre, abs(seg)))
+                    else:
+                        res.append((pre, abs(seg)))
+            return res
+
+    ############
 
     """ BASIC ABS_ANGLE METOHDS """
 

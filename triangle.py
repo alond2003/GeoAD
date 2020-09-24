@@ -18,3 +18,5 @@ class Triangle:
         """Return name of triangle"""
         return "".join([i.name for i in self.points])
 
+    def __repr__(self):
+        return "△" + str(self)
