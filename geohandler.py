@@ -128,7 +128,7 @@ class GeoHandler:
             )
 
     def exterior_angle_in_triangle(self):
-        """@th6: the size of an exterior angle at a vertex of a triangle equals the sum of the sizes of the interior angles at the other two vertices of the triangle"""
+        """@th7: the size of an exterior angle at a vertex of a triangle equals the sum of the sizes of the interior angles at the other two vertices of the triangle"""
         for tri in self.find_all_triangles():
             for side in tri.sides:
                 for seg in self.segments:
@@ -282,12 +282,42 @@ class GeoHandler:
                     points = list(perm)
                     sides = [self.get_full_seg(s.start, s.end) for s in sides]
                     # do aangs based on most non-reflex angles
-                    aangs = [
+                    aangs1 = [
+                        AbsAngle(
+                            self.get_full_seg(pfrom, vertex),
+                            vertex,
+                            self.get_full_seg(vertex, pto),
+                        )
+                        for pfrom, vertex, pto in zip(
+                            points[-1:] + points[:-1], points, points[1:] + points[:1]
+                        )
+                    ]
+                    aangs2 = [
+                        AbsAngle(
+                            self.get_full_seg(vertex, pto),
+                            vertex,
+                            self.get_full_seg(pfrom, vertex),
+                        )
+                        for pfrom, vertex, pto in zip(
+                            points[-1:] + points[:-1], points, points[1:] + points[:1]
+                        )
+                    ]
+                    non_reflex_aangs = [
                         self.get_non_reflex_angle(i, j, k)
                         for i, j, k in zip(
                             points[-1:] + points[:-1], points, points[1:] + points[:1]
                         )
                     ]
+                    non1, non2 = 0, 0
+                    for idx, non in enumerate(non_reflex_aangs):
+                        if non == aangs1[idx]:
+                            non1 += 1
+                        else:
+                            non2 += 1
+                    if non1 > non2:
+                        aangs = aangs1
+                    else:
+                        aangs = aangs2
                     aconv = Convertor(self.disassemble_angle, self.get_rang)
                     sconv = Convertor(self.disassemble_segment, self.get_rseg)
                     res.append(Polygon(points, sides, aangs, aconv, sconv))

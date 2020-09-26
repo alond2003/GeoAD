@@ -22,8 +22,10 @@ Theorems:
 @th2: 2 vertical angles are equal
 @th3: all angles around a point sum up to 360°
 @th4: Corresponding angles are equal and the sum of two consecutive interior angles is 180° (2pl&t)
-@th5: The sum of the measures of the interior angles of a triangle is 180°.
-@th6: the size of an exterior angle at a vertex of a triangle equals the sum of the sizes of the interior angles at the other two vertices of the triangle
+@th5: The sum of the measures of the interior angles of a triangle is 180°
+@th6: The sum of the measures of the interior angles of a Quadrilateral is 360°
+@th7: the size of an exterior angle at a vertex of a triangle equals the sum of the sizes of the interior angles at the other two vertices of the triangle
+
 """
 
 
@@ -156,9 +158,13 @@ def th5(debug=False):
         print([str(i) for i in h.g().find_all_triangles()])
     return h.geta("BAC") + h.geta("ACB") + h.geta("CBA") == 180
 
-
 def th6(debug=False):
-    """@th1 + @th5 -> @th6"""
+    """@ax2 + @th5 -> @th6"""
+    h = Helper()
+    h.
+
+def th7(debug=False):
+    """@th1 + @th5 -> @th7"""
     h = Helper()
     # h.s("BC", "AB", "ACD")
     h.tri("ABC")
@@ -175,4 +181,4 @@ def th6(debug=False):
 #     j()
 #     Degree.reset()
 
-print(th6(False))
+print(th7(False))
