@@ -274,7 +274,12 @@ def p352_e19():
     h.sets("BD", 6)
     h.sets("AC", 8)
 
-    return h.gets("CE"), h.gets("BC"), h.geta("BCA"), h.geta("EOD")
+    return (
+        h.gets("CE"),
+        h.gets("BC"),
+        h.geta("BCA"),
+        h.geta("EOD"),
+    )
 
 
 # arr = [

@@ -1,4 +1,5 @@
 import itertools
+from quadrilateral import Quadrilateral
 from realsegment import RealSegment
 from realangle import RealAngle
 from absangle import AbsAngle
@@ -6,6 +7,7 @@ from segment import Segment
 from degree import Degree
 from point import Point
 from length import Length
+from polygon import Polygon
 from triangle import Triangle
 from convertor import Convertor
 
@@ -241,35 +243,62 @@ class GeoHandler:
         """Return RealAngle from elementry AbsAngle"""
         return self.angles[aang]
 
-    def find_all_triangles(self):
-        """Return list of all triangles (point's order doesn't matter)"""
+    def find_all_polygons(self, numofsides):
+        """Return list of all polygons with numofsides sides"""
+        # TODO problem with Convex Polygons
         res = []
-        for i, j, k in itertools.combinations(self.points, 3):
-            sides = [Segment(i, j), Segment(j, k), Segment(k, i)]
-            if all(
-                [
-                    any([seg.is_subsegment(side) for seg in self.segments])
-                    for side in sides
+        for point_list in itertools.combinations(self.points, numofsides):
+            for perm in self.circle_perm(point_list):
+                sides = [
+                    Segment(perm[i], perm[(i + 1) % len(perm)])
+                    for i in range(len(perm))
                 ]
-            ) and not any(
-                [
-                    i in seg.get_all_points()
-                    and j in seg.get_all_points()
-                    and k in seg.get_all_points()
-                    for seg in self.segments
-                ]
-            ):
-                # create triangle
-                points = [i, j, k]
-                sides = [self.get_full_seg(s.start, s.end) for s in sides]
-                aangs = [
-                    self.get_non_reflex_angle(*(points[n:] + points[:n]))
-                    for n in range(3)
-                ]
-                aconv = Convertor(self.disassemble_angle, self.get_rang)
-                sconv = Convertor(self.disassemble_segment, self.get_rseg)
-                res.append(Triangle(points, sides, aangs, aconv, sconv))
+                # if (all segments exist) and (no 3 points on same line) and (no non-neighbor sides intersect)
+                if (
+                    all(
+                        [
+                            any([seg.is_subsegment(side) for seg in self.segments])
+                            for side in sides
+                        ]
+                    )
+                    and not any(
+                        [
+                            [p in seg.get_all_points() for p in perm].count(True) > 2
+                            for seg in self.segments
+                        ]
+                    )
+                    and not any(
+                        [
+                            side.get_intersection_point(non_adj_side) is not None
+                            for side_idx, side in enumerate(sides)
+                            for non_adj_idx, non_adj_side in enumerate(sides)
+                            if non_adj_idx != side_idx
+                            and non_adj_idx != (side_idx + 1) % len(sides)
+                            and non_adj_idx != (side_idx - 1 + len(sides)) % len(sides)
+                        ]
+                    )
+                ):
+                    # create Polygon
+                    points = list(perm)
+                    sides = [self.get_full_seg(s.start, s.end) for s in sides]
+                    # do aangs based on most non-reflex angles
+                    aangs = [
+                        self.get_non_reflex_angle(i, j, k)
+                        for i, j, k in zip(
+                            points[-1:] + points[:-1], points, points[1:] + points[:1]
+                        )
+                    ]
+                    aconv = Convertor(self.disassemble_angle, self.get_rang)
+                    sconv = Convertor(self.disassemble_segment, self.get_rseg)
+                    res.append(Polygon(points, sides, aangs, aconv, sconv))
+                    break
         return res
+
+    def find_all_triangles(self):
+        return [Triangle.fromPolygon(p) for p in self.find_all_polygons(3)]
+
+    def find_all_quadrilateral(self):
+        return [Quadrilateral.fromPolygon(p) for p in self.find_all_polygons(3)]
 
     """ BASIC ANGLES_CALC METHODS """
 
@@ -1043,5 +1072,15 @@ class GeoHandler:
             res.append(sub_angles[i])
             i = (i + 1) % len(sub_angles)
 
+        return res
+
+    @staticmethod
+    def circle_perm(lst):
+        res = [i for i in itertools.permutations(lst[1:])]
+        i = 0
+        while i < len(res):
+            res.remove(res[i][::-1])
+            i += 1
+        res = [(lst[0],) + i for i in res]
         return res
 
