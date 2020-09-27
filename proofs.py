@@ -158,10 +158,39 @@ def th5(debug=False):
         print([str(i) for i in h.g().find_all_triangles()])
     return h.geta("BAC") + h.geta("ACB") + h.geta("CBA") == 180
 
+
 def th6(debug=False):
     """@ax2 + @th5 -> @th6"""
     h = Helper()
-    h.
+    h.poly("ABCD")
+    h.poly_diag("ABCD", "AC")
+    if debug:
+        h.calc()
+        print(h.g().angles)
+        print(
+            " + ".join(
+                map(
+                    lambda x: f"({str(x)})",
+                    [h.a("BAD"), h.a("ADC"), h.a("DCB"), h.a("CBA")],
+                )
+            ),
+            "=",
+            " + ".join(
+                [
+                    f"({str(i.deg) if isinstance(i, RealAngle) else str(i)})"
+                    for i in [
+                        h.geta("BAD"),
+                        h.geta("ADC"),
+                        h.geta("DCB"),
+                        h.geta("CBA"),
+                    ]
+                ]
+            ),
+            "=",
+            sum([h.geta("BAD"), h.geta("ADC"), h.geta("DCB"), h.geta("CBA")]),
+        )
+    return sum([h.geta("BAD"), h.geta("ADC"), h.geta("DCB"), h.geta("CBA")]) == 360
+
 
 def th7(debug=False):
     """@th1 + @th5 -> @th7"""
@@ -181,4 +210,4 @@ def th7(debug=False):
 #     j()
 #     Degree.reset()
 
-print(th7(False))
+print(th6(True))

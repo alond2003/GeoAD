@@ -91,7 +91,45 @@ class Helper:
             pp[2].lines[bc_idx],
         )
 
+    def poly(self, name):
+        """
+        Create Polygon based on name
+        - order of points clockwise
+        -> direction of sides anti-clockwise
+        -> direction of angles clockwise
+        """
+        name = name[0] + name[1:][::-1]
+        pp = [self.p(i) for i in name]
+        for i, j in zip(pp, (pp[1:] + pp[:1])):
+            # print(i, j)
+            self.s(str(i) + str(j))
+        # fix first angle (replace index of first and last line)
+        firstline_idx = pp[0].lines.index(self.s(name[:2]))
+        lastline_idx = pp[0].lines.index(self.s(name[-1] + name[0]))
+        pp[0].lines[firstline_idx], pp[0].lines[lastline_idx] = (
+            pp[0].lines[lastline_idx],
+            pp[0].lines[firstline_idx],
+        )
+
+    def poly_diag(self, poly, name):
+        """Create diagonal in polygon"""
+        pfrom = self.p(name[0])
+        pto = self.p(name[-1])
+        sides = [self.s(i + j) for i, j in zip(poly, poly[1:] + poly[:1])]
+        rays_pfrom = [side for side in sides if pfrom in side.get_all_points()]
+        rays_pto = [side for side in sides if pto in side.get_all_points()]
+        dig = self.s(name)
+        self.insert_between(pfrom, rays_pfrom, dig)
+        self.insert_between(pto, rays_pto, dig)
+
     """~~~~~~~~"""
+
+    def insert_between(self, vertex, rays, seg):
+        try:
+            vertex.lines.remove(seg)
+        except ValueError:
+            pass
+        vertex.lines.insert(max([vertex.lines.index(r) for r in rays]), seg)
 
     def tri_med(self, tri, name):
         """Build median in existing triangle (end point already exists)"""
