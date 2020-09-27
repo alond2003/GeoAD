@@ -119,12 +119,20 @@ class GeoHandler:
 
     def angle_sum_in_triangle(self):
         """@th5: The sum of the measures of the interior angles of a triangle is 180°"""
-        triangles = self.find_all_triangles()
-        for t in triangles:
+        for t in self.find_all_triangles():
             self.aang_equal_deg(
                 t.aangs,
                 Degree(False, 180),
                 f"the sum of the interior angles of △{str(t)} is 180°",
+            )
+
+    def angle_sum_in_quadrilateral(self):
+        """@th6: The sum of the measures of the interior angles of a Quadrilateral is 360°"""
+        for q in self.find_all_polygons(4):
+            self.aang_equal_deg(
+                q.aangs,
+                Degree(False, 360),
+                f"the sum of the interior angles in quadrilateral {str(q)} is 360°",
             )
 
     def exterior_angle_in_triangle(self):
@@ -198,6 +206,7 @@ class GeoHandler:
         self.vertical_angles()
         self.angle_sum_on_line()
         self.angle_sum_in_triangle()
+        self.angle_sum_in_quadrilateral()
         self.exterior_angle_in_triangle()
         self.angles_on_parallel_lines()
         self.angle_sum_around_point()

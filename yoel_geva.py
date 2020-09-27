@@ -267,7 +267,7 @@ def p352_e19():
     h.tri("BAC")
     h.conts("AC", "AEC")
     h.tri_segbi("BAC", "EO", "AC")
-    h.tri_innerline("BAC", "CO")
+    # h.tri_innerline("BAC", "CO")
     h.conts("BC", "BDC")
     h.tri_segbi("BAC", "DO", "BC")
     # other data
