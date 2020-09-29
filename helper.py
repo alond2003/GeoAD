@@ -3,6 +3,7 @@
 # ישרים מקבילים באותו כיוון
 # סדר רציץ של קווים היוצאים\העוברים בנקודה עם כיוון השעון (going through: to, from)
 # זווית מעל 180 אחרונה בסדר הקווים בנקודה
+# צלעות במצולע הן נגד כיוון השעון
 # first build everything then assign value
 
 from segment import Segment
@@ -10,11 +11,15 @@ from absangle import AbsAngle
 from geohandler import GeoHandler
 from point import Point
 from functools import partial
+from degree import Degree
+from length import Length
 
 
 class Helper:
     def __init__(self):
         """Init points,segments and geo"""
+        Degree.reset_all()
+        Length.reset_all()
         self.points = []
         self.segments = []
         self.geo = None

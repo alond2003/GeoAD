@@ -65,6 +65,10 @@ class Degree:
                 return False
         return True
 
+    def watch(self):
+        """Set watch on this degree (update its value when can)"""
+        Degree.watched.append(self)
+
     def __add__(self, other):
         """Add the values for the same key and add the missing keys with dict/Degree/int/float"""
         res = self.new_copy()
@@ -157,6 +161,8 @@ class Degree:
 
     def __str__(self, *custom):
         """Returns a greek letter or A{idx} polynomial"""
+        if self == 0:
+            return "0"
         if len(custom) % 2 != 0:
             raise "problem!!!"
         else:
@@ -219,10 +225,6 @@ class Degree:
                 for deg in all_deg:
                     deg.switch(i, Degree(False, {xchg: 1}))
 
-    def watch(self):
-        """Set watch on this degree (update its value when can)"""
-        Degree.watched.append(self)
-
     @classmethod
     def switchWatched(cls, key, deg):
         """Switch key for deg in every Degree in watched if it hasn't been done before"""
@@ -246,3 +248,11 @@ class Degree:
             return res[0]
         return tuple(res)
 
+    @classmethod
+    def reset_all(cls):
+        """Reset's the entire class"""
+        Degree.nextGivenIdx = 2
+        Degree.nextVarIdx = 1
+        Degree.watched = []
+        Degree.switched = []
+        Degree.givenSymbols = {}

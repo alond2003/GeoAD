@@ -241,3 +241,10 @@ class Length:
         d.watch()
         return d
 
+    @classmethod
+    def reset_all(cls):
+        Length.nextGivenIdx = 2
+        Length.nextVarIdx = 1
+        Length.watched = []
+        Length.switched = []
+        Length.givenSymbols = {}

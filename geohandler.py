@@ -78,7 +78,17 @@ class GeoHandler:
                 order = [pe, te, ps, ts]
                 for j in range(4):
                     if order[j] is not None and order[(j + 1) % 4] is not None:
-                        aangs[i].append(AbsAngle(order[j], tp[i], order[(j + 1) % 4]))
+                        aangs[i].append(
+                            self.get_non_reflex_angle(
+                                order[j].end
+                                if order[j].end != tp[i]
+                                else order[j].start,
+                                tp[i],
+                                order[(j + 1) % 4].end
+                                if order[(j + 1) % 4].end != tp[i]
+                                else order[(j + 1) % 4].start,
+                            )
+                        )
                     else:
                         aangs[i].append(None)
 
@@ -118,7 +128,7 @@ class GeoHandler:
                 )
 
     def angle_sum_in_triangle(self):
-        """@th5: The sum of the measures of the interior angles of a triangle is 180°"""
+        """@th6: The sum of the measures of the interior angles of a triangle is 180°"""
         for t in self.find_all_triangles():
             self.aang_equal_deg(
                 t.aangs,
@@ -127,8 +137,8 @@ class GeoHandler:
             )
 
     def angle_sum_in_quadrilateral(self):
-        """@th6: The sum of the measures of the interior angles of a Quadrilateral is 360°"""
-        for q in self.find_all_polygons(4):
+        """@th7: The sum of the measures of the interior angles of a Quadrilateral is 360°"""
+        for q in self.find_all_quadrilateral():
             self.aang_equal_deg(
                 q.aangs,
                 Degree(False, 360),
@@ -136,7 +146,7 @@ class GeoHandler:
             )
 
     def exterior_angle_in_triangle(self):
-        """@th7: the size of an exterior angle at a vertex of a triangle equals the sum of the sizes of the interior angles at the other two vertices of the triangle"""
+        """@th8: the size of an exterior angle at a vertex of a triangle equals the sum of the sizes of the interior angles at the other two vertices of the triangle"""
         for tri in self.find_all_triangles():
             for side in tri.sides:
                 for seg in self.segments:
@@ -254,7 +264,6 @@ class GeoHandler:
 
     def find_all_polygons(self, numofsides):
         """Return list of all polygons with numofsides sides"""
-        # TODO problem with Convex Polygons
         res = []
         for point_list in itertools.combinations(self.points, numofsides):
             for perm in self.circle_perm(point_list):
@@ -263,20 +272,19 @@ class GeoHandler:
                     for i in range(len(perm))
                 ]
                 # if (all segments exist) and (no 3 points on same line) and (no non-neighbor sides intersect)
-                if (
-                    all(
-                        [
-                            any([seg.is_subsegment(side) for seg in self.segments])
-                            for side in sides
-                        ]
-                    )
-                    and not any(
+                if all(
+                    [
+                        any([seg.is_subsegment(side) for seg in self.segments])
+                        for side in sides
+                    ]
+                ):
+                    sides = [self.get_full_seg(seg.start, seg.end) for seg in sides]
+                    if not any(
                         [
                             [p in seg.get_all_points() for p in perm].count(True) > 2
                             for seg in self.segments
                         ]
-                    )
-                    and not any(
+                    ) and not any(
                         [
                             side.get_intersection_point(non_adj_side) is not None
                             for side_idx, side in enumerate(sides)
@@ -285,59 +293,64 @@ class GeoHandler:
                             and non_adj_idx != (side_idx + 1) % len(sides)
                             and non_adj_idx != (side_idx - 1 + len(sides)) % len(sides)
                         ]
-                    )
-                ):
-                    # create Polygon
-                    points = list(perm)
-                    sides = [self.get_full_seg(s.start, s.end) for s in sides]
-                    # do aangs based on most non-reflex angles
-                    aangs1 = [
-                        AbsAngle(
-                            self.get_full_seg(pfrom, vertex),
-                            vertex,
-                            self.get_full_seg(vertex, pto),
-                        )
-                        for pfrom, vertex, pto in zip(
-                            points[-1:] + points[:-1], points, points[1:] + points[:1]
-                        )
-                    ]
-                    aangs2 = [
-                        AbsAngle(
-                            self.get_full_seg(vertex, pto),
-                            vertex,
-                            self.get_full_seg(pfrom, vertex),
-                        )
-                        for pfrom, vertex, pto in zip(
-                            points[-1:] + points[:-1], points, points[1:] + points[:1]
-                        )
-                    ]
-                    non_reflex_aangs = [
-                        self.get_non_reflex_angle(i, j, k)
-                        for i, j, k in zip(
-                            points[-1:] + points[:-1], points, points[1:] + points[:1]
-                        )
-                    ]
-                    non1, non2 = 0, 0
-                    for idx, non in enumerate(non_reflex_aangs):
-                        if non == aangs1[idx]:
-                            non1 += 1
+                    ):
+                        # create Polygon
+                        points = list(perm)
+                        sides = [self.get_full_seg(s.start, s.end) for s in sides]
+                        # do aangs based on most non-reflex angles
+                        aangs1 = [
+                            AbsAngle(
+                                self.get_full_seg(pfrom, vertex),
+                                vertex,
+                                self.get_full_seg(vertex, pto),
+                            )
+                            for pfrom, vertex, pto in zip(
+                                points[-1:] + points[:-1],
+                                points,
+                                points[1:] + points[:1],
+                            )
+                        ]
+                        aangs2 = [
+                            AbsAngle(
+                                self.get_full_seg(vertex, pto),
+                                vertex,
+                                self.get_full_seg(pfrom, vertex),
+                            )
+                            for pfrom, vertex, pto in zip(
+                                points[-1:] + points[:-1],
+                                points,
+                                points[1:] + points[:1],
+                            )
+                        ]
+                        non_reflex_aangs = [
+                            self.get_non_reflex_angle(i, j, k)
+                            for i, j, k in zip(
+                                points[-1:] + points[:-1],
+                                points,
+                                points[1:] + points[:1],
+                            )
+                        ]
+                        non1, non2 = 0, 0
+                        for idx, non in enumerate(non_reflex_aangs):
+                            if non == aangs1[idx]:
+                                non1 += 1
+                            else:
+                                non2 += 1
+                        if non1 > non2:
+                            aangs = aangs1
                         else:
-                            non2 += 1
-                    if non1 > non2:
-                        aangs = aangs1
-                    else:
-                        aangs = aangs2
-                    aconv = Convertor(self.disassemble_angle, self.get_rang)
-                    sconv = Convertor(self.disassemble_segment, self.get_rseg)
-                    res.append(Polygon(points, sides, aangs, aconv, sconv))
-                    break
+                            aangs = aangs2
+                        aconv = Convertor(self.disassemble_angle, self.get_rang)
+                        sconv = Convertor(self.disassemble_segment, self.get_rseg)
+                        res.append(Polygon(points, sides, aangs, aconv, sconv))
+                        break
         return res
 
     def find_all_triangles(self):
         return [Triangle.fromPolygon(p) for p in self.find_all_polygons(3)]
 
     def find_all_quadrilateral(self):
-        return [Quadrilateral.fromPolygon(p) for p in self.find_all_polygons(3)]
+        return [Quadrilateral.fromPolygon(p) for p in self.find_all_polygons(4)]
 
     """ BASIC ANGLES_CALC METHODS """
 

@@ -263,6 +263,7 @@ def p351_e18():
 
 
 def p352_e19():
+    # CH Proof
     h = Helper()
     h.tri("BAC")
     h.conts("AC", "AEC")
@@ -282,20 +283,52 @@ def p352_e19():
     )
 
 
-# arr = [
-#     p349_e1,
-#     p349_e2,
-#     p349_e3,
-#     p349_e4,
-#     p349_e5,
-#     p352_e20,
-#     p352_e21,
-#     p352_e23,
-#     p349_e6,
-# ]
-# # print(len(arr))
-# f = arr[8]
-# print(p350_e8())
+def p352_e22():
+    # CH Proof
+    h = Helper()
+    h.tri("BAC")
+    h.conts("AB", "AEB")
+    h.conts("BC", "BDC")
+    h.tri_angbi("BAC", "AD")
+    h.conts("AD", "AFD")
+    h.tri_angbi("BAC", "CE")
+    h.conts("CE", "CFE")
+    h.seta("ABC", 64)
+    return h.geta("AFC")
 
-print(p352_e19())
+
+def p352_e24():
+    # CH Proof
+    h = Helper()
+    h.tri("BAC")
+    h.conts("AB", "ADB")
+    h.conts("AC", "AEC")
+    h.s("DE")
+    h.paras("DE", "BC")
+    h.seta("ABC", 50)
+    h.seta("BCA", 60)
+    return h.geta("ADE"), h.geta("CED")
+
+
+def p353_e25():
+    # CH Proof
+    h = Helper()
+    h.tri("BAC")
+    h.conts("AB", "ADB")
+    h.conts("AC", "AEC")
+    h.s("DE")
+    h.seta("CAB", 72)
+    h.seta("ABC", 48)
+    h.seta("CED", 120)
+    h.calc()
+    return h.geta("DEA"), h.geta("BCA")
+    # return h.g().angles
+
+
+def p_e():
+    # CH Proof
+    h = Helper()
+
+
+print(p353_e25())
 

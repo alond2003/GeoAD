@@ -18,14 +18,14 @@ Axioms:
 
 """
 Theorems:
-@th1: the sum of 2 angles on a line is 180° (adjacent supplementary angles / linear pair)
-@th2: 2 vertical angles are equal
-@th3: all angles around a point sum up to 360°
+@th1: The sum of 2 angles on a line is 180° (adjacent supplementary angles / linear pair)
+@th2: Two vertical angles are equal
+@th3: All angles around a point sum up to 360°
 @th4: Corresponding angles are equal and the sum of two consecutive interior angles is 180° (2pl&t)
-@th5: The sum of the measures of the interior angles of a triangle is 180°
-@th6: The sum of the measures of the interior angles of a Quadrilateral is 360°
-@th7: the size of an exterior angle at a vertex of a triangle equals the sum of the sizes of the interior angles at the other two vertices of the triangle
-
+@th5: Converse of angles between parallel lines (alternate interior / corresponding / consecutive) 
+@th6: Tgit he sum of the measures of the interior angles of a triangle is 180°
+@th7: The sum of the measures of the interior angles of a Quadrilateral is 360°
+@th8: The size of an exterior angle at a vertex of a triangle equals the sum of the sizes of the interior angles at the other two vertices of the triangle
 """
 
 
@@ -144,7 +144,82 @@ def th4(debug=False):
 
 
 def th5(debug=False):
-    """@ax3 + @th1 -> @th5"""
+    """@ax3 + @th3 -> @th5 (proof by contradiction)"""
+    # 3 part Proof:
+    # 1. Converse alternate interior angles (proof by contradiction)
+    # 2. Converse corresponding angles (proof based on 1)
+    # 3. Converse consecutive interior angles (proof based on 1)
+
+    """ 1. Prove Converse Alternate Interior angles """
+    # Need to prove that AB || CD, based on equal alternate interior angles
+    h = Helper()
+    # Traverse GH (E in AB, F in CD)
+    h.s("GEFH")
+    # AB
+    h.s("BEA")
+    # CD
+    h.s("DFC")
+    # assume CD is not parallel to AB
+    # therefore there must be a different parallel to CD that goes through E
+    # That parallel is IJ
+    h.s("IEJ")
+    h.paras("IJ", "DC")
+    # it is given that BEH == CFG
+    h.equala("BEH", "CFG")
+    # let's calc
+    h.calc()
+    # we get that BEI is zero
+    if debug:
+        print(h.geta("BEI"))
+    # therefore IJ and therefore our assumption was wrong
+    # Thus, AB || CD
+    yield "AB || CD (proof by contradiction)"
+
+    if debug:
+        print("\n", "------------------------------------------\n" * 3)
+
+    """ 2. Prove Converse equal corresponding angles """
+    # Need to prove that AB || CD, based on equal corresponding angles
+    h = Helper()
+    # AB
+    h.s("AEB")
+    # CD
+    h.s("CFD")
+    # Traverse GH (E in AB, F in CD)
+    h.s("GEFH")
+    # it is given that GFD == GEB
+    h.equala("GFD", "GEB")
+    # lets see if GFD == HEA
+    if debug:
+        print(h.geta("GFD"), h.geta("HEA"))
+    # because they are a pair of equal alternate interior angles, AB || CD (as was proven in 1)
+    yield "AB || CD (proof by Converse Alternate Interior Angles)"
+
+    if debug:
+        print("\n", "------------------------------------------\n" * 3)
+
+    """ 3. Prove converse consecutive interior angles """
+    # Need to prove that AB || CD, based on consecutive interior angles
+    h = Helper()
+    # AB
+    h.s("AEB")
+    # CD
+    h.s("CFD")
+    # Traverse GH (E in AB, F in CD)
+    h.s("GEFH")
+    # it is given that GFD + BEH == 180
+    x = Degree.given("x")
+    h.seta("GFD", x)
+    h.seta("BEH", 180 - x)
+    # lets see if GFD == HEA
+    if debug:
+        print(h.geta("GFD"), h.geta("HEA"))
+    # because they are a pair of equal alternate interior angles, AB || CD (as was proven in 1)
+    yield "AB || CD (proof by Converse Alternate Interior Angles)"
+
+
+def th6(debug=False):
+    """@ax3 + @th1 -> @th6"""
     h = Helper()
     h.s("CA", "CB", "ECD", "BA")
     # h.inita()
@@ -159,8 +234,8 @@ def th5(debug=False):
     return h.geta("BAC") + h.geta("ACB") + h.geta("CBA") == 180
 
 
-def th6(debug=False):
-    """@ax2 + @th5 -> @th6"""
+def th7(debug=False):
+    """@ax2 + @th6 -> @th7"""
     h = Helper()
     h.poly("ABCD")
     h.poly_diag("ABCD", "AC")
@@ -192,8 +267,8 @@ def th6(debug=False):
     return sum([h.geta("BAD"), h.geta("ADC"), h.geta("DCB"), h.geta("CBA")]) == 360
 
 
-def th7(debug=False):
-    """@th1 + @th5 -> @th7"""
+def th8(debug=False):
+    """@th1 + @th6 -> @th8"""
     h = Helper()
     # h.s("BC", "AB", "ACD")
     h.tri("ABC")
@@ -205,9 +280,4 @@ def th7(debug=False):
     return h.geta("BAC"), h.geta("CBA"), h.geta("BCD")
 
 
-# for i, j in enumerate([th1, th2, th3, th4]):
-#     print(f"th{i+1}:", end=" ")
-#     j()
-#     Degree.reset()
-
-print(th6(True))
+print(list(th5(True)))

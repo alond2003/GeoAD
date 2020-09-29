@@ -1,7 +1,8 @@
 # TODO: make degree str better looking (180 - alpha, 180 + alpha - beta)
 # TODO: if angle is 180 -> it is a segment
 # TODO: use tri_innerline in angle bisector and such
-# TODO: angle sum in מרובע
+# TODO: value class that merges degree and length
+# TODO: MAYBE merge rang=deg and such (same code twice for seg and ang)
 from point import Point
 from segment import Segment
 from realangle import RealAngle
