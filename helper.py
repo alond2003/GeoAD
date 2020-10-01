@@ -118,6 +118,7 @@ class Helper:
 
     def poly_diag(self, poly, name):
         """Create diagonal in polygon"""
+        self.s(name)
         pfrom = self.p(name[0])
         pto = self.p(name[-1])
         sides = [self.s(i + j) for i, j in zip(poly, poly[1:] + poly[:1])]
@@ -365,6 +366,11 @@ class Helper:
         if not self.did_inits:
             self.inits()
         self.g().seg_equal_seg(self.s(name1), self.s(name2), reason)
+
+    def isparas(self, name1, name2):
+        if not self.did_calc:
+            self.calc()
+        return self.s(name1).is_parallel(self.s(name2))
 
     def get_intersection_point(self, iter1, iter2):
         lst = list(

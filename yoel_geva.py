@@ -321,8 +321,39 @@ def p353_e25():
     h.seta("ABC", 48)
     h.seta("CED", 120)
     h.calc()
-    return h.geta("DEA"), h.geta("BCA")
+    return h.isparas("DE", "BC")
     # return h.g().angles
+
+
+def p353_e26():
+    # CH Proof
+    h = Helper()
+    h.s("DEB")
+    h.s("DC")
+    h.s("AB")
+    h.s("AEC")
+    h.seta("BAC", 39)
+    h.seta("BDC", 98)
+    h.seta("AEB", 43)
+    # h.calc()
+    return h.isparas("AB", "DC")
+
+
+def p353_e27():
+    # CH Proof
+    h = Helper()
+    h.s("DEB")
+    h.s("DA")
+    h.s("CB")
+    h.s("CEA")
+    h.s("AB")
+    h.p("B").lines.insert(0, h.p("B").lines[-1])
+    del h.p("B").lines[-1]
+    h.paras("AD", "BC")
+    h.seta("DAC", 42)
+    h.seta("CEB", 94)
+
+    return h.geta("EBC")
 
 
 def p_e():
@@ -330,5 +361,5 @@ def p_e():
     h = Helper()
 
 
-print(p353_e25())
+print(p353_e27())
 

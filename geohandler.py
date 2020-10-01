@@ -21,6 +21,13 @@ class GeoHandler:
 
     """ THEOREMS """
 
+    def angle_sum_on_line(self):
+        """@th1: the sum of 2 angles on a line is 180°"""
+        for ang180, seg in self.find_all_180_angles():
+            self.aang_equal_deg(
+                ang180, Degree(False, 180), f"angle upon line {seg} is 180"
+            )
+
     def vertical_angles(self):
         """@th2: 2 vertical angles are equal"""
         for p in self.points:
@@ -33,13 +40,6 @@ class GeoHandler:
                     or self.is_180_angle(AbsAngle(a2.ray2, p, a1.ray2))
                 ):
                     self.aang_equal_aang(a1, a2, "vertical angles")
-
-    def angle_sum_on_line(self):
-        """@th1: the sum of 2 angles on a line is 180°"""
-        for ang180, seg in self.find_all_180_angles():
-            self.aang_equal_deg(
-                ang180, Degree(False, 180), f"angle upon line {seg} is 180"
-            )
 
     def angle_sum_around_point(self):
         """@th3: all angles around a point sum up to 360°"""
@@ -58,7 +58,7 @@ class GeoHandler:
         parallels_transversal = [
             (p1, p2, t)
             for p1, p2 in itertools.combinations(self.segments, 2)
-            if p1.is_parallel(p2) and p1 != p2
+            if p1.is_parallel(p2)
             for t in self.segments
             if t.get_intersection_point(p1) is not None
             and t.get_intersection_point(p2) is not None
@@ -126,6 +126,91 @@ class GeoHandler:
                     Degree(False, 180),
                     f"sum of consecutive angles between {str(p[0])} || {str(p[1])} and {str(t)}",
                 )
+
+    def converse_angles_on_parallel_lines(self):
+        """@th5: Converse of angles between parallel lines (alternate interior / corresponding / consecutive)"""
+        if len(self.segments) < 3:
+            return
+
+        pos_parallels_transversal = [
+            (p1, p2, t)
+            for p1, p2 in itertools.combinations(self.segments, 2)
+            if not p1.is_parallel(p2) and p1.get_intersection_point(p2) is None
+            for t in self.segments
+            if t.get_intersection_point(p1) is not None
+            and t.get_intersection_point(p2) is not None
+        ]
+
+        for *p, t in pos_parallels_transversal:
+            if p[0].is_parallel(p[1]):
+                continue
+            tp = [t.get_intersection_point(p[0]), t.get_intersection_point(p[1])]
+            if t.get_all_points().index(tp[0]) > t.get_all_points().index(tp[1]):
+                p[0], p[1] = p[1], p[0]
+                tp[0], tp[1] = tp[1], tp[0]
+            aangs = [[], []]
+            for i in range(2):
+                pe = p[i].get_subsegment_from(tp[i])
+                te = t.get_subsegment_from(tp[i])
+                ps = p[i].get_subsegment_to(tp[i])
+                ts = t.get_subsegment_to(tp[i])
+                order = [pe, te, ps, ts]
+                for j in range(4):
+                    if order[j] is not None and order[(j + 1) % 4] is not None:
+                        aangs[i].append(
+                            self.get_non_reflex_angle(
+                                order[j].end
+                                if order[j].end != tp[i]
+                                else order[j].start,
+                                tp[i],
+                                order[(j + 1) % 4].end
+                                if order[(j + 1) % 4].end != tp[i]
+                                else order[(j + 1) % 4].start,
+                            )
+                        )
+                    else:
+                        aangs[i].append(None)
+
+            # זוויות מתאימות
+            # Corresponding angles
+            for i in range(4):
+                if aangs[0][i] is None or aangs[1][i] is None:
+                    continue
+                if self.get_value_of_aang(aangs[0][i]) == self.get_value_of_aang(
+                    aangs[1][i]
+                ):
+                    self.set_parallel(
+                        *p,
+                        f"{str(aangs[0][i])} = {str(self.get_value_of_aang(aangs[0][i]))} = {str(aangs[1][i])}, converse corresponding angles between {str(p[0])}, {str(p[1])} and traverse {str(t)}",
+                    )
+
+            # זוויות מתחלפות
+            # alternate angles
+            for i in range(4):
+                altidx = (i + 2) % 4
+                if aangs[0][i] is None or aangs[1][altidx] is None:
+                    continue
+                if self.get_value_of_aang(aangs[0][i]) == self.get_value_of_aang(
+                    aangs[1][altidx]
+                ):
+                    self.set_parallel(
+                        *p,
+                        f"{str(aangs[0][i])} = {str(self.get_value_of_aang(aangs[0][i]))} = {str(aangs[1][altidx])}, converse alternating angles between {str(p[0])}, {str(p[1])} and traverse {str(t)}",
+                    )
+
+            # זוויות חד צדדיות
+            # consecutive angles
+            for i in range(4):
+                considx = 3 - i
+                if aangs[0][i] is None or aangs[1][considx] is None:
+                    continue
+                if self.get_value_of_aang(aangs[0][i]) == self.get_value_of_aang(
+                    aangs[1][considx]
+                ):
+                    self.set_parallel(
+                        *p,
+                        f"{str(aangs[0][i])} = {str(self.get_value_of_aang(aangs[0][i]))} = {str(aangs[1][considx])}, converse consecutive angles between {str(p[0])}, {str(p[1])} and traverse {str(t)}",
+                    )
 
     def angle_sum_in_triangle(self):
         """@th6: The sum of the measures of the interior angles of a triangle is 180°"""
@@ -219,6 +304,7 @@ class GeoHandler:
         self.angle_sum_in_quadrilateral()
         self.exterior_angle_in_triangle()
         self.angles_on_parallel_lines()
+        self.converse_angles_on_parallel_lines()
         self.angle_sum_around_point()
         # Degree.variable_reduction(*[i.deg for i in self.angles.values()])
         # print([str(i) for i in self.angles])
@@ -261,6 +347,9 @@ class GeoHandler:
     def get_rang(self, aang):
         """Return RealAngle from elementry AbsAngle"""
         return self.angles[aang]
+
+    def get_value_of_aang(self, aang):
+        return sum([self.get_rang(a) for a in self.disassemble_angle(aang)])
 
     def find_all_polygons(self, numofsides):
         """Return list of all polygons with numofsides sides"""
@@ -378,8 +467,6 @@ class GeoHandler:
         self.angle_sum_around_point()
         Degree.variable_reduction(*[i.deg for i in self.angles.values()])
         # print([str(i) for i in self.angles])
-
-    ####### make these function work for segment also
 
     def aang_equal_aang(self, aang1, aang2, reason):
         """Assume AbsAngle1 = AbsAngle2 and act apon it"""
@@ -984,6 +1071,22 @@ class GeoHandler:
                     else:
                         res.append((pre, abs(seg)))
             return res
+
+    def set_parallel(self, p1, p2, reason="given"):
+        """Set p1 || p2 based on resaon"""
+        print("---")
+        p1 = [
+            s
+            for s in self.segments
+            if p1.start in s.get_all_points() and p1.end in s.get_all_points()
+        ][0]
+        p2 = [
+            s
+            for s in self.segments
+            if p2.start in s.get_all_points() and p2.end in s.get_all_points()
+        ][0]
+        p1.set_parallel(p2)
+        print(f"{str(p1)} || {str(p2)} ({reason})")
 
     ############
 
