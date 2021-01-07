@@ -11,26 +11,26 @@ from geo.helper import Helper
 """
 Axioms:
 
-@ax1: All straight angles are congruent (180°).
-@ax2: The whole is equal to the sum of its parts.
-@ax3: A pair of alternate interior angles between 2 parallel lines and a transversal are equal
+_ax1: All straight angles are congruent (180°).
+_ax2: The whole is equal to the sum of its parts.
+_ax3: A pair of alternate interior angles between 2 parallel lines and a transversal are equal
 """
 
 """
 Theorems:
-@th1: The sum of 2 angles on a line is 180° (adjacent supplementary angles / linear pair)
-@th2: Two vertical angles are equal
-@th3: All angles around a point sum up to 360°
-@th4: Corresponding angles are equal and the sum of two consecutive interior angles is 180° (2pl&t)
-@th5: Converse of angles between parallel lines (alternate interior / corresponding / consecutive) 
-@th6: Tgit he sum of the measures of the interior angles of a triangle is 180°
-@th7: The sum of the measures of the interior angles of a Quadrilateral is 360°
-@th8: The size of an exterior angle at a vertex of a triangle equals the sum of the sizes of the interior angles at the other two vertices of the triangle
+_th1: The sum of 2 angles on a line is 180° (adjacent supplementary angles / linear pair)
+_th2: Two vertical angles are equal
+_th3: All angles around a point sum up to 360°
+_th4: Corresponding angles are equal and the sum of two consecutive interior angles is 180° (2pl&t)
+_th5: Converse of angles between parallel lines (alternate interior / corresponding / consecutive) 
+_th6: Tgit he sum of the measures of the interior angles of a triangle is 180°
+_th7: The sum of the measures of the interior angles of a Quadrilateral is 360°
+_th8: The size of an exterior angle at a vertex of a triangle equals the sum of the sizes of the interior angles at the other two vertices of the triangle
 """
 
 
 def th1(debug=False):
-    """@ax1 & @ax2 -> @th1"""
+    """_ax1 & _ax2 -> _th1"""
     # Create line AB, C point on AB, CD line from C
     A, B, C, D = Point.createPoints("A", "B", "C", "D")
     AB = Segment(A, B, True)
@@ -51,7 +51,7 @@ def th1(debug=False):
 
 
 def th2(debug=False):
-    """@th1 -> @th2"""
+    """_th1 -> _th2"""
     # Create lines AB and CD, E is their intersection point
     A, B, C, D, E = Point.createPoints("A", "B", "C", "D", "E")
     AB = Segment(A, B, True)
@@ -75,7 +75,7 @@ def th2(debug=False):
 
 
 def th3(debug=False):
-    """@th1 -> @th3"""
+    """_th1 -> _th3"""
     # Create lines AB and CD, E is their intersection point
     A, B, C, D, E = Point.createPoints("A", "B", "C", "D", "E")
     AB = Segment(A, B, True)
@@ -110,7 +110,7 @@ def th3(debug=False):
 
 
 def th4(debug=False):
-    """@th1 & @ax3 -> @th4"""
+    """_th1 & _ax3 -> _th4"""
     # Create AB||CD, GFEH transversal: E ∈ AB, F ∈ CD
     A, B, C, D, E, F, G, H = Point.createPoints(8)
     AB = Segment(A, B, True)
@@ -144,7 +144,7 @@ def th4(debug=False):
 
 
 def th5(debug=False):
-    """@ax3 + @th3 -> @th5 (proof by contradiction)"""
+    """_ax3 + _th3 -> _th5 (proof by contradiction)"""
     # 3 part Proof:
     # 1. Converse alternate interior angles (proof by contradiction)
     # 2. Converse corresponding angles (proof based on 1)
@@ -219,7 +219,7 @@ def th5(debug=False):
 
 
 def th6(debug=False):
-    """@ax3 + @th1 -> @th6"""
+    """_ax3 + _th1 -> _th6"""
     h = Helper()
     h.s("CA", "CB", "ECD", "BA")
     # h.inita()
@@ -235,7 +235,7 @@ def th6(debug=False):
 
 
 def th7(debug=False):
-    """@ax2 + @th6 -> @th7"""
+    """_ax2 + _th6 -> _th7"""
     h = Helper()
     h.poly("ABCD")
     h.poly_diag("ABCD", "AC")
@@ -268,7 +268,7 @@ def th7(debug=False):
 
 
 def th8(debug=False):
-    """@th1 + @th6 -> @th8"""
+    """_th1 + _th6 -> _th8"""
     h = Helper()
     # h.s("BC", "AB", "ACD")
     h.tri("ABC")

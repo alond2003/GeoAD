@@ -23,14 +23,14 @@ class Handler:
     """ THEOREMS """
 
     def angle_sum_on_line(self):
-        """@th1: the sum of 2 angles on a line is 180°"""
+        """_th1: the sum of 2 angles on a line is 180°"""
         for ang180, seg in self.find_all_180_angles():
             self.aang_equal_deg(
                 ang180, Degree(False, 180), f"angle upon line {seg} is 180"
             )
 
     def vertical_angles(self):
-        """@th2: 2 vertical angles are equal"""
+        """_th2: 2 vertical angles are equal"""
         for p in self.points:
             for a1, a2 in itertools.combinations(self.get_angles_around_point(p), 2):
                 if (
@@ -43,7 +43,7 @@ class Handler:
                     self.aang_equal_aang(a1, a2, "vertical angles")
 
     def angle_sum_around_point(self):
-        """@th3: all angles around a point sum up to 360°"""
+        """_th3: all angles around a point sum up to 360°"""
         for p in self.points:
             parts = self.get_angles_around_point(p)
             if len(parts) != 0:
@@ -52,7 +52,7 @@ class Handler:
                 )
 
     def angles_on_parallel_lines(self):
-        """@ax3 + @th4: corresponding,alteranting and consecutive angles between 2 parallel lines and a transversal are equal"""
+        """_ax3 + _th4: corresponding,alteranting and consecutive angles between 2 parallel lines and a transversal are equal"""
         if len(self.segments) < 3:
             return
 
@@ -129,7 +129,7 @@ class Handler:
                 )
 
     def converse_angles_on_parallel_lines(self):
-        """@th5: Converse of angles between parallel lines (alternate interior / corresponding / consecutive)"""
+        """_th5: Converse of angles between parallel lines (alternate interior / corresponding / consecutive)"""
         if len(self.segments) < 3:
             return
 
@@ -214,7 +214,7 @@ class Handler:
                     )
 
     def angle_sum_in_triangle(self):
-        """@th6: The sum of the measures of the interior angles of a triangle is 180°"""
+        """_th6: The sum of the measures of the interior angles of a triangle is 180°"""
         for t in self.find_all_triangles():
             self.aang_equal_deg(
                 t.aangs,
@@ -223,7 +223,7 @@ class Handler:
             )
 
     def angle_sum_in_quadrilateral(self):
-        """@th7: The sum of the measures of the interior angles of a Quadrilateral is 360°"""
+        """_th7: The sum of the measures of the interior angles of a Quadrilateral is 360°"""
         for q in self.find_all_quadrilateral():
             self.aang_equal_deg(
                 q.aangs,
@@ -232,7 +232,7 @@ class Handler:
             )
 
     def exterior_angle_in_triangle(self):
-        """@th8: the size of an exterior angle at a vertex of a triangle equals the sum of the sizes of the interior angles at the other two vertices of the triangle"""
+        """_th8: the size of an exterior angle at a vertex of a triangle equals the sum of the sizes of the interior angles at the other two vertices of the triangle"""
         for tri in self.find_all_triangles():
             for side in tri.sides:
                 for seg in self.segments:
