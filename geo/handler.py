@@ -1,20 +1,21 @@
 import itertools
-from quadrilateral import Quadrilateral
-from realsegment import RealSegment
-from realangle import RealAngle
-from absangle import AbsAngle
-from segment import Segment
-from degree import Degree
-from point import Point
-from length import Length
-from polygon import Polygon
-from triangle import Triangle
-from convertor import Convertor
+
+from geo.abs.point import Point
+from geo.abs.segment import Segment
+from geo.abs.absangle import AbsAngle
+from geo.real.realsegment import RealSegment
+from geo.real.realangle import RealAngle
+from geo.real.degree import Degree
+from geo.real.length import Length
+from geo.comp.polygon import Polygon
+from geo.comp.triangle import Triangle
+from geo.comp.quadrilateral import Quadrilateral
+from geo.comp.convertor import Convertor
 
 
-class GeoHandler:
+class Handler:
     def __init__(self, *points):
-        """Create a GeoHandler object, keep all Points and collect all Segments"""
+        """Create a Handler object, keep all Points and collect all Segments"""
         self.points = list(points)
 
         self.segments = list(set([l for p in self.points for l in p.lines]))
@@ -1238,4 +1239,3 @@ class GeoHandler:
             i += 1
         res = [(lst[0],) + i for i in res]
         return res
-

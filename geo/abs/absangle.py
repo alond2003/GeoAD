@@ -1,5 +1,5 @@
-from segment import Segment
-from degree import Degree
+from geo.abs.segment import Segment
+from geo.real.degree import Degree
 
 
 class AbsAngle:
@@ -56,4 +56,3 @@ class AbsAngle:
     def __repr__(self):
         """Return str(self)"""
         return str(self)
-

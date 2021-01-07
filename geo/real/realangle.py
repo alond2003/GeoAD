@@ -1,6 +1,6 @@
-from segment import Segment
-from degree import Degree
-from absangle import AbsAngle
+from geo.abs.segment import Segment
+from geo.abs.absangle import AbsAngle
+from geo.real.degree import Degree
 
 from functools import total_ordering
 
@@ -90,4 +90,3 @@ class RealAngle(AbsAngle):
     def fromAbsAngle(cls, absang, deg=None):
         """Create a RealAngle based on an AbsAngle"""
         return RealAngle(absang.ray1, absang.vertex, absang.ray2, deg)
-

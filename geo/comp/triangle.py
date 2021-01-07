@@ -1,4 +1,4 @@
-from polygon import Polygon
+from geo.comp.polygon import Polygon
 
 
 class Triangle(Polygon):

@@ -1,4 +1,4 @@
-from unionfind import UnionFind
+from geo.alg.unionfind import UnionFind
 
 
 class Segment:
@@ -123,4 +123,3 @@ class Segment:
             other.get_all_points() == self.get_all_points()
             or other.get_all_points()[::-1] == self.get_all_points()
         )
-

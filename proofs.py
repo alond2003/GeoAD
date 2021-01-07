@@ -1,10 +1,10 @@
-from segment import Segment
-from absangle import AbsAngle
-from realangle import RealAngle
-from degree import Degree
-from geohandler import GeoHandler
-from point import Point
-from helper import Helper
+from geo.abs.segment import Segment
+from geo.abs.absangle import AbsAngle
+from geo.real.realangle import RealAngle
+from geo.real.degree import Degree
+from geo.handler import Handler
+from geo.abs.point import Point
+from geo.helper import Helper
 
 # http://mathbitsnotebook.com/JuniorMath/Geometry/GEORules.html
 
@@ -43,7 +43,7 @@ def th1(debug=False):
     CB = AB.get_subsegment_from(C)
     DCB = AbsAngle(CD, C, CB)
     # Prove the sum of the angles is equal to 180°
-    geo = GeoHandler(A, B, C, D)
+    geo = Handler(A, B, C, D)
     geo.angles_calc()
     print(geo.angles[ACD], "+", geo.angles[DCB], "=", geo.angles[ACD] + geo.angles[DCB])
     if debug:
@@ -67,7 +67,7 @@ def th2(debug=False):
     ED = CD.get_subsegment_from(E)
     BED = AbsAngle(EB, E, ED)
     # Prove the 2 vertical Angles are equal
-    geo = GeoHandler(A, B, C, D, E)
+    geo = Handler(A, B, C, D, E)
     geo.angles_calc()
     print(geo.angles[AEC], "=", geo.angles[BED])
     if debug:
@@ -92,7 +92,7 @@ def th3(debug=False):
     BED = AbsAngle(EB, E, ED)
     DEA = AbsAngle(ED, E, AE)
     # Prove the sum of all point around point E is 360°
-    geo = GeoHandler(A, B, C, D, E)
+    geo = Handler(A, B, C, D, E)
     geo.angles_calc()
     print(
         geo.angles[AEC],
@@ -133,7 +133,7 @@ def th4(debug=False):
     FD = CD.get_subsegment_from(F)
     FH = GH.get_subsegment_from(F)
     DFH = AbsAngle(FD, F, FH)
-    geo = GeoHandler(A, B, C, D, E, F, G, H)
+    geo = Handler(A, B, C, D, E, F, G, H)
     geo.angles_calc()
     # Prove that corresponding angles are equal
     print(geo.angles[AEG], "=", geo.angles[CFG], end=", ")

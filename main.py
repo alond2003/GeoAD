@@ -3,13 +3,13 @@
 # TODO: use tri_innerline in angle bisector and such
 # TODO: value class that merges degree and length
 # TODO: MAYBE merge rang=deg and such (same code twice for seg and ang)
-from point import Point
-from segment import Segment
-from realangle import RealAngle
-from absangle import AbsAngle
-from geohandler import GeoHandler
-from degree import Degree
-from helper import Helper
+from geo.abs.point import Point
+from geo.abs.segment import Segment
+from geo.real.realangle import RealAngle
+from geo.abs.absangle import AbsAngle
+from geo.handler import Handler
+from geo.real.degree import Degree
+from geo.helper import Helper
 
 print("start\n")
 
@@ -35,7 +35,7 @@ CD = Segment(C, D, True)
 # GH = Segment(G, H, True)
 # GH.set_midpoints(F, E)
 # AB.set_parallel(CD)
-# geo = GeoHandler(A, B, C, D, E, F, G, H)
+# geo = Handler(A, B, C, D, E, F, G, H)
 # geo.angles_calc()
 # print(geo.angles)
 

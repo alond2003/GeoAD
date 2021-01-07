@@ -1,5 +1,5 @@
-from segment import Segment
-from length import Length
+from geo.abs.segment import Segment
+from geo.real.length import Length
 from functools import total_ordering
 
 

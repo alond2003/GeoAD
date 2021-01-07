@@ -6,13 +6,14 @@
 # צלעות במצולע הן נגד כיוון השעון
 # first build everything then assign value
 
-from segment import Segment
-from absangle import AbsAngle
-from geohandler import GeoHandler
-from point import Point
+from geo.abs.segment import Segment
+from geo.abs.absangle import AbsAngle
+from geo.handler import Handler
+from geo.abs.point import Point
+
 from functools import partial
-from degree import Degree
-from length import Length
+from geo.real.degree import Degree
+from geo.real.length import Length
 
 
 class Helper:
@@ -70,9 +71,9 @@ class Helper:
         )
 
     def g(self):
-        """Create new GeoHandler (if needed) and return it"""
+        """Create new Handler (if needed) and return it"""
         if self.geo is None or len(self.geo.points) < len(self.points):
-            self.geo = GeoHandler(*self.points)
+            self.geo = Handler(*self.points)
         return self.geo
 
     def tri(self, name):
@@ -381,4 +382,3 @@ class Helper:
         if len(lst) == 0:
             return None
         return lst[0]
-

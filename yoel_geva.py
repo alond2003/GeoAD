@@ -1,10 +1,10 @@
-from point import Point
-from segment import Segment
-from realangle import RealAngle
-from absangle import AbsAngle
-from geohandler import GeoHandler
-from degree import Degree
-from helper import Helper
+from geo.abs.point import Point
+from geo.abs.segment import Segment
+from geo.real.realangle import RealAngle
+from geo.abs.absangle import AbsAngle
+from geo.handler import Handler
+from geo.real.degree import Degree
+from geo.helper import Helper
 
 
 def p349_e1():
@@ -362,4 +362,3 @@ def p_e():
 
 
 print(p353_e27())
-
