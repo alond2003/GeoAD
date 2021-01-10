@@ -3,7 +3,7 @@ from geo.abs.segment import Segment
 from geo.real.realangle import RealAngle
 from geo.abs.absangle import AbsAngle
 from geo.handler import Handler
-from geo.real.degree import Degree
+from geo.real.expression import Degree
 from geo.helper import Helper
 
 
@@ -361,4 +361,4 @@ def p_e():
     h = Helper()
 
 
-print(p353_e27())
+print(p352_e22())

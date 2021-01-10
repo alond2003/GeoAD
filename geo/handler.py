@@ -5,8 +5,8 @@ from geo.abs.segment import Segment
 from geo.abs.absangle import AbsAngle
 from geo.real.realsegment import RealSegment
 from geo.real.realangle import RealAngle
-from geo.real.degree import Degree
-from geo.real.length import Length
+from geo.real.expression import Degree
+from geo.real.expression import Length
 from geo.comp.polygon import Polygon
 from geo.comp.triangle import Triangle
 from geo.comp.quadrilateral import Quadrilateral

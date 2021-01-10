@@ -1,6 +1,6 @@
 from geo.abs.segment import Segment
 from geo.abs.absangle import AbsAngle
-from geo.real.degree import Degree
+from geo.real.expression import Degree
 
 from functools import total_ordering
 

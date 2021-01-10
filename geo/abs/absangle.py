@@ -1,5 +1,5 @@
 from geo.abs.segment import Segment
-from geo.real.degree import Degree
+from geo.real.expression import Degree
 
 
 class AbsAngle:

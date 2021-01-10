@@ -12,8 +12,8 @@ from geo.handler import Handler
 from geo.abs.point import Point
 
 from functools import partial
-from geo.real.degree import Degree
-from geo.real.length import Length
+from geo.real.expression import Degree
+from geo.real.expression import Length
 
 
 class Helper:

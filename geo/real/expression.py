@@ -2,16 +2,17 @@ from functools import total_ordering
 
 
 @total_ordering
-class Length:
+class Expression:
 
-    nextGivenIdx = 2
-    nextVarIdx = 1
+    next_given_idx = 2
+    next_var_idx = 1
     watched = []
     switched = []
-    givenSymbols = {}
+    given_symbols = {}
+    alphabet = "abcdefghijklmnopqrstuvwxyz"
 
     def __init__(self, newvar=True, d={}):
-        """Create Length object based on dict,int,float or empty (w/ or w/o newvar)"""
+        """Create Expression object based on dict,int,float or empty (w/ or w/o newvar)"""
         if isinstance(d, dict):
             self.value = dict(d)
         elif isinstance(d, (int, float)):
@@ -19,13 +20,13 @@ class Length:
         else:
             raise TypeError(f"d as a {type(d)} is not supported")
         if newvar:
-            self.value[Length.nextVarIdx] = 1
-            Length.nextVarIdx += 1
+            self.value[type(self).next_var_idx] = 1
+            type(self).next_var_idx += 1
         self.clean()
 
     def new_copy(self):
         """Return a new_copy of this object"""
-        res = Length(False)
+        res = type(self)(False)
         for i, j in self.value.items():
             res.value[i] = j
         return res
@@ -38,15 +39,15 @@ class Length:
             self.value[i] = j
         self.clean()
 
-    def switch(self, key, switchlen):
-        """switch every instance of this key to switchlen"""
-        Length.switchWatched(key, switchlen)
+    def switch(self, key, switch_exp):
+        """switch every instance of this key to switch_exp"""
+        type(self).switch_watched(key, switch_exp)
         if key not in self.value:
             return
         else:
             times = self.value[key]
             del self.value[key]
-            self += switchlen * times
+            self += switch_exp * times
             self.clean()
 
     def clean(self):
@@ -58,24 +59,28 @@ class Length:
                 self.value[key] = int(self.value[key])
 
     def isknown(self):
-        """Check if the Length is known or has variables in it"""
+        """Check if the expression is known or has variables in it"""
         self.clean()
         for i in self.value:
             if i != 0:
                 return False
         return True
 
+    def watch(self):
+        """Set watch on this expression (update its value when can)"""
+        type(self).watched.append(self)
+
     def __add__(self, other):
-        """Add the values for the same key and add the missing keys with dict/Length/int/float"""
+        """Add the values for the same key and add the missing keys with dict/Expression/int/float"""
         res = self.new_copy()
-        if isinstance(other, Length):
+        if isinstance(other, type(self)):
             for idx, val in other.value.items():
                 if idx in res.value:
                     res.value[idx] += val
                 else:
                     res.value[idx] = val
         elif isinstance(other, (dict, int, float)):
-            return self + Length(newvar=False, d=other)
+            return self + type(self)(newvar=False, d=other)
         else:
             return NotImplemented
 
@@ -90,10 +95,10 @@ class Length:
         return self
 
     def __sub__(self, other):
-        if isinstance(other, (Length, int, float)):
+        if isinstance(other, (type(self), int, float)):
             return self + (-other)
         elif isinstance(other, dict):
-            return self + (-(Length(newvar=False, d=other)))
+            return self + (-(type(self)(newvar=False, d=other)))
         else:
             return NotImplemented
 
@@ -132,8 +137,8 @@ class Length:
     def __neg__(self):
         return self * (-1)
 
-    @staticmethod
-    def str_term(tup, custom):
+    @classmethod
+    def str_term(cls, tup, custom):
         idx, val = tup
         if val == 0:
             return ""
@@ -142,11 +147,11 @@ class Length:
                 return "+" + str(val)
             return str(val)
 
-        EA = "abcdefghijklmnopqrstuvwxyz"
+        alp = cls.alphabet
         if isinstance(idx, int):
-            str_var = EA[idx - 1] if 0 < idx < len(EA) + 1 else f"L{idx-1}"
+            str_var = alp[idx - 1] if 0 < idx < len(alp) + 1 else f"A{idx-1}"
         else:
-            str_var = Length.givenSymbols[idx]
+            str_var = cls.given_symbols[idx]
         if idx in custom:
             str_var = custom[idx]
         if val == 1 or val == -1:
@@ -156,7 +161,9 @@ class Length:
         return sgn + str(val) + str_var
 
     def __str__(self, *custom):
-        """Returns a greek letter or L{idx} polynomial"""
+        """Returns a alphabet letter or A{idx} polynomial"""
+        if self == 0:
+            return "0"
         if len(custom) % 2 != 0:
             raise "problem!!!"
         else:
@@ -168,12 +175,12 @@ class Length:
         res = ""
         for i in sorted(self.value.items())[::-1]:
             if res == "":
-                if Length.str_term(i, custom)[0] == "+":
-                    res = Length.str_term(i, custom)[1:]
+                if type(self).str_term(i, custom)[0] == "+":
+                    res = type(self).str_term(i, custom)[1:]
                 else:
-                    res = Length.str_term(i, custom)
+                    res = type(self).str_term(i, custom)
             else:
-                res += " " + Length.str_term(i, custom)
+                res += " " + type(self).str_term(i, custom)
         return res
 
     def __repr__(self):
@@ -183,10 +190,10 @@ class Length:
     def __lt__(self, other):
         """Do lexicographic compare between the objects' sorted keys"""
         if other is None:
-            raise TypeError("NoneType compared to Length")
+            raise TypeError("NoneType compared to Degree")
         if isinstance(other, (int, float, dict)):
-            return self < Length(False, other)
-        if isinstance(other, Length):
+            return self < type(self)(False, other)
+        if isinstance(other, type(self)):
             return sorted(list(self.value.keys())) < sorted(list(other.value.keys()))
         return NotImplemented
 
@@ -195,20 +202,20 @@ class Length:
             if other == 0 and len(self.value) == 0:
                 return True
             return len(self.value) == 1 and 0 in self.value and self.value[0] == other
-        elif isinstance(other, (Length, dict)):
+        elif isinstance(other, (type(self), dict)):
             return self - other == 0
         else:
             return NotImplemented
 
     @classmethod
     def reset(cls):
-        """Resets the variable count to start over from a"""
-        Length.nextVarIdx = 1
+        """Resets the variable count to start over from alpha"""
+        cls.nextVarIdx = 1
 
     @classmethod
-    def variable_reduction(cls, *all_len):
-        """Replaces variables' names to fill the EA from the beginning"""
-        existing_keys = set(sum([list(i.value.keys()) for i in all_len], []))
+    def variable_reduction(cls, *all_exp):
+        """Replaces variables' names to fill the alphabet from the beginning"""
+        existing_keys = set(sum([list(i.value.keys()) for i in all_exp], []))
         if 0 in existing_keys:
             existing_keys.remove(0)
         xchg = 1
@@ -216,35 +223,64 @@ class Length:
             if i > len(existing_keys):
                 while xchg in existing_keys:
                     xchg += 1
-                for leng in all_len:
-                    leng.switch(i, Length(False, {xchg: 1}))
-
-    def watch(self):
-        """Set watch on this Length (update its value when can)"""
-        Length.watched.append(self)
+                for exp in all_exp:
+                    exp.switch(i, cls(False, {xchg: 1}))
 
     @classmethod
-    def switchWatched(cls, key, leng):
-        """Switch key for leng in every Length in watched if it hasn't been done before"""
-        if (key, leng) in Length.switched:
+    def switch_watched(cls, key, exp):
+        """Switch key for exp in every Expression in watched if it hasn't been done before"""
+        if (key, exp) in cls.switched:
             return
-        Length.switched.append((key, leng.new_copy()))
-        for w in Length.watched:
-            w.switch(key, leng)
+        cls.switched.append((key, exp.new_copy()))
+        for w in cls.watched:
+            w.switch(key, exp)
 
     @classmethod
-    def given(cls, symbol):
-        d = Length(False, {})
-        d.value[1 / Length.nextGivenIdx] = 1
-        Length.givenSymbols[1 / Length.nextGivenIdx] = symbol
-        Length.nextGivenIdx += 1
-        d.watch()
-        return d
+    def given(cls, *symbols):
+        res = []
+        for symbol in symbols:
+            d = cls(False, {})
+            d.value[1 / cls.next_given_idx] = 1
+            cls.given_symbols[1 / cls.next_given_idx] = symbol
+            cls.next_given_idx += 1
+            d.watch()
+            res.append(d)
+        if len(res) == 1:
+            return res[0]
+        return tuple(res)
 
     @classmethod
     def reset_all(cls):
-        Length.nextGivenIdx = 2
-        Length.nextVarIdx = 1
-        Length.watched = []
-        Length.switched = []
-        Length.givenSymbols = {}
+        """Reset's the entire class"""
+        cls.next_given_idx = 2
+        cls.next_var_idx = 1
+        cls.watched = []
+        cls.switched = []
+        cls.given_symbols = {}
+
+
+@total_ordering
+class Degree(Expression):
+
+    next_given_idx = 2
+    next_var_idx = 1
+    watched = []
+    switched = []
+    given_symbols = {}
+    alphabet = "\u03B1\u03B2\u03B3\u03B4\u03B5\u03B6\u03B7\u03B8\u03B9\u03Ba\u03Bb\u03Bc\u03Bd\u03Be\u03Bf\u03C0\u03C1\u03C2\u03C3\u03C4\u03C5\u03C6\u03C7\u03C8\u03C9"
+
+    def __init__(self, newvar=True, d={}):
+        Expression.__init__(self, newvar, d)
+
+
+@total_ordering
+class Length(Expression):
+
+    next_given_idx = 2
+    next_var_idx = 1
+    watched = []
+    switched = []
+    given_symbols = {}
+
+    def __init__(self, newvar=True, d={}):
+        Expression.__init__(self, newvar, d)
