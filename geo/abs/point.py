@@ -9,6 +9,12 @@ class Point:
         Point.nextId += 1
         self.lines = []
 
+    def copy(self, p):
+        """Copy constructor from Point p"""
+        self.name = p.name
+        self.id = p.id
+        self.lines = p.lines  # does it affect same?
+
     def add_line(self, *lines):
         """Add line or lines that the point is on"""
         self.lines += list(lines)

@@ -53,3 +53,20 @@ class Dog:
 # da += 1
 # print(da)
 # ba = da.new_copy()
+
+
+# test that array copying is by reference and not by value
+from geo.abs.point import Point
+from geo.abs.segment import Segment
+from geo.real.realpoint import RealPoint
+
+A, B, C, D = Point.createPoints("A", "B", "C", "D")
+for i in (A, B, C, D):
+    print(i)
+
+d = RealPoint(0, 0, D)
+print(f"{d.lines=}")
+
+AD = Segment(A, D, isnew=True)
+print(f"{d.lines=}")
+print(f"{D.lines=}")
