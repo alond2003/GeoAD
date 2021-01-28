@@ -48,14 +48,8 @@ class Helper:
 
     def rp(self, name, x, y):
         """Create new RealPoint and return it"""
-        if name not in [p.name for p in self.points]:
-            # create Point
-            p = Point(name)
-            self.points.append(p)
-        else:
-            # find point
-            p = [pp for pp in self.points if pp.name == name][0]
         # create RealPoint from Point
+        p = self.p(name)
         rp = RealPoint(x, y, p)
         # swap Realpoint in self.points
         for idx in range(len(self.points)):

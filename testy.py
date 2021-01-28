@@ -1,4 +1,4 @@
-from geo.abs.point import Point
+'''from geo.abs.point import Point
 from geo.abs.segment import Segment
 from enum import Enum
 from typing import List
@@ -70,3 +70,10 @@ print(f"{d.lines=}")
 AD = Segment(A, D, isnew=True)
 print(f"{d.lines=}")
 print(f"{D.lines=}")
+
+
+'''
+
+from geo import *
+
+h = Helper()
