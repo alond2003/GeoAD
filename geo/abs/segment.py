@@ -1,3 +1,5 @@
+import math
+
 from geo.alg.unionfind import UnionFind
 
 
@@ -97,6 +99,29 @@ class Segment:
         if len(lst) == 0:
             return None
         return lst[0]
+
+    def get_slope_angle(self, p):
+        """Return the angle of the slope in correlation to point p"""
+        dy = self.end.y - self.start.y
+        dx = self.end.x - self.start.x
+
+        other_p = [i for i in (self.end, self.start) if i != p][0]
+        if dx == 0:
+            if other_p.y > p.y:
+                return math.pi / 2
+            else:
+                return math.pi * 1.5
+        if dy == 0:
+            if other_p.x > p.x:
+                return 0
+            else:
+                return math.pi
+
+        arctan = math.atan(dy / dx)
+
+        if other_p.x < p.x:
+            return arctan + math.pi
+        return arctan
 
     def __repr__(self):
         """Return Segment's name and midpoints"""
