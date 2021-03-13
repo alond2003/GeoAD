@@ -31,6 +31,12 @@ class AbsAngle:
         """Switch ray1 & ray2"""
         self.ray1, self.ray2 = self.ray2, self.ray1
 
+    def get_angle_size_from_coordinates(self):
+        """Return angle size based on points' coordinates"""
+        ray1_slope_angle = self.ray1.get_slope_angle()
+        ray2_slope_angle = self.ray2.get_slope_angle()
+        return (ray1_slope_angle - ray2_slope_angle + 360) % 360
+
     def __hash__(self):
         """custom hash function such that every same angle gets the same hash"""
         ang = self.get_minimized_absangle()

@@ -108,20 +108,20 @@ class Segment:
         other_p = [i for i in (self.end, self.start) if i != p][0]
         if dx == 0:
             if other_p.y > p.y:
-                return math.pi / 2
+                return 90
             else:
-                return math.pi * 1.5
+                return 270
         if dy == 0:
             if other_p.x > p.x:
                 return 0
             else:
-                return math.pi
+                return 180
 
-        arctan = math.atan(dy / dx)
+        arctan = math.degrees(math.atan(dy / dx))
 
         if other_p.x < p.x:
-            return arctan + math.pi
-        return arctan
+            return (arctan + 180 + 360) % 360
+        return (arctan + 360) % 360
 
     def __repr__(self):
         """Return Segment's name and midpoints"""

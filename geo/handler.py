@@ -18,7 +18,7 @@ class Handler:
         """Create a Handler object, keep all Points and collect all Segments"""
         self.points = list(points)
 
-        self.segments = list(set([l for p in self.points for l in p.lines]))
+        self.segments = list(set([l for p in self.points for _, l in p.lines]))
 
     """ THEOREMS """
 
@@ -1095,13 +1095,16 @@ class Handler:
 
     def get_non_reflex_angle(self, pfrom, vertex, pto):
         """Return acute angle based on 3 points"""
-        ans1 = AbsAngle(
-            self.get_full_seg(pfrom, vertex), vertex, self.get_full_seg(vertex, pto)
-        )
-        ans2 = AbsAngle(ans1.ray2, vertex, ans1.ray1)
+        ans = [
+            AbsAngle(
+                self.get_full_seg(pfrom, vertex), vertex, self.get_full_seg(vertex, pto)
+            )
+        ]
+        ans.append(AbsAngle(ans[0].ray2, vertex, ans[0].ray1))
         for i in range(2):
-            a = ans1 if i == 0 else ans2
+            a = ans[i]
             arr = self.disassemble_angle(a)
+            # if a is known to be less than 180, return a
             if (
                 sum([self.angles[aa] for aa in arr]).isknown()
                 and sum([self.angles[aa] for aa in arr]) < 180
@@ -1117,27 +1120,10 @@ class Handler:
                             ).value.items()
                         ]
                     ):
-                        return ans1 if a == ans2 else ans2
+                        return ans[0] if i == 1 else ans[1]
 
-        res = AbsAngle(None, vertex, None)
-        for aang in self.get_angles_around_point(vertex):
-            if res.ray1 is None and (
-                pfrom in aang.ray1.get_all_points() or pto in aang.ray1.get_all_points()
-            ):
-                res.ray1 = aang.ray1.get_subsegment(
-                    str(vertex)
-                    + str(pto if pto in aang.ray1.get_all_points() else pfrom)
-                )
-            if (
-                res.ray1 is not None
-                and (pfrom if pto in res.ray1.get_all_points() else pto)
-                in aang.ray2.get_all_points()
-            ):
-                res.ray2 = aang.ray2.get_subsegment(
-                    str(vertex) + str(pto if res.get_start_point() == pfrom else pfrom)
-                )
-
-                return res
+        # use x,y to understand which is acute
+        return min(ans, key=lambda aa: aa.get_angle_size_from_coordinates())
 
     def get_angles_around_point(self, p):
         """Return a list of all the elementary AbsAngles around a point"""
@@ -1146,16 +1132,7 @@ class Handler:
         elif len(p.lines) == 1 and p in (p.lines[0].start, p.lines[0].end):
             return []
         else:
-            rays = []
-            for l in p.lines:
-                if p not in (l.start, l.end):
-                    rays.append(l.get_subsegment_to(p))
-                else:
-                    rays.append(l)
-
-            for l in p.lines:
-                if p not in (l.start, l.end):
-                    rays.append(l.get_subsegment_from(p))
+            rays = [line for line, _ in p.lines]
 
             return [AbsAngle(r1, p, r2) for r1, r2 in zip(rays, rays[1:] + rays[:1])]
 
@@ -1175,12 +1152,8 @@ class Handler:
             else:
                 l = [l for l in self.segments if l.is_subsegment(ray)][0]
                 otherpoint = ray.end if ang.vertex == ray.start else ray.start
-                if l.get_all_points().index(ang.vertex) < l.get_all_points().index(
-                    otherpoint
-                ):
-                    true_rays.append(l.get_subsegment_from(ang.vertex))
-                else:
-                    true_rays.append(l.get_subsegment_to(ang.vertex))
+                true_rays.append(l.get_subsegment(otherpoint.name + ang.vertex.name))
+
         return AbsAngle(true_rays[0], ang.vertex, true_rays[1])
 
     def find_all_180_angles(self):
@@ -1220,7 +1193,7 @@ class Handler:
 
         if not found:
             raise Exception(
-                f"didn't found the ray of the given angle ({str(ang)}) around the vertex ({ang.vertex.name})"
+                f"didn't found the ray of the given angle ({ang}) around the vertex ({ang.vertex.name})"
             )
 
         res = []

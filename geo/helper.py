@@ -10,7 +10,6 @@ from geo.abs.segment import Segment
 from geo.abs.absangle import AbsAngle
 from geo.handler import Handler
 from geo.abs.point import Point
-from geo.real.realpoint import RealPoint
 
 from functools import partial
 from geo.real.expression import Degree
@@ -45,21 +44,6 @@ class Helper:
         for p in self.points:
             if p.name == name:
                 return p
-
-    def rp(self, name, x, y):
-        """Create new RealPoint and return it"""
-        # create RealPoint from Point
-        p = self.p(name)
-        rp = RealPoint(x, y, p)
-        # swap Realpoint in self.points
-        for idx in range(len(self.points)):
-            if self.points[idx].name == p:
-                self.points[idx] = rp
-                return rp
-
-    def rpoints(self, names, coordinates):
-        """Create multiple RealPoints (if needed) and return them"""
-        return [self.rp(name, x, y) for name, (x, y) in zip(names, coordinates)]
 
     def s(self, *names):
         """Create new Segment(s) (if needed) and return it(them)"""

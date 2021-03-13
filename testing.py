@@ -28,10 +28,13 @@ def test_segment_ordering_inside_point_lines_arr():
     print(E.lines)
     print(len(E.lines))
     for line, _ in E.lines:
-        print(f"{line} {(180*line.get_slope_angle(E))/(math.pi)}")
+        print(f"{line} {(line.get_slope_angle(E))}")
 
     """
     A B C
     D E F
     G H I
     """
+
+
+test_segment_ordering_inside_point_lines_arr()

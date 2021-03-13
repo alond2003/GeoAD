@@ -31,20 +31,15 @@ class Point:
             if self in line.midpoints:
                 # split the segment into 2 segments (self is an endpoint to both)
                 self.lines.append(
-                    (line.get_subsegment(self.name + line.start.name), True)
+                    (line.get_subsegment(self.name + line.start.name), line)
                 )
                 self.lines.append(
-                    (line.get_subsegment(self.name + line.end.name), True)
+                    (line.get_subsegment(self.name + line.end.name), line)
                 )
             else:
-                self.lines.append((line, False))
+                self.lines.append((line, line))
 
-        # def ggg(x):
-        #     line = x[0]
-        #     return line.get_slope_angle(self)
-
-        # self.lines.sort(key=ggg)
-        self.lines.sort(key=lambda t: t[0].get_slope_angle(self))
+        self.lines.sort(key=lambda t: -t[0].get_slope_angle(self))
 
     def __str__(self):
         """Return the point's name"""
