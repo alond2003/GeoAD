@@ -36,7 +36,16 @@ class Problem:
         """Set the currect_answer function"""
         self.funcs["currect_answer"] = f
 
-    def set_functions(self, create, answer, currect_answer):
+    def set_sub_problem_nums(self, subs):
+        """Set the available sub problem numbers"""
+        self.subs = subs
+
+    def set_functions(self, create, answer, currect_answer, subs=(None,)):
         self.set_create(create)
         self.set_answer(answer)
         self.set_currect_answer(currect_answer)
+        self.set_sub_problem_nums(subs)
+
+    def print_ans(self):
+        for i in self.subs:
+            print(self.answer(i), self.currect_answer(i))

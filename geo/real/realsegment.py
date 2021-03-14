@@ -90,6 +90,10 @@ class RealSegment(Segment):
         res.set_midpoints(*self.midpoints)
         return res
 
+    def __int__(self):
+        """Return the value of the length"""
+        return int(self.leng)
+
     @classmethod
     def fromSegment(cls, seg, leng=None):
         """Create a RealSegment based on Segment"""

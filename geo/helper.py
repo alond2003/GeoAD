@@ -6,6 +6,7 @@
 # צלעות במצולע הן נגד כיוון השעון
 # first build everything then assign value
 
+import itertools
 from geo.abs.segment import Segment
 from geo.abs.absangle import AbsAngle
 from geo.handler import Handler
@@ -44,6 +45,10 @@ class Helper:
         for p in self.points:
             if p.name == name:
                 return p
+
+    def ps(self, names, xs=itertools.cycle([None]), ys=itertools.cycle([None])):
+        """Create a tuple of points"""
+        return tuple([self.p(name, x, y) for name, x, y in zip(names, xs, ys)])
 
     def s(self, *names):
         """Create new Segment(s) (if needed) and return it (them)"""
@@ -88,44 +93,15 @@ class Helper:
 
     def tri(self, name):
         """Create new triangle by name"""
-        pp = [self.p(i) for i in name[:3]]
-        for i in range(3):
-            self.s(str(pp[(i + 1) % 3]) + str(pp[i]))
-        # angles a (bac)
-        # fix angle b (abc -> cba)
-        ab_idx = pp[1].lines.index(self.s(str(pp[0]) + str(pp[1])))
-        bc_idx = pp[1].lines.index(self.s(str(pp[1]) + str(pp[2])))
-        pp[1].lines[ab_idx], pp[1].lines[bc_idx] = (
-            pp[1].lines[bc_idx],
-            pp[1].lines[ab_idx],
-        )
-        # fix angle c (bca -> acb)
-        bc_idx = pp[2].lines.index(self.s(str(pp[1]) + str(pp[2])))
-        ca_idx = pp[2].lines.index(self.s(str(pp[2]) + str(pp[0])))
-        pp[2].lines[bc_idx], pp[2].lines[ca_idx] = (
-            pp[2].lines[ca_idx],
-            pp[2].lines[bc_idx],
-        )
+        self.poly(name)
 
     def poly(self, name):
         """
         Create Polygon based on name
-        - order of points clockwise
-        -> direction of sides anti-clockwise
-        -> direction of angles clockwise
         """
-        name = name[0] + name[1:][::-1]
-        pp = [self.p(i) for i in name]
-        for i, j in zip(pp, (pp[1:] + pp[:1])):
-            # print(i, j)
-            self.s(str(i) + str(j))
-        # fix first angle (replace index of first and last line)
-        firstline_idx = pp[0].lines.index(self.s(name[:2]))
-        lastline_idx = pp[0].lines.index(self.s(name[-1] + name[0]))
-        pp[0].lines[firstline_idx], pp[0].lines[lastline_idx] = (
-            pp[0].lines[lastline_idx],
-            pp[0].lines[firstline_idx],
-        )
+        p_arr = [self.p(p_name) for p_name in name]
+        for pfrom, pto in zip(p_arr, p_arr[1:] + p_arr[:1]):
+            self.s(f"{pfrom}{pto}")
 
     def poly_diag(self, poly, name):
         """Create diagonal in polygon"""

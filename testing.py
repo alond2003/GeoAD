@@ -45,7 +45,6 @@ def test_segment_ordering_inside_point_lines_arr():
 def try_solve_problem_using_coor_system():
     """with Problem object"""
 
-    # TODO: create given Degrees and length using helper, so that you could retrive their value in answer function
     p = Problem(349, 1)
 
     def create():
@@ -62,11 +61,8 @@ def try_solve_problem_using_coor_system():
         h.calc()
         return h
 
-    def answer(h, _):
-        return str(h.given(Degree, "x"))
-
-    def cur_ans(_):
-        return str(50)
+    answer = lambda h, _: str(h.given(Degree, "x"))
+    cur_ans = lambda _: "50"
 
     p.set_functions(create, answer, cur_ans)
 

@@ -187,6 +187,12 @@ class Expression:
         """Return <str(self)>"""
         return f"<{str(self)}>"
 
+    def __int__(self):
+        """Return the value of the expression"""
+        if self.isknown():
+            return self.value[0]
+        raise ValueError(f"Cannot convert {self} to type int")
+
     def __lt__(self, other):
         """Do lexicographic compare between the objects' sorted keys"""
         if other is None:
