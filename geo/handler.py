@@ -1129,7 +1129,7 @@ class Handler:
         """Return a list of all the elementary AbsAngles around a point"""
         if len(p.lines) == 0:
             return []
-        elif len(p.lines) == 1 and p in (p.lines[0].start, p.lines[0].end):
+        elif len(p.lines) == 1 and p in (p.lines[0][0].start, p.lines[0][0].end):
             return []
         else:
             rays = [line for line, _ in p.lines]

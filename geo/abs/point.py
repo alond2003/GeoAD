@@ -24,9 +24,6 @@ class Point:
     def add_line(self, *lines):
         """Add line or lines that the point is on"""
 
-        if self.name == "E":
-            print(f"E{self.lines=}")
-
         for line in lines:
             if self in line.midpoints:
                 # split the segment into 2 segments (self is an endpoint to both)

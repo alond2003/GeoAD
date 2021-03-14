@@ -12,8 +12,7 @@ from geo.handler import Handler
 from geo.abs.point import Point
 
 from functools import partial
-from geo.real.expression import Degree
-from geo.real.expression import Length
+from geo.real.expression import Expression, Degree, Length
 
 
 class Helper:
@@ -29,10 +28,11 @@ class Helper:
         self.did_calc = False
         self.to_inits = []
         self.to_inita = []
+        self.given_dict = {}
 
     """Create new or retrive present"""
 
-    def p(self, name):
+    def p(self, name, x=None, y=None):
         """Create new Point (if needed) and return it"""
         # print(name, [i.name for i in self.points])
         if isinstance(name, Point):
@@ -40,13 +40,13 @@ class Helper:
                 self.points.append(name)
             return name
         if name not in [i.name for i in self.points]:
-            self.points.append(Point(name))
+            self.points.append(Point(name, x, y))
         for p in self.points:
             if p.name == name:
                 return p
 
     def s(self, *names):
-        """Create new Segment(s) (if needed) and return it(them)"""
+        """Create new Segment(s) (if needed) and return it (them)"""
         res = []
         for name in names:
             for pname in name:
@@ -75,6 +75,16 @@ class Helper:
         if self.geo is None or len(self.geo.points) < len(self.points):
             self.geo = Handler(*self.points)
         return self.geo
+
+    def given(self, cls, symbol):
+        """Create new given Expression (if needed) and return it"""
+        if not issubclass(cls, Expression):
+            raise TypeError(f"{cls} cannot be given, must be Expression")
+        try:
+            return self.given_dict[(cls, symbol)]
+        except KeyError:
+            self.given_dict[(cls, symbol)] = cls.given(symbol)
+            return self.given_dict[(cls, symbol)]
 
     def tri(self, name):
         """Create new triangle by name"""
@@ -328,7 +338,6 @@ class Helper:
         """Set valuie of segment in geo to leng"""
         if not self.did_inits:
             self.inits()
-
         self.g().seg_equal_leng(self.s(name), leng, reason)
 
     def geta(self, name):
