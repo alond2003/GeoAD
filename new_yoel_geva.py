@@ -82,4 +82,18 @@ def p349_e7():
     return (h.geta("CAB"), h.geta("BCA")), (25, 65)
 
 
-print(p349_e7())
+def p350_e11():
+    h = Helper()
+    h.ps("ABCDEF", [1, 0, 7, 3, 4, 2.4], [4, 0, 0, 0, 2, 1.2])
+    h.tri("ABC")
+    h.conts("BC", "BDC")
+    h.tri_med("ABC", "AFD")
+    h.conts("AC", "AEC")
+    h.tri_angbi("ABC", "BFE")
+    h.sets("BC", 12)
+    h.seta("ABE", Degree(False, {0: 36}))
+    h.calc()
+    return (h.gets("DC"), h.geta("ABC")), (6, 72)
+
+
+print(p350_e11())

@@ -136,7 +136,7 @@ class Handler:
         pos_parallels_transversal = [
             (p1, p2, t)
             for p1, p2 in itertools.combinations(self.segments, 2)
-            if not p1.is_parallel(p2) and p1.get_intersection_point(p2) is None
+            if p1.is_parallel(p2) and p1.get_intersection_point(p2) is None
             for t in self.segments
             if t.get_intersection_point(p1) is not None
             and t.get_intersection_point(p2) is not None
@@ -1103,6 +1103,8 @@ class Handler:
         ans.append(AbsAngle(ans[0].ray2, vertex, ans[0].ray1))
         for i in range(2):
             a = ans[i]
+            if a is None:
+                print("f")
             arr = self.disassemble_angle(a)
             # if a is known to be less than 180, return a
             if (
@@ -1110,13 +1112,13 @@ class Handler:
                 and sum([self.angles[aa] for aa in arr]) < 180
             ):
                 return a
-            for i in range(len(arr)):
-                for j in range(i, len(arr)):
-                    if sum([self.angles[aa] for aa in arr[i : (j + 1)]]) == 180 or all(
+            for ii in range(len(arr)):
+                for j in range(ii, len(arr)):
+                    if sum([self.angles[aa] for aa in arr[ii : (j + 1)]]) == 180 or all(
                         [
                             val > 0
                             for key, val in (
-                                sum([self.angles[aa] for aa in arr[i : (j + 1)]]) - 180
+                                sum([self.angles[aa] for aa in arr[ii : (j + 1)]]) - 180
                             ).value.items()
                         ]
                     ):
@@ -1147,12 +1149,19 @@ class Handler:
         """Find a better representation for the AbsAngle and return it"""
         true_rays = []
         for ray in [ang.ray1, ang.ray2]:
+            if ray is None:
+                print("f")
             if ray in self.segments:
                 true_rays.append(ray)
             else:
                 l = [l for l in self.segments if l.is_subsegment(ray)][0]
                 otherpoint = ray.end if ang.vertex == ray.start else ray.start
-                true_rays.append(l.get_subsegment(otherpoint.name + ang.vertex.name))
+                opt1 = l.get_subsegment_from(ang.vertex)
+                opt2 = l.get_subsegment_to(ang.vertex)
+                if otherpoint in opt1.get_all_points():
+                    true_rays.append(opt1)
+                else:
+                    true_rays.append(opt2)
 
         return AbsAngle(true_rays[0], ang.vertex, true_rays[1])
 

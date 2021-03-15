@@ -22,6 +22,25 @@ class Segment:
             for i in x:
                 i.add_line(self)
 
+    def update_midpoints(self, *x):
+        """Add Midpoints to segment"""
+        if self.isnew:
+            # remove all instances of this segment in Point.lines
+            for p in self.midpoints:
+                rm = []
+                for i in range(p.lines):
+                    if p.lines[i][1] == self:
+                        rm.append(i)
+                for idx in rm[::-1]:
+                    del p.lines[idx]
+            # set the midpoints to x
+            self.midpoints = list(x)
+            # readd this segment to Point.lines
+            for p in self.midpoints:
+                p.add_line(self)
+        else:
+            self.midpoints = list(x)
+
     def get_all_points(self):
         """Return a list containing startpoint, midpoints and endpoint"""
         return [self.start] + self.midpoints + [self.end]
@@ -35,6 +54,8 @@ class Segment:
             return res
         elif point == self.end:
             return self
+        elif point == self.start:
+            return Segment(point, point)
         return None
 
     def get_subsegment_from(self, point):
@@ -46,6 +67,8 @@ class Segment:
             return res
         elif point == self.start:
             return self
+        elif point == self.end:
+            return Segment(point, point)
         return None
 
     def is_subsegment(self, other):
@@ -102,6 +125,13 @@ class Segment:
 
     def get_slope_angle(self, p):
         """Return the angle of the slope in correlation to point p"""
+        if (
+            self.end.x is None
+            or self.end.y is None
+            or self.start.x is None
+            or self.start.y is None
+        ):
+            return 0
         dy = self.end.y - self.start.y
         dx = self.end.x - self.start.x
 

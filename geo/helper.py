@@ -125,35 +125,36 @@ class Helper:
         vertex.lines.insert(max([vertex.lines.index(r) for r in rays]), seg)
 
     def tri_med(self, tri, name):
-        """Build median in existing triangle (end point already exists)"""
+        """Build median in existing triangle (end point should already exists)"""
+        # create median segment
         pfrom = self.p(self.get_intersection_point(tri, name))
-        pto = self.p(name[0])
-        if pfrom == pto:
-            pto = self.p(name[-1])
-        rays = [self.s(str(pfrom) + p) for p in tri if p != str(pfrom)]
-        med_seg = self.s(name)
-        pfrom.lines.remove(med_seg)
-        pfrom.lines.insert(max([pfrom.lines.index(r) for r in rays]), med_seg)
         across_seg = self.s("".join([i for i in tri if i != str(pfrom)]))
-        self.to_inits.append(
-            partial(
-                self.g().seg_equal_seg,
+        for p in name:
+            if self.p(p) in across_seg.get_all_points():
+                pto = self.p(p)
+                break
+        self.s(name)
+        # set median to be the middle of the triangle side
+
+        def func(h, across_seg, pto, pfrom, name, tri):
+            h.g().seg_equal_seg(
                 across_seg.get_subsegment_to(pto),
                 across_seg.get_subsegment_from(pto),
                 f"given that {name} is median to {str(across_seg)} in △{tri}",
             )
-        )
+
+        self.to_inits.append(partial(func, self, across_seg, pto, pfrom, name, tri))
 
     def tri_angbi(self, tri, name):
         """Build Angle bisector in existing triangle (end point already exists)"""
         pfrom = self.p(self.get_intersection_point(tri, name))
-        pto = self.p(name[0])
-        if pfrom == pto:
-            pto = self.p(name[-1])
-        rays = [self.s(str(pfrom) + p) for p in tri if p != str(pfrom)]
-        angbi_seg = self.s(name)
-        pfrom.lines.remove(angbi_seg)
-        pfrom.lines.insert(max([pfrom.lines.index(r) for r in rays]), angbi_seg)
+        across_seg = self.s("".join([i for i in tri if i != str(pfrom)]))
+        for p in name:
+            if self.p(p) in across_seg.get_all_points():
+                pto = self.p(p)
+                break
+        self.s(name)
+
         other_points = [self.p(i) for i in tri if i != str(pfrom)]
 
         def func(h, other_points, pfrom, pto, name, tri):
@@ -168,16 +169,15 @@ class Helper:
     def tri_alt(self, tri, name):
         """Build Altitude in existing triangle (end point already exists)"""
         pfrom = self.p(self.get_intersection_point(tri, name))
-        pto = self.p(name[0])
-        if pfrom == pto:
-            pto = self.p(name[-1])
-
-        rays = [self.s(str(pfrom) + p) for p in tri if p != str(pfrom)]
-        alt_seg = self.s(name)
-        pfrom.lines.remove(alt_seg)
-        pfrom.lines.insert(max([pfrom.lines.index(r) for r in rays]), alt_seg)
-        other_points = [self.p(i) for i in tri if i != str(pfrom)]
         across_seg = self.s("".join([i for i in tri if i != str(pfrom)]))
+
+        for p in name:
+            if self.p(p) in across_seg.get_all_points():
+                pto = self.p(p)
+                break
+        self.s(name)
+
+        other_points = [self.p(i) for i in tri if i != str(pfrom)]
 
         def func(h, pfrom, pto, other_points, name, across_seg, tri):
             for i in range(2):
@@ -277,24 +277,8 @@ class Helper:
         og = self.s(og)
         if new.index(str(og.start)) > new.index(str(og.end)):
             new = new[::-1]
-        old_p = og.get_all_points()
         new_p = [self.p(i) for i in new]
-        if old_p == new_p or old_p == new_p[::-1]:
-            return
-        new = Segment(new_p[0], new_p[-1])
-        new.set_midpoints(*new_p[1:-1])
-        for i in new.get_all_points():
-            if i in old_p:
-                for j in range(len(i.lines)):
-                    if i.lines[j] == og:
-                        i.lines[j] = new
-                        break
-            else:
-                i.add_line(new)
-
-        for i in range(len(self.segments)):
-            if self.segments[i] == og:
-                self.segments[i] = new
+        og.update_midpoints(*new_p[1:-1])
 
     """Angles"""
 
