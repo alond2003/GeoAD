@@ -6,6 +6,7 @@ from geo.real.expression import Degree
 from geo.abs.absangle import AbsAngle
 from geo.helper import Helper
 from geo.problem import Problem
+from geo.filehandler import get_points_from_file
 
 
 def test_segment_ordering_inside_point_lines_arr():
@@ -105,5 +106,17 @@ def try_solve_problem_using_coor_system():
     """
 
 
+def ggb_test():
+
+    path = r"C:\Users\alond\Documents\School\AvodatGemer\AvodatGemerCode\ggb_test\geogebra-export.ggb"
+    from time import perf_counter
+
+    start = perf_counter()
+    print(get_points_from_file(path))
+    end = perf_counter()
+    print(end - start)
+
+
 # test_segment_ordering_inside_point_lines_arr()
-try_solve_problem_using_coor_system()
+# try_solve_problem_using_coor_system()
+ggb_test()

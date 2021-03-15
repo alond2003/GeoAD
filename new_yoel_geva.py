@@ -96,4 +96,29 @@ def p350_e11():
     return (h.gets("DC"), h.geta("ABC")), (6, 72)
 
 
-print(p350_e11())
+def p350_e12():
+    h = Helper()
+    h.ps("ABCD", [0, 2, 6, 4], [0, 4, 0, 2])
+    h.tri("ABC")
+    h.conts("BC", "BDC")
+    h.tri_angbi("ABC", "AD")
+    h.seta("ACB", 44)
+    h.seta("CBA", 80)
+    h.calc()
+    return (h.geta("ADB"), h.geta("CDA")), (72, 108)
+
+
+def p351_e15():
+    h = Helper()
+    h.ps("ABCDE", [0, 8, 0, 2, 4], [4, 0, 0, 3, 2])
+    h.tri("ABC")
+    h.conts("AB", "ADEB")
+    h.tri_alt("ABC", "CD")
+    h.tri_angbi("ABC", "CE")
+    h.seta("ACB", 90)
+    h.seta("CBA", 26)
+    h.calc()
+    return h.geta("DCE")
+
+
+print(p351_e15())
