@@ -51,3 +51,11 @@ def get_points_from_file(path, temp_folder_path="temp_ggb"):
 
     # return the sorted points' list
     return sorted(points)
+
+
+def print_points_from_file(path, temp_folder_path="temp_ggb"):
+    """Print Point names, xs and ys"""
+    res = get_points_from_file(path, temp_folder_path)
+    print([name for name, *_ in res])
+    print([x for _, x, _ in res])
+    print([y for *_, y in res])

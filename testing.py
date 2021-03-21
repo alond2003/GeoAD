@@ -6,7 +6,7 @@ from geo.real.expression import Degree
 from geo.abs.absangle import AbsAngle
 from geo.helper import Helper
 from geo.problem import Problem
-from geo.filehandler import get_points_from_file
+from geo.filehandler import print_points_from_file
 
 
 def test_segment_ordering_inside_point_lines_arr():
@@ -112,7 +112,7 @@ def ggb_test():
     from time import perf_counter
 
     start = perf_counter()
-    print(get_points_from_file(path))
+    print_points_from_file(path)
     end = perf_counter()
     print(end - start)
 

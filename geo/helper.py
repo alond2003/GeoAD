@@ -14,6 +14,7 @@ from geo.abs.point import Point
 
 from functools import partial
 from geo.real.expression import Expression, Degree, Length
+from geo.filehandler import get_points_from_file
 
 
 class Helper:
@@ -49,6 +50,14 @@ class Helper:
     def ps(self, names, xs=itertools.cycle([None]), ys=itertools.cycle([None])):
         """Create a tuple of points"""
         return tuple([self.p(name, x, y) for name, x, y in zip(names, xs, ys)])
+
+    def ps_from_file(self, path):
+        """Create a tuple of points from ggb file"""
+        res = get_points_from_file(path)
+        names = [name for name, *_ in res]
+        xs = [x for name, x, y in res]
+        ys = [y for *_, y in res]
+        return self.ps(names, xs, ys)
 
     def s(self, *names):
         """Create new Segment(s) (if needed) and return it (them)"""
