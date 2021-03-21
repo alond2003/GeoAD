@@ -175,7 +175,8 @@ def p352_e24():
     h.seta("ABC", 50)
     h.seta("BCA", 60)
     h.calc()
-    return (h.geta("ADE"), h.geta("CED"))
+    return (h.geta("ADE"), h.geta("CED")), (50, 120)
 
 
-print(p352_e24())
+print(ans := p352_e24())
+print(ans[0] == ans[1])

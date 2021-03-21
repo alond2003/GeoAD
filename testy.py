@@ -74,6 +74,12 @@ print(f"{D.lines=}")
 
 '''
 
-from geo import *
+from geo.helper import Helper
+from geo.abs.segment import Segment
 
 h = Helper()
+h.ps("ABC", [0, 1, 2], [0, 1, 2])
+h.s("ABC")
+s: Segment = h.s("AC")
+for p in s.get_all_points():
+    print(p, s.get_slope_angle(p))

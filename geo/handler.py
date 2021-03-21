@@ -70,6 +70,10 @@ class Handler:
             if t.get_all_points().index(tp[0]) > t.get_all_points().index(tp[1]):
                 p[0], p[1] = p[1], p[0]
                 tp[0], tp[1] = tp[1], tp[0]
+            # make sure both p are the same direction
+            for s in p:
+                s.better_direction()
+
             aangs = [[], []]
             for i in range(2):
                 pe = p[i].get_subsegment_from(tp[i])
@@ -78,7 +82,12 @@ class Handler:
                 ts = t.get_subsegment_to(tp[i])
                 order = [pe, te, ps, ts]
                 for j in range(4):
-                    if order[j] is not None and order[(j + 1) % 4] is not None:
+                    if (
+                        order[j] is not None
+                        and order[j].is_valid()
+                        and order[(j + 1) % 4] is not None
+                        and order[(j + 1) % 4].is_valid()
+                    ):
                         aangs[i].append(
                             self.get_non_reflex_angle(
                                 order[j].end

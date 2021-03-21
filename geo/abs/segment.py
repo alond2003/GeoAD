@@ -1,6 +1,7 @@
 import math
 
 from geo.alg.unionfind import UnionFind
+from geo.abs.point import Point
 
 
 class Segment:
@@ -123,8 +124,15 @@ class Segment:
             return None
         return lst[0]
 
-    def get_slope_angle(self, p):
-        """Return the angle of the slope in correlation to point p"""
+    def reverse(self):
+        """Reverse self.start and self.end"""
+        self.start, self.end = self.end, self.start
+        self.midpoints = self.midpoints[::-1]
+
+    def get_slope_angle(self, p=None):
+        """Return the angle of the slope in correlation to point p (default is self.start)"""
+        if p is None:
+            p = self.start
         if (
             self.end.x is None
             or self.end.y is None
@@ -152,6 +160,24 @@ class Segment:
         if other_p.x < p.x:
             return (arctan + 180 + 360) % 360
         return (arctan + 360) % 360
+
+    def better_direction(self):
+        """Reverse segment if needed (for min slope angle)"""
+        slope_ang = self.get_slope_angle()
+        self.reverse()
+        new_slope_ang = self.get_slope_angle()
+        if new_slope_ang > slope_ang:
+            self.reverse()
+
+    def is_valid(self):
+        """Checks if self is a valid segment (has startpoint and endpoint)"""
+        return (
+            self.start is not None
+            and self.end is not None
+            and self.start != self.end
+            and isinstance(self.start, Point)
+            and isinstance(self.end, Point)
+        )
 
     def __repr__(self):
         """Return Segment's name and midpoints"""

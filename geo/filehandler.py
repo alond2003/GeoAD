@@ -61,6 +61,8 @@ def print_points_from_file(
     res = get_points_from_file(path, temp_folder_path)
 
     names = [name for name, *_ in res]
-    xs = [int(x) if x.is_integer() else round(x, 2) for _, x, _ in res]
-    ys = [int(y) if y.is_integer() else round(y, 2) for *_, y in res]
+    xs = [round(x, 2) for _, x, _ in res]
+    ys = [round(y, 2) for *_, y in res]
+    xs = [int(x) if x.is_integer() else x for x in xs]
+    ys = [int(y) if y.is_integer() else y for y in ys]
     print(f"h.ps(\"{''.join(names)}\",{xs},{ys})")
