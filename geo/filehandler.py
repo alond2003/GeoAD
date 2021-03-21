@@ -53,9 +53,14 @@ def get_points_from_file(path, temp_folder_path="temp_ggb"):
     return sorted(points)
 
 
-def print_points_from_file(path, temp_folder_path="temp_ggb"):
+def print_points_from_file(
+    path=r"C:\Users\alond\Documents\School\AvodatGemer\AvodatGemerCode\ggb_test\test.ggb",
+    temp_folder_path="temp_ggb",
+):
     """Print Point names, xs and ys"""
     res = get_points_from_file(path, temp_folder_path)
-    print([name for name, *_ in res])
-    print([x for _, x, _ in res])
-    print([y for *_, y in res])
+
+    names = [name for name, *_ in res]
+    xs = [int(x) if x.is_integer() else round(x, 2) for _, x, _ in res]
+    ys = [int(y) if y.is_integer() else round(y, 2) for *_, y in res]
+    print(f"h.ps(\"{''.join(names)}\",{xs},{ys})")

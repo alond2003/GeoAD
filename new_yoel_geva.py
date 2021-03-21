@@ -121,4 +121,61 @@ def p351_e15():
     return h.geta("DCE")
 
 
-print(p351_e15())
+def p351_e17():
+    h = Helper()
+    h.ps("ABCDEN", [0.0, 6.0, 0.0, 3.0, 3.0, 2.1], [4.0, 0.0, 0.0, 0.0, 2.0, 1.4])
+    h.tri("ABC")
+    h.conts("BC", "BDC")
+    h.conts("AB", "AEB")
+    h.tri_alt("ABC", "CNE")
+    h.tri_angbi("ABC", "AND")
+    h.seta("ACB", 90)
+    h.seta("BAC", 34)
+    h.calc()
+    return (h.geta("DNC"),), (73,)
+
+
+def p352_e19():
+    h = Helper()
+    h.ps("ABCDEO", [3.0, 0.0, 6.0, 3.0, 4.488, 3.0], [4.0, 0.0, 0.0, 0.0, 2.016, 2.0])
+    h.tri("ABC")
+    h.conts("BC", "BDC")
+    h.conts("AC", "AEC")
+    h.tri_segbi("ABC", "DO", "BC")
+    h.tri_segbi("ABC", "EO", "AC")
+    h.sets("BD", 6)
+    h.sets("AC", 8)
+    h.calc()
+    return (h.gets("CE"), h.gets("BC"), h.geta("BCA") + h.geta("EOD")), (4, 12, 180)
+
+
+def p352_e23():
+    h = Helper()
+    h.ps("ABCDEFGH", [0, 9, 0, 9, 6, 0, 4, 2], [4, 4, 2, 2, 6, 0, 4, 2])
+    h.paras("AGB", "CHD")
+    h.s("EGHF")
+    x, y = h.given(Degree, "x"), h.given(Degree, "y")
+    h.seta("FGA", x + y)
+    h.seta("BGF", 4 * x - 2 * y)
+    h.seta("EHD", 60)
+    h.calc()
+    return (x, y), (40, 20)
+
+
+def p352_e24():
+    from geo.filehandler import print_points_from_file as pggb
+
+    h = Helper()
+    h.ps("ABCDE", [4, 0, 8, 2, 6], [6, 0, 0, 3, 3])
+    h.tri("ABC")
+    h.conts("AB", "ADB")
+    h.conts("AC", "AEC")
+    h.s("DE")
+    h.paras("DE", "BC")
+    h.seta("ABC", 50)
+    h.seta("BCA", 60)
+    h.calc()
+    return (h.geta("ADE"), h.geta("CED"))
+
+
+print(p352_e24())

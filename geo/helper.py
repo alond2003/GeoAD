@@ -112,26 +112,7 @@ class Helper:
         for pfrom, pto in zip(p_arr, p_arr[1:] + p_arr[:1]):
             self.s(f"{pfrom}{pto}")
 
-    def poly_diag(self, poly, name):
-        """Create diagonal in polygon"""
-        self.s(name)
-        pfrom = self.p(name[0])
-        pto = self.p(name[-1])
-        sides = [self.s(i + j) for i, j in zip(poly, poly[1:] + poly[:1])]
-        rays_pfrom = [side for side in sides if pfrom in side.get_all_points()]
-        rays_pto = [side for side in sides if pto in side.get_all_points()]
-        dig = self.s(name)
-        self.insert_between(pfrom, rays_pfrom, dig)
-        self.insert_between(pto, rays_pto, dig)
-
     """~~~~~~~~"""
-
-    def insert_between(self, vertex, rays, seg):
-        try:
-            vertex.lines.remove(seg)
-        except ValueError:
-            pass
-        vertex.lines.insert(max([vertex.lines.index(r) for r in rays]), seg)
 
     def tri_med(self, tri, name):
         """Build median in existing triangle (end point should already exists)"""
@@ -199,17 +180,6 @@ class Helper:
         self.to_inita.append(
             partial(func, self, pfrom, pto, other_points, name, across_seg, tri)
         )
-
-    def tri_innerline(self, tri, name):
-        """Creates a line inside the tri from one of its vertices"""
-        pfrom = self.p(self.get_intersection_point(tri, name))
-        pto = self.p(name[0])
-        if pfrom == pto:
-            pto = self.p(name[-1])
-        rays = [self.s(str(pfrom) + p) for p in tri if p != str(pfrom)]
-        med_seg = self.s(name)
-        pfrom.lines.remove(med_seg)
-        pfrom.lines.insert(max([pfrom.lines.index(r) for r in rays]), med_seg)
 
     def tri_segbi(self, tri, name, side):
         """Build Segment bisector in existing triangle (end point already exists)"""
