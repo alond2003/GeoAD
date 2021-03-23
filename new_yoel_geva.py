@@ -237,6 +237,7 @@ def p353_e28():
     h.equala("DCA", "ACB")
     h.calc()
     A = h.geta("ACB") == h.geta("BAC")
+    print("\n" * 10)
     h.seta("DCB", 80)
     h.calc()
     B = h.geta("BAC")
@@ -256,10 +257,11 @@ def p353_e29():
     return (h.geta("BEC"),), (90,)
 
 
-# print(ans := p353_e29())
+# print(ans := p353_e28())
 # print(ans[0] == ans[1])
 print(all((check_prob(prob) for prob in [i for i in dir() if i.startswith("p")])))
 # for prob in [i for i in dir() if i.startswith("p")]:
 #     print(prob)
 #     if not check_prob(prob):
 #         print(prob, "is wrong")
+#         break

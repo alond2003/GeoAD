@@ -25,11 +25,9 @@ class Helper:
         self.points = []
         self.segments = []
         self.geo = None
-        self.did_inita = False
-        self.did_inits = False
-        self.did_calc = False
         self.to_inits = []
         self.to_inita = []
+        self.did_calc = False
         self.given_dict = {}
 
     """Create new or retrive present"""
@@ -209,17 +207,17 @@ class Helper:
         )
 
     def calc(self):
-        if not self.did_inita:
-            self.inita()
-        if not self.did_inits:
-            self.inits()
-        self.g().calc(not self.did_inita, not self.did_inits)
+        self.inita()
+        self.inits()
+        self.g().calc(False, False)
         self.did_calc = True
 
     def inits(self):
-        self.g().init_segments()
-        self.did_inits = True
-        [f() for f in self.to_inits]
+        if not self.did_calc:
+            self.g().init_segments()
+        for f in self.to_inits:
+            f()
+        self.to_inits = []
 
     def paras(self, *names):
         """Set segments to be parallel by their names"""
@@ -247,10 +245,7 @@ class Helper:
                 reason=reason,
             )
 
-        if self.did_inita:
-            func(self, seg1, interp, seg2, reason)
-        else:
-            self.to_inita.append(partial(func, self, seg1, interp, seg2, reason))
+        self.to_inita.append(partial(func, self, seg1, interp, seg2, reason))
 
     def conts(self, og, new):
         og = self.s(og)
@@ -263,21 +258,27 @@ class Helper:
 
     def inita(self):
         """Call self.geo.init_angles"""
-        self.g().init_angles()
-        self.did_inita = True
-        [f() for f in self.to_inita]
+        if not self.did_calc:
+            self.g().init_angles()
+        for f in self.to_inita:
+            f()
+        self.to_inita = []
 
     def seta(self, name, deg, reason="given"):
         """Set value of angle in geo to deg"""
-        if not self.did_inita:
-            self.inita()
-        self.g().aang_equal_deg(self.a(name), deg, reason)
+
+        def func(h, name, deg, reason):
+            h.g().aang_equal_deg(h.a(name), deg, reason)
+
+        self.to_inita.append(partial(func, self, name, deg, reason))
 
     def sets(self, name, leng, reason="given"):
-        """Set valuie of segment in geo to leng"""
-        if not self.did_inits:
-            self.inits()
-        self.g().seg_equal_leng(self.s(name), leng, reason)
+        """Set value of segment in geo to leng"""
+
+        def func(h, name, deg, reason):
+            h.g().seg_equal_leng(h.s(name), leng, reason)
+
+        self.to_inits.append(partial(func, self, name, leng, reason))
 
     def geta(self, name):
         """Get angle value from geo by name"""
@@ -306,15 +307,19 @@ class Helper:
 
     def equala(self, name1, name2, reason="given"):
         """Set angle name1 to be equal to name2"""
-        if not self.did_inita:
-            self.inita()
-        self.g().aang_equal_aang(self.a(name1), self.a(name2), reason)
+
+        def func(h, name, deg, reason):
+            h.g().aang_equal_aang(h.a(name1), h.a(name2), reason)
+
+        self.to_inita.append(partial(func, self, name1, name2, reason))
 
     def equals(self, name1, name2, reason="given"):
         """Set seg name1 to be equal to name2"""
-        if not self.did_inits:
-            self.inits()
-        self.g().seg_equal_seg(self.s(name1), self.s(name2), reason)
+
+        def func(h, name, deg, reason):
+            h.g().seg_equal_seg(h.s(name1), h.s(name2), reason)
+
+        self.to_inita.append(partial(func, self, name1, name2, reason))
 
     def isparas(self, name1, name2):
         if not self.did_calc:
