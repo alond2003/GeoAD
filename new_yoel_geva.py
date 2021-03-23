@@ -1,6 +1,17 @@
 from geo.problem import Problem
 from geo.helper import Helper
 from geo.real.expression import Degree
+from geo.filehandler import print_points_from_file as _pggb
+
+
+def check_prob(func_name):
+    func = eval(func_name)
+    if not callable(func):
+        raise TypeError(
+            f"type {type(func)} cannot be called as a function, (var name is {func_name})"
+        )
+    ans = func()
+    return ans[0] == ans[1]
 
 
 def p349_e1():
@@ -118,7 +129,7 @@ def p351_e15():
     h.seta("ACB", 90)
     h.seta("CBA", 26)
     h.calc()
-    return h.geta("DCE")
+    return (h.geta("DCE"),), (19,)
 
 
 def p351_e17():
@@ -163,8 +174,6 @@ def p352_e23():
 
 
 def p352_e24():
-    from geo.filehandler import print_points_from_file as pggb
-
     h = Helper()
     h.ps("ABCDE", [4, 0, 8, 2, 6], [6, 0, 0, 3, 3])
     h.tri("ABC")
@@ -178,5 +187,24 @@ def p352_e24():
     return (h.geta("ADE"), h.geta("CED")), (50, 120)
 
 
-print(ans := p352_e24())
-print(ans[0] == ans[1])
+def p353_e25():
+    h = Helper()
+    h.ps("ABCDE", [4, 0, 8, 2, 6], [6, 0, 0, 3, 3])
+    h.tri("ABC")
+    h.conts("AB", "ADB")
+    h.conts("AC", "AEC")
+    h.s("DE")
+    h.seta("CAB", 72)
+    h.seta("ABC", 48)
+    h.seta("CED", 120)
+    h.calc()
+    return (h.isparas("DE", "BC"),), (True,)
+
+
+# print(ans := p353_e25())
+# print(ans[0] == ans[1])
+print(all((check_prob(prob) for prob in [i for i in dir() if i.startswith("p")])))
+# for prob in [i for i in dir() if i.startswith("p")]:
+#     print(prob)
+#     if not check_prob(prob):
+#         print(prob, "is wrong")

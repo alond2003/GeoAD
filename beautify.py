@@ -5,3 +5,5 @@
 # TODO: make Segment::is_subsegment reverse -> small.is_subsegment_of(large)
 # TODO: make all assignments partial until h.calc()
 # TODO: from geo import *
+# TODO: add option to not print proof
+# TODO: add .gitignore
