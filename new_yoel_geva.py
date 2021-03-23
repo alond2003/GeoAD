@@ -201,7 +201,62 @@ def p353_e25():
     return (h.isparas("DE", "BC"),), (True,)
 
 
-# print(ans := p353_e25())
+def p353_e26():
+    # _pggb()
+    h = Helper()
+    h.ps("ABCDE", [7, 6, 0, 2, 4], [0, -2, 0, 2, 0])
+    h.s("AEC")
+    h.s("BED")
+    h.s("AB")
+    h.s("CD")
+    h.seta("BAC", 39)
+    h.seta("BDC", 98)
+    h.seta("AEB", 43)
+    h.calc()
+    return (h.isparas("AB", "DC"),), (True,)
+
+
+def p353_e27():
+    h = Helper()
+    h.ps("ABCDE", [0, 0, 6, 4, 2.4], [4, 0, 0, 4, 2.4])
+    h.s("AB", "BC", "CEA", "AD", "DEB")
+    h.paras("AD", "BC")
+    h.seta("DAC", 42)
+    h.seta("CEB", 94)
+    h.calc()
+    return (h.geta("EBC"),), (44,)
+
+
+def p353_e28():
+    # _pggb()
+    h = Helper()
+    h.ps("ABCD", [2, 6, 8, 0], [4, 4, 0, 0])
+    h.poly("ABCD")
+    h.s("AC")
+    h.paras("AB", "DC")
+    h.equala("DCA", "ACB")
+    h.calc()
+    A = h.geta("ACB") == h.geta("BAC")
+    h.seta("DCB", 80)
+    h.calc()
+    B = h.geta("BAC")
+    return (A, B), (True, 40)
+
+
+def p353_e29():
+    # _pggb()
+    h = Helper()
+    h.ps("ABCDE", [2, 8, 10, 0, 6], [4, 4, 0, 0, 2])
+    h.poly("ABCD")
+    h.s("BE", "EC")
+    h.paras("AB", "DC")
+    h.equala("CBE", "EBA")
+    h.equala("DCE", "ECB")
+    h.calc()
+    return (h.geta("BEC"),), (90,)
+
+
+# print(ans := p353_e29())
 # print(ans[0] == ans[1])
 print(all((check_prob(prob) for prob in [i for i in dir() if i.startswith("p")])))
 # for prob in [i for i in dir() if i.startswith("p")]:
