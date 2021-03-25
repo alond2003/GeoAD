@@ -46,12 +46,14 @@ class RealAngle(AbsAngle):
         )
 
     def __lt__(self, other):
+        """Compare self to Degree or RealAngle"""
         if isinstance(other, RealAngle):
             return self.deg < other.deg
         else:
             return self.deg < other
 
     def __eq__(self, other):
+        """Compare self to Degree/RealAngle or AbsAngle"""
         if isinstance(other, RealAngle):
             return self.deg == other.deg
         elif isinstance(other, AbsAngle):

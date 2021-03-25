@@ -98,14 +98,3 @@ class RealSegment(AbsSegment):
     def fromSegment(cls, seg, leng=None):
         """Create a RealSegment based on Segment"""
         return RealSegment(*seg.get_all_points(), leng=leng)
-
-
-"""
-from point import Point
-
-A, B = Point.createPoints(2)
-rs = RealSegment(A, B)
-rs.set_value()
-print(rs)
-
-"""

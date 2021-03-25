@@ -20,6 +20,7 @@ class Expression:
         else:
             raise TypeError(f"d as a {type(d)} is not supported")
         if newvar:
+            # create new variable
             self.value[type(self).next_var_idx] = 1
             type(self).next_var_idx += 1
         self.clean()
@@ -52,8 +53,10 @@ class Expression:
 
     def clean(self):
         """clean keys that have a zero value or float to int"""
+        # remove zero value keys
         for key in [key for key in self.value if self.value[key] == 0]:
             del self.value[key]
+        # convert float keys to int when needed
         for key in self.value:
             if isinstance(self.value[key], float) and self.value[key].is_integer():
                 self.value[key] = int(self.value[key])
@@ -165,7 +168,7 @@ class Expression:
         if self == 0:
             return "0"
         if len(custom) % 2 != 0:
-            raise "problem!!!"
+            raise "Custom alphabet size should be even!"
         else:
             d = {}
             for i in range(0, len(custom), 2):
@@ -204,6 +207,7 @@ class Expression:
         return NotImplemented
 
     def __eq__(self, other):
+        """Compare two Expressions"""
         if isinstance(other, (int, float)):
             if other == 0 and len(self.value) == 0:
                 return True
