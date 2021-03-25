@@ -206,55 +206,7 @@ class Helper:
             )
         )
 
-    def calc(self):
-        self.inita()
-        self.inits()
-        self.g().calc(False, False)
-        self.did_calc = True
-
-    def inits(self):
-        if not self.did_calc:
-            self.g().init_segments()
-        for f in self.to_inits:
-            f()
-        self.to_inits = []
-
-    def paras(self, *names):
-        """Set segments to be parallel by their names"""
-        if len(names) < 2:
-            return
-        first = self.s(names[0])
-        for name in names[1:]:
-            first.set_parallel(self.s(name))
-
-    def perps(self, seg1, seg2, reason="given"):
-        """Set segments to be perpendicular"""
-        seg1 = self.s(seg1)
-        seg2 = self.s(seg2)
-        # intersection point
-        interp = seg1.get_intersection_point(seg2)
-
-        def func(h, seg1, interp, seg2, reason):
-            h.seta(
-                h.g().get_non_reflex_angle(
-                    seg1.start if seg1.start != interp else seg1.end,
-                    interp,
-                    seg2.start if seg2.start != interp else seg2.end,
-                ),
-                90,
-                reason=reason,
-            )
-
-        self.to_inita.append(partial(func, self, seg1, interp, seg2, reason))
-
-    def conts(self, og, new):
-        og = self.s(og)
-        if new.index(str(og.start)) > new.index(str(og.end)):
-            new = new[::-1]
-        new_p = [self.p(i) for i in new]
-        og.update_midpoints(*new_p[1:-1])
-
-    """Angles"""
+    """Init / Calc"""
 
     def inita(self):
         """Call self.geo.init_angles"""
@@ -263,6 +215,21 @@ class Helper:
         for f in self.to_inita:
             f()
         self.to_inita = []
+
+    def inits(self):
+        if not self.did_calc:
+            self.g().init_segments()
+        for f in self.to_inits:
+            f()
+        self.to_inits = []
+
+    def calc(self):
+        self.inita()
+        self.inits()
+        self.g().calc(False, False)
+        self.did_calc = True
+
+    """Set/Get/Equal Expressions"""
 
     def seta(self, name, deg, reason="given"):
         """Set value of angle in geo to deg"""
@@ -321,10 +288,49 @@ class Helper:
 
         self.to_inita.append(partial(func, self, name1, name2, reason))
 
+    """Segments"""
+
+    def conts(self, og, new):
+        og = self.s(og)
+        if new.index(str(og.start)) > new.index(str(og.end)):
+            new = new[::-1]
+        new_p = [self.p(i) for i in new]
+        og.update_midpoints(*new_p[1:-1])
+
+    def perps(self, seg1, seg2, reason="given"):
+        """Set segments to be perpendicular"""
+        seg1 = self.s(seg1)
+        seg2 = self.s(seg2)
+        # intersection point
+        interp = seg1.get_intersection_point(seg2)
+
+        def func(h, seg1, interp, seg2, reason):
+            h.seta(
+                h.g().get_non_reflex_angle(
+                    seg1.start if seg1.start != interp else seg1.end,
+                    interp,
+                    seg2.start if seg2.start != interp else seg2.end,
+                ),
+                90,
+                reason=reason,
+            )
+
+        self.to_inita.append(partial(func, self, seg1, interp, seg2, reason))
+
+    def paras(self, *names):
+        """Set segments to be parallel by their names"""
+        if len(names) < 2:
+            return
+        first = self.s(names[0])
+        for name in names[1:]:
+            first.set_parallel(self.s(name))
+
     def isparas(self, name1, name2):
         if not self.did_calc:
             self.calc()
         return self.s(name1).is_parallel(self.s(name2))
+
+    """Other"""
 
     def get_intersection_point(self, iter1, iter2):
         lst = list(
