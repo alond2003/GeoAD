@@ -1,6 +1,6 @@
 import math
 from geo.abs.point import Point
-from geo.abs.segment import Segment
+from geo.abs.abssegment import AbsSegment
 from geo.handler import Handler
 from geo.real.expression import Degree
 from geo.abs.absangle import AbsAngle
@@ -21,10 +21,10 @@ def test_segment_ordering_inside_point_lines_arr():
     H = Point("H", 0, -1)
     I = Point("I", 1, -1)
 
-    AI = Segment(A, I, True)
-    CG = Segment(C, G, True)
-    DF = Segment(D, F, True)
-    BH = Segment(B, H, True)
+    AI = AbsSegment(A, I, True)
+    CG = AbsSegment(C, G, True)
+    DF = AbsSegment(D, F, True)
+    BH = AbsSegment(B, H, True)
 
     arr = [AI, CG, DF, BH]
 
@@ -89,9 +89,9 @@ def try_solve_problem_using_coor_system():
         C = Point("C", 4, 4)
         D = Point("D", -4, -2)
         E = Point("E", -1.33, 0)
-        AB = Segment(A, B, True)
+        AB = AbsSegment(A, B, True)
         AB.set_midpoints(E)
-        CD = Segment(C, D, True)
+        CD = AbsSegment(C, D, True)
         CD.set_midpoints(E)
         geo = Handler(A, B, C, D, E)
         geo.init_angles()

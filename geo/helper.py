@@ -7,7 +7,7 @@
 # first build everything then assign value
 
 import itertools
-from geo.abs.segment import Segment
+from geo.abs.abssegment import AbsSegment
 from geo.abs.absangle import AbsAngle
 from geo.handler import Handler
 from geo.abs.point import Point
@@ -58,16 +58,16 @@ class Helper:
         return self.ps(names, xs, ys)
 
     def s(self, *names):
-        """Create new Segment(s) (if needed) and return it (them)"""
+        """Create new AbsSegment(s) (if needed) and return it (them)"""
         res = []
         for name in names:
             for pname in name:
                 self.p(pname)
-            maybe = Segment(self.p(name[0]), self.p(name[-1]))
+            maybe = AbsSegment(self.p(name[0]), self.p(name[-1]))
             for seg in self.segments:
                 if seg.is_subsegment(maybe):
                     return seg.get_subsegment(name)
-            self.segments.append(Segment(self.p(name[0]), self.p(name[-1]), True))
+            self.segments.append(AbsSegment(self.p(name[0]), self.p(name[-1]), True))
             self.segments[-1].set_midpoints(*[self.p(i) for i in name[1:-1]])
             res.append(self.segments[-1])
         if len(names) == 1:

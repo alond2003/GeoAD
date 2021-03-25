@@ -1,14 +1,14 @@
-from geo.abs.segment import Segment
+from geo.abs.abssegment import AbsSegment
 from geo.real.expression import Length
 from functools import total_ordering
 
 
 @total_ordering
-class RealSegment(Segment):
+class RealSegment(AbsSegment):
     def __init__(self, *points, leng=None):
         """Create an Segment with length"""
         self.leng = leng.new_copy() if leng is not None else None
-        Segment.__init__(self, points[0], points[-1])
+        AbsSegment.__init__(self, points[0], points[-1])
         self.set_midpoints(*points[1:-1])
 
     def set_value(self, val=None):
@@ -41,7 +41,7 @@ class RealSegment(Segment):
     def __str__(self):
         """Return Segment's name and length"""
         return (
-            Segment.__str__(self)
+            AbsSegment.__str__(self)
             + "("
             + (str(self.leng) if self.leng is not None else "")
             + ")"
@@ -60,7 +60,7 @@ class RealSegment(Segment):
     def __eq__(self, other):
         if isinstance(other, RealSegment):
             return self.leng == other.leng
-        elif isinstance(other, Segment):
+        elif isinstance(other, AbsSegment):
             return other == abs(self)
         else:
             return self.leng == other
@@ -86,7 +86,7 @@ class RealSegment(Segment):
 
     def __abs__(self):
         """Return Segment from this RealSegemnt"""
-        res = Segment(self.start, self.end)
+        res = AbsSegment(self.start, self.end)
         res.set_midpoints(*self.midpoints)
         return res
 

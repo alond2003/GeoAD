@@ -1,4 +1,4 @@
-from geo.abs.segment import Segment
+from geo.abs.abssegment import AbsSegment
 from geo.abs.absangle import AbsAngle
 from geo.real.realangle import RealAngle
 from geo.real.expression import Degree
@@ -33,9 +33,9 @@ def th1(debug=False):
     """_ax1 & _ax2 -> _th1"""
     # Create line AB, C point on AB, CD line from C
     A, B, C, D = Point.createPoints("A", "B", "C", "D")
-    AB = Segment(A, B, True)
+    AB = AbsSegment(A, B, True)
     AB.set_midpoints(C)
-    CD = Segment(C, D, True)
+    CD = AbsSegment(C, D, True)
     # Create Angle ACD
     AC = AB.get_subsegment_to(C)
     ACD = AbsAngle(AC, C, CD)
@@ -54,9 +54,9 @@ def th2(debug=False):
     """_th1 -> _th2"""
     # Create lines AB and CD, E is their intersection point
     A, B, C, D, E = Point.createPoints("A", "B", "C", "D", "E")
-    AB = Segment(A, B, True)
+    AB = AbsSegment(A, B, True)
     AB.set_midpoints(E)
-    CD = Segment(C, D, True)
+    CD = AbsSegment(C, D, True)
     CD.set_midpoints(E)
     # Create Angle AEC
     AE = AB.get_subsegment_to(E)
@@ -78,9 +78,9 @@ def th3(debug=False):
     """_th1 -> _th3"""
     # Create lines AB and CD, E is their intersection point
     A, B, C, D, E = Point.createPoints("A", "B", "C", "D", "E")
-    AB = Segment(A, B, True)
+    AB = AbsSegment(A, B, True)
     AB.set_midpoints(E)
-    CD = Segment(C, D, True)
+    CD = AbsSegment(C, D, True)
     CD.set_midpoints(E)
     # Create the 4 angles around point E
     AE = AB.get_subsegment_to(E)
@@ -113,11 +113,11 @@ def th4(debug=False):
     """_th1 & _ax3 -> _th4"""
     # Create AB||CD, GFEH transversal: E ∈ AB, F ∈ CD
     A, B, C, D, E, F, G, H = Point.createPoints(8)
-    AB = Segment(A, B, True)
+    AB = AbsSegment(A, B, True)
     AB.set_midpoints(E)
-    CD = Segment(C, D, True)
+    CD = AbsSegment(C, D, True)
     CD.set_midpoints(F)
-    GH = Segment(G, H, True)
+    GH = AbsSegment(G, H, True)
     GH.set_midpoints(F, E)
     AB.set_parallel(CD)
     # Corresponding [מתאימות] angles example (AEG & CFG)

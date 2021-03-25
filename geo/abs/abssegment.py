@@ -4,7 +4,7 @@ from geo.alg.unionfind import UnionFind
 from geo.abs.point import Point
 
 
-class Segment:
+class AbsSegment:
     def __init__(self, pointstart, pointend, isnew=False):
         """ if isnew: add this line to the start & end points"""
         self.start = pointstart
@@ -49,27 +49,27 @@ class Segment:
     def get_subsegment_to(self, point):
         """Return subsegment to point (containing all the midpoints in between)"""
         if point in self.midpoints:
-            res = Segment(self.start, point)
+            res = AbsSegment(self.start, point)
             res.set_midpoints(*self.midpoints[0 : self.midpoints.index(point)])
             res.parallel = self.parallel
             return res
         elif point == self.end:
             return self
         elif point == self.start:
-            return Segment(point, point)
+            return AbsSegment(point, point)
         return None
 
     def get_subsegment_from(self, point):
         """Return subsegment from point (containing all the midpoints in between)"""
         if point in self.midpoints:
-            res = Segment(point, self.end)
+            res = AbsSegment(point, self.end)
             res.set_midpoints(*self.midpoints[self.midpoints.index(point) + 1 :])
             res.parallel = self.parallel
             return res
         elif point == self.start:
             return self
         elif point == self.end:
-            return Segment(point, point)
+            return AbsSegment(point, point)
         return None
 
     def is_subsegment(self, other):

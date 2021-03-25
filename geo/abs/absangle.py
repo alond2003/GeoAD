@@ -1,4 +1,4 @@
-from geo.abs.segment import Segment
+from geo.abs.abssegment import AbsSegment
 from geo.real.expression import Degree
 
 

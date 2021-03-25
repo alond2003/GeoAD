@@ -1,5 +1,5 @@
 from geo.abs.point import Point
-from geo.abs.segment import Segment
+from geo.abs.abssegment import AbsSegment
 from geo.real.realangle import RealAngle
 from geo.abs.absangle import AbsAngle
 from geo.handler import Handler

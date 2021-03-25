@@ -1,7 +1,7 @@
 import itertools
 
 from geo.abs.point import Point
-from geo.abs.segment import Segment
+from geo.abs.abssegment import AbsSegment
 from geo.abs.absangle import AbsAngle
 from geo.real.realsegment import RealSegment
 from geo.real.realangle import RealAngle
@@ -330,8 +330,8 @@ class Handler:
     """ BASIC SEGMENT_CALC METHODS"""
 
     def get_full_seg(self, startpoint, endpoint):
-        """Return Segment from 2 points"""
-        maybeline = Segment(startpoint, endpoint)
+        """Return AbsSegment from 2 points"""
+        maybeline = AbsSegment(startpoint, endpoint)
         for i in self.segments:
             if i.is_subsegment(maybeline):
                 return i.get_subsegment(startpoint.name + endpoint.name)
@@ -350,13 +350,13 @@ class Handler:
         """Return list of all SubSegments"""
         seg = self.get_full_seg(seg.start, seg.end)
         points = seg.get_all_points()
-        return [Segment(*points[i : i + 2]) for i in range(len(points) - 1)]
+        return [AbsSegment(*points[i : i + 2]) for i in range(len(points) - 1)]
 
     def is_elementry_seg(self, seg):
         return len(self.disassemble_segment(seg)) == 1
 
     def get_rseg(self, seg):
-        """Return RealSegment from elementry Segment"""
+        """Return RealSegment from elementry AbsSegment"""
         lst = [i for i in self.rsegments if seg == abs(i)]
         if len(lst) == 0:
             raise KeyError
@@ -375,7 +375,7 @@ class Handler:
         for point_list in itertools.combinations(self.points, numofsides):
             for perm in self.circle_perm(point_list):
                 sides = [
-                    Segment(perm[i], perm[(i + 1) % len(perm)])
+                    AbsSegment(perm[i], perm[(i + 1) % len(perm)])
                     for i in range(len(perm))
                 ]
                 # if (all segments exist) and (no 3 points on same line) and (no non-neighbor sides intersect)
@@ -1200,7 +1200,7 @@ class Handler:
         if isinstance(ang, RealAngle):
             if ang == 180:
                 return True
-        maybeline = Segment(ang.get_start_point(), ang.get_end_point())
+        maybeline = AbsSegment(ang.get_start_point(), ang.get_end_point())
         maybeline.set_midpoints(ang.vertex)
 
         return any(i.is_subsegment(maybeline) for i in self.segments)
