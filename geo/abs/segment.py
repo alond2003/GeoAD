@@ -17,14 +17,14 @@ class Segment:
             self.end.add_line(self)
 
     def set_midpoints(self, *x):
-        """add a midpoints"""
+        """Set line's midpoints"""
         self.midpoints = list(x)
         if self.isnew:
-            for i in x:
-                i.add_line(self)
+            for p in x:
+                p.add_line(self)
 
     def update_midpoints(self, *x):
-        """Add Midpoints to segment"""
+        """Add midpoints to segment"""
         if self.isnew:
             # remove all instances of this segment in Point.lines
             for p in self.midpoints:
@@ -36,7 +36,7 @@ class Segment:
                     del p.lines[idx]
             # set the midpoints to x
             self.midpoints = list(x)
-            # readd this segment to Point.lines
+            # re-add this segment to Point.lines
             for p in self.midpoints:
                 p.add_line(self)
         else:
@@ -75,17 +75,20 @@ class Segment:
     def is_subsegment(self, other):
         """Check if other is a subsegment of this Segment"""
         idxs = []
-        for i in other.get_all_points():
+        for p in other.get_all_points():
             try:
-                idxs.append(self.get_all_points().index(i))
+                idxs.append(self.get_all_points().index(p))
             except ValueError:
+                # if p not in this segment's points, other is not a subsegment
                 return False
+
+        # return True if all the idxs are ordered, one after another in self.get_all_points()
         return all(i < j for i, j in zip(idxs, idxs[1:])) or all(
             i > j for i, j in zip(idxs, idxs[1:])
         )
 
     def get_subsegment(self, name):
-        """Get subsegment based on name"""
+        """Get subsegment based on name (2 points segment)"""
         p = [
             list(filter(lambda x: x.name == name[i], self.get_all_points()))[0]
             for i in range(2)
@@ -97,10 +100,11 @@ class Segment:
         elif p[1] == self.end or p[1] == self.start:
             return self.get_subsegment(name[::-1])
         else:
-            furthest = p[0]
-            if self.get_all_points().index(p[0]) < self.get_all_points().index(p[1]):
-                furthest = p[1]
-            closest = p[1] if furthest == p[0] else p[0]
+            furthest, closest = p[0], p[1]
+            if self.get_all_points().index(furthest) < self.get_all_points().index(
+                closest
+            ):
+                furthest, closest = closest, furthest
             return self.get_subsegment_to(furthest).get_subsegment_from(closest)
 
     def are_inclusive(self, other):

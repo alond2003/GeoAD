@@ -12,15 +12,6 @@ class Point:
         self.x = x
         self.y = y
 
-    def copy(self, p):
-        """Copy constructor from Point p"""
-        self.name = p.name
-        self.id = p.id
-        self.lines = p.lines  # does it affect same?
-
-        self.x = p.x
-        self.y = p.y
-
     def add_line(self, *lines):
         """Add line or lines that the point is on"""
 
@@ -36,6 +27,7 @@ class Point:
             else:
                 self.lines.append((line, line))
 
+        # sort self.lines by slope_angle
         self.lines.sort(key=lambda t: -t[0].get_slope_angle(self))
 
     def __str__(self):
@@ -55,14 +47,6 @@ class Point:
         return other.id == self.id
 
     @staticmethod
-    def numtoname(n):
-        ans = ""
-        while n > 0:
-            ans = chr(65 + (n - 1) % 26) + ans
-            n = (n - 1) // 26
-        return ans
-
-    @staticmethod
     def createPoints(names, xs, ys):
-        """Return a tuple of Points according to point_names or number of points"""
+        """Return a tuple of Points according to points' names,xs and ys"""
         return tuple([Point(name, x, y) for name, x, y in zip(names, xs, ys)])
