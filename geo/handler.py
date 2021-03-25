@@ -1,3 +1,4 @@
+from numpy import argmax
 import itertools
 
 from geo.abs.point import Point
@@ -250,63 +251,67 @@ class Handler:
 
     def exterior_angle_in_triangle(self):
         """_th8: the size of an exterior angle at a vertex of a triangle equals the sum of the sizes of the interior angles at the other two vertices of the triangle"""
-        for tri in self.find_all_triangles():
-            for side in tri.sides:
-                for seg in self.segments:
-                    if seg.is_subsegment(side) and not (
-                        (seg.start == side.start or seg.start == side.end)
-                        and (seg.end == side.start or seg.end == side.end)
-                    ):
-                        # side is subsegment of seg
-                        start = (seg.get_all_points().index(side.start), side.start)
-                        end = (seg.get_all_points().index(side.end), side.end)
-                        if start[0] > end[0]:
-                            start, end = end, start
-                        if start[0] != 0:
-                            external_angle = self.get_non_reflex_angle(
-                                seg.start,
-                                start[1],
-                                [
-                                    p
-                                    for p in tri.points
-                                    if p not in side.get_all_points()
-                                ][0],
-                            )
-                            # add list support for aang=aang
-                            # write tri.get_angle_from_point
-                            self.aang_equal_aang(
-                                external_angle,
-                                [
-                                    tri.get_angle_from_point(p)
-                                    for p in tri.points
-                                    if p != start[1]
-                                ],
-                                f"external angle to {str(tri.get_angle_from_point(start[1]))} in △{str(tri)}",
-                            )
-                        if end[0] != len(seg.get_all_points()) - 1:
-                            external_angle = self.get_non_reflex_angle(
-                                seg.end,
-                                end[1],
-                                [
-                                    p
-                                    for p in tri.points
-                                    if p not in side.get_all_points()
-                                ][0],
-                            )
-                            # add list support for aang=aang
-                            # write tri.get_angle_from_point
-                            self.aang_equal_aang(
-                                external_angle,
-                                [
-                                    tri.get_angle_from_point(p)
-                                    for p in tri.points
-                                    if p != end[1]
-                                ],
-                                f"external angle to {str(tri.get_angle_from_point(end[1]))} in △{str(tri)}",
-                            )
-                        break
+        tri_side_seg = [
+            (tri, side, seg)
+            for tri in self.find_all_triangles()
+            for side in tri.sides
+            for seg in self.segments
+            if seg.is_subsegment(side)
+            and not (
+                (seg.start == side.start or seg.start == side.end)
+                and (seg.end == side.start or seg.end == side.end)
+            )  # and not seg's endpoints are the same as side's
+        ]
+        for tri, side, seg in tri_side_seg:
+            # side is subsegment of seg
+            start = (seg.get_all_points().index(side.start), side.start)
+            end = (seg.get_all_points().index(side.end), side.end)
+            if start[0] > end[0]:
+                start, end = end, start
+            if start[0] != 0:
+                external_angle = self.get_non_reflex_angle(
+                    seg.start,
+                    start[1],
+                    [p for p in tri.points if p not in side.get_all_points()][0],
+                )
+                self.aang_equal_aang(
+                    external_angle,
+                    [tri.get_angle_from_point(p) for p in tri.points if p != start[1]],
+                    f"external angle to {str(tri.get_angle_from_point(start[1]))} in △{str(tri)}",
+                )
+            if end[0] != len(seg.get_all_points()) - 1:
+                external_angle = self.get_non_reflex_angle(
+                    seg.end,
+                    end[1],
+                    [p for p in tri.points if p not in side.get_all_points()][0],
+                )
+                self.aang_equal_aang(
+                    external_angle,
+                    [tri.get_angle_from_point(p) for p in tri.points if p != end[1]],
+                    f"external angle to {str(tri.get_angle_from_point(end[1]))} in △{str(tri)}",
+                )
 
     """ CALC """
+
+    def init_angles(self):
+        """Init angles with 180 or variable"""
+        self.angles = dict(((i, None) for i in self.get_angles()))
+        for abs_ang in self.angles.keys():
+            if self.is_180_angle(abs_ang):
+                self.angles[abs_ang] = RealAngle.fromAbsAngle(
+                    abs_ang, Degree(False, d=180)
+                )
+            else:
+                self.angles[abs_ang] = RealAngle.fromAbsAngle(abs_ang, Degree())
+
+    def init_segments(self):
+        """Init segments with length value"""
+        self.rsegments = sum(
+            [RealSegment.fromSegment(i).get_all_subsegments() for i in self.segments],
+            [],
+        )
+        for i in self.rsegments:
+            i.set_value()
 
     def calc(self, inita=True, inits=True):
         """Get information through theroms and given data"""
@@ -337,15 +342,6 @@ class Handler:
                 return i.get_subsegment(startpoint.name + endpoint.name)
         return None
 
-    def init_segments(self):
-        """Init segments with length value"""
-        self.rsegments = sum(
-            [RealSegment.fromSegment(i).get_all_subsegments() for i in self.segments],
-            [],
-        )
-        for i in self.rsegments:
-            i.set_value()
-
     def disassemble_segment(self, seg):
         """Return list of all SubSegments"""
         seg = self.get_full_seg(seg.start, seg.end)
@@ -362,96 +358,85 @@ class Handler:
             raise KeyError
         return lst[0]
 
-    def get_rang(self, aang):
-        """Return RealAngle from elementry AbsAngle"""
-        return self.angles[aang]
-
     def get_value_of_aang(self, aang):
-        return sum([self.get_rang(a) for a in self.disassemble_angle(aang)])
+        return sum([self.angles[a] for a in self.disassemble_angle(aang)])
 
-    def find_all_polygons(self, numofsides):
-        """Return list of all polygons with numofsides sides"""
+    """ POLYGONS """
+
+    def find_all_polygons(self, num_of_sides):
+        """Return list of all polygons with num_of_sides sides"""
         res = []
-        for point_list in itertools.combinations(self.points, numofsides):
+        for point_list in itertools.combinations(self.points, num_of_sides):
             for perm in self.circle_perm(point_list):
-                sides = [
-                    AbsSegment(perm[i], perm[(i + 1) % len(perm)])
-                    for i in range(len(perm))
-                ]
-                # if (all segments exist) and (no 3 points on same line) and (no non-neighbor sides intersect)
-                if all(
-                    [
-                        any([seg.is_subsegment(side) for seg in self.segments])
-                        for side in sides
-                    ]
-                ):
-                    sides = [self.get_full_seg(seg.start, seg.end) for seg in sides]
-                    if not any(
-                        [
-                            [p in seg.get_all_points() for p in perm].count(True) > 2
-                            for seg in self.segments
-                        ]
-                    ) and not any(
-                        [
-                            side.get_intersection_point(non_adj_side) is not None
-                            for side_idx, side in enumerate(sides)
-                            for non_adj_idx, non_adj_side in enumerate(sides)
-                            if non_adj_idx != side_idx
-                            and non_adj_idx != (side_idx + 1) % len(sides)
-                            and non_adj_idx != (side_idx - 1 + len(sides)) % len(sides)
-                        ]
-                    ):
-                        # create Polygon
-                        points = list(perm)
-                        sides = [self.get_full_seg(s.start, s.end) for s in sides]
-                        # do aangs based on most non-reflex angles
-                        aangs1 = [
-                            AbsAngle(
-                                self.get_full_seg(pfrom, vertex),
-                                vertex,
-                                self.get_full_seg(vertex, pto),
-                            )
-                            for pfrom, vertex, pto in zip(
-                                points[-1:] + points[:-1],
-                                points,
-                                points[1:] + points[:1],
-                            )
-                        ]
-                        aangs2 = [
-                            AbsAngle(
-                                self.get_full_seg(vertex, pto),
-                                vertex,
-                                self.get_full_seg(pfrom, vertex),
-                            )
-                            for pfrom, vertex, pto in zip(
-                                points[-1:] + points[:-1],
-                                points,
-                                points[1:] + points[:1],
-                            )
-                        ]
-                        non_reflex_aangs = [
-                            self.get_non_reflex_angle(i, j, k)
-                            for i, j, k in zip(
-                                points[-1:] + points[:-1],
-                                points,
-                                points[1:] + points[:1],
-                            )
-                        ]
-                        non1, non2 = 0, 0
-                        for idx, non in enumerate(non_reflex_aangs):
-                            if non == aangs1[idx]:
-                                non1 += 1
-                            else:
-                                non2 += 1
-                        if non1 > non2:
-                            aangs = aangs1
-                        else:
-                            aangs = aangs2
-                        aconv = Convertor(self.disassemble_angle, self.get_rang)
-                        sconv = Convertor(self.disassemble_segment, self.get_rseg)
-                        res.append(Polygon(points, sides, aangs, aconv, sconv))
-                        break
+                if self.is_pointlist_poly(list(perm)):
+                    res.append(self.create_poly_from_pointlist(list(perm)))
         return res
+
+    def is_pointlist_poly(self, pointlist):
+        """Checks if pointlist is a polygon"""
+        sides = [
+            AbsSegment(pfrom, pto)
+            for pfrom, pto in zip(pointlist, pointlist[1:] + pointlist[:1])
+        ]
+
+        # if not (all segments exist) -> no poly
+        if not all(
+            [any([seg.is_subsegment(side) for seg in self.segments]) for side in sides]
+        ):
+            return False
+
+        # if (3 points on same line) -> no poly
+
+        sides = [self.get_full_seg(seg.start, seg.end) for seg in sides]
+        if any(
+            [
+                [p in seg.get_all_points() for p in pointlist].count(True) > 2
+                for seg in self.segments
+            ]
+        ):
+            return False
+        # if (non-neighbor sides intersect) -> no poly
+        if any(
+            [
+                side.get_intersection_point(non_adj_side) is not None
+                for side_idx, side in enumerate(sides)
+                for non_adj_idx, non_adj_side in enumerate(sides)
+                if non_adj_idx != side_idx
+                and non_adj_idx != (side_idx + 1) % len(sides)
+                and non_adj_idx != (side_idx - 1 + len(sides)) % len(sides)
+            ]
+        ):
+            return False
+        return True
+
+    def create_poly_from_pointlist(self, pointlist):
+        """Create Polygon from pointlist (pointlist is a polygon)"""
+        sides = [
+            self.get_full_seg(pfrom, pto)
+            for pfrom, pto in zip(pointlist, pointlist[1:] + pointlist[:1])
+        ]
+        # choose aangs based on most non-reflex angles
+        aangs = [[], []]
+        counter = [0, 0]
+        for pfrom, vertex, pto in zip(
+            pointlist[-1:] + pointlist[:-1], pointlist, pointlist[1:] + pointlist[:1]
+        ):
+            from_seg = self.get_full_seg(pfrom, vertex)
+            to_seg = self.get_full_seg(vertex, pto)
+
+            aangs[0].append(AbsAngle(from_seg, vertex, to_seg))
+            aangs[1].append(AbsAngle(to_seg, vertex, from_seg))
+            non_reflex_aang = self.get_non_reflex_angle(pfrom, vertex, pto)
+            for i in range(2):
+                if non_reflex_aang == aangs[i][-1]:
+                    counter[i] += 1
+                    break
+
+        aangs = aangs[argmax(counter)]
+        aconv = Convertor(self.disassemble_angle, lambda aang: self.angles[aang])
+        # aconv = Convertor(self.disassemble_angle, self.get_rang)
+        sconv = Convertor(self.disassemble_segment, self.get_rseg)
+        return Polygon(pointlist, sides, aangs, aconv, sconv)
 
     def find_all_triangles(self):
         return [Triangle.fromPolygon(p) for p in self.find_all_polygons(3)]
@@ -459,34 +444,9 @@ class Handler:
     def find_all_quadrilateral(self):
         return [Quadrilateral.fromPolygon(p) for p in self.find_all_polygons(4)]
 
-    """ BASIC ANGLES_CALC METHODS """
+    """ SET EQUAL/PARALLEL """
 
-    def init_angles(self):
-        """Init angles with 180 or variable"""
-        self.angles = dict(((i, None) for i in self.get_angles()))
-        for abs_ang in self.angles.keys():
-            if self.is_180_angle(abs_ang):
-                self.angles[abs_ang] = RealAngle.fromAbsAngle(
-                    abs_ang, Degree(False, d=180)
-                )
-            else:
-                self.angles[abs_ang] = RealAngle.fromAbsAngle(abs_ang, Degree())
-
-    def angles_calc(self, init=True):
-        """Try to minimize the unknown variables"""
-        # TODO: add better documentation
-        if init:
-            self.init_angles()
-
-        # print(self.angles)
-        self.vertical_angles()
-        self.angle_sum_on_line()
-        self.angles_on_parallel_lines()
-        self.angle_sum_around_point()
-        Degree.variable_reduction(*[i.deg for i in self.angles.values()])
-        # print([str(i) for i in self.angles])
-
-    def aang_equal_aang(self, aang1, aang2, reason):
+    def aang_equal_aang(self, aang1, aang2, reason="given"):
         """Assume AbsAngle1 = AbsAngle2 and act apon it"""
         mes = "---\n"
         # print("---")
@@ -634,7 +594,7 @@ class Handler:
                     self.angles[aa].deg,
                 )
 
-    def seg_equal_seg(self, seg1, seg2, reason):
+    def seg_equal_seg(self, seg1, seg2, reason="given"):
         """Assume Segment1 = Segment2 and act apon it"""
         mes = "---\n"
         # print("---")
@@ -783,7 +743,7 @@ class Handler:
                     self.angles[ss].leng,
                 )
 
-    def aang_equal_deg(self, aang, deg, reason):
+    def aang_equal_deg(self, aang, deg, reason="given"):
         """Assume (AbsAngle = deg) and act apon it"""
         mes = "---\n"
         # print("---")
@@ -905,7 +865,7 @@ class Handler:
                     self.angles[aa].deg,
                 )
 
-    def seg_equal_leng(self, seg, leng, reason):
+    def seg_equal_leng(self, seg, leng, reason="given"):
         """Assume (Segment = leng) and act apon it"""
         mes = "---\n"
         # print("---")
@@ -1106,38 +1066,32 @@ class Handler:
         p1.set_parallel(p2)
         print(f"{str(p1)} || {str(p2)} ({reason})")
 
-    ############
-
     """ BASIC ABS_ANGLE METOHDS """
 
     def get_non_reflex_angle(self, pfrom, vertex, pto):
-        """Return acute angle based on 3 points"""
+        """Return non reflex angle based on 3 points"""
         ans = [
             AbsAngle(
                 self.get_full_seg(pfrom, vertex), vertex, self.get_full_seg(vertex, pto)
             )
         ]
         ans.append(AbsAngle(ans[0].ray2, vertex, ans[0].ray1))
+        # ans[0] and ans[1] are the two options, both close a circle around the vertex
+
         for i in range(2):
             a = ans[i]
-            if a is None:
-                print("f")
             arr = self.disassemble_angle(a)
+
+            a_sum = sum([self.angles[aa] for aa in arr])
             # if a is known to be less than 180, return a
-            if (
-                sum([self.angles[aa] for aa in arr]).isknown()
-                and sum([self.angles[aa] for aa in arr]) < 180
-            ):
+            if a_sum.isknown() and a_sum < 180:
                 return a
             for ii in range(len(arr)):
                 for j in range(ii, len(arr)):
-                    if sum([self.angles[aa] for aa in arr[ii : (j + 1)]]) == 180 or all(
-                        [
-                            val > 0
-                            for key, val in (
-                                sum([self.angles[aa] for aa in arr[ii : (j + 1)]]) - 180
-                            ).value.items()
-                        ]
+                    # if a contains a subsum that is >= 180, return the other ans
+                    a_sum = sum([self.angles[aa] for aa in arr[ii : (j + 1)]])
+                    if a_sum == 180 or all(
+                        [val > 0 for key, val in (a_sum - 180).value.items()]
                     ):
                         return ans[0] if i == 1 else ans[1]
 
@@ -1150,10 +1104,10 @@ class Handler:
             return []
         elif len(p.lines) == 1 and p in (p.lines[0][0].start, p.lines[0][0].end):
             return []
-        else:
-            rays = [line for line, _ in p.lines]
 
-            return [AbsAngle(r1, p, r2) for r1, r2 in zip(rays, rays[1:] + rays[:1])]
+        rays = [line for line, _ in p.lines]
+
+        return [AbsAngle(r1, p, r2) for r1, r2 in zip(rays, rays[1:] + rays[:1])]
 
     def get_angles(self):
         """Return a list of all the elementary AbsAngles"""
@@ -1166,12 +1120,14 @@ class Handler:
         """Find a better representation for the AbsAngle and return it"""
         true_rays = []
         for ray in [ang.ray1, ang.ray2]:
-            if ray is None:
-                print("f")
+            # find the biggest segment from vertex instead of ray
             if ray in self.segments:
                 true_rays.append(ray)
             else:
-                l = [l for l in self.segments if l.is_subsegment(ray)][0]
+                for seg in self.segments:
+                    if seg.is_subsegment(ray):
+                        l = seg
+                        break
                 otherpoint = ray.end if ang.vertex == ray.start else ray.start
                 opt1 = l.get_subsegment_from(ang.vertex)
                 opt2 = l.get_subsegment_to(ang.vertex)
@@ -1231,6 +1187,7 @@ class Handler:
 
     @staticmethod
     def circle_perm(lst):
+        """Return all possible permutation to put lst on a circle"""
         res = [i for i in itertools.permutations(lst[1:])]
         i = 0
         while i < len(res):
