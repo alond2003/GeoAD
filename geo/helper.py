@@ -59,6 +59,8 @@ class Helper:
 
     def s(self, *names):
         """Create new AbsSegment(s) (if needed) and return it (them)"""
+        if len(names) == 0:
+            return None
         res = []
         for name in names:
             for pname in name:
@@ -70,17 +72,23 @@ class Helper:
             self.segments.append(AbsSegment(self.p(name[0]), self.p(name[-1]), True))
             self.segments[-1].set_midpoints(*[self.p(i) for i in name[1:-1]])
             res.append(self.segments[-1])
-        if len(names) == 1:
-            return res[0]
-        return tuple(res)
+        return tuple(res) if len(res) > 1 else res[0]
 
-    def a(self, name):
-        """Create new AbsAngle and return it"""
-        if isinstance(name, AbsAngle):
-            return name
-        return self.g().get_better_name_angle(
-            AbsAngle(self.s(name[:-1]), self.p(name[1]), self.s(name[1:]))
-        )
+    def a(self, *names):
+        """Create new AbsAngle(s) (if needed) and return it (them)"""
+        if len(names) == 0:
+            return None
+        res = []
+        for name in names:
+            if isinstance(name, AbsAngle):
+                res.append(name)
+            else:
+                res.append(
+                    self.g().get_better_name_angle(
+                        AbsAngle(self.s(name[:-1]), self.p(name[1]), self.s(name[1:]))
+                    )
+                )
+        return tuple(res) if len(res) > 1 else res[0]
 
     def g(self):
         """Create new Handler (if needed) and return it"""
@@ -98,24 +106,24 @@ class Helper:
             self.given_dict[(cls, symbol)] = cls.given(symbol)
             return self.given_dict[(cls, symbol)]
 
-    def tri(self, name):
-        """Create new triangle by name"""
-        self.poly(name)
+    def tri(self, *names):
+        """Create new triangle(s) by name"""
+        for name in names:
+            self.poly(name)
 
-    def poly(self, name):
-        """
-        Create Polygon based on name
-        """
-        p_arr = [self.p(p_name) for p_name in name]
-        for pfrom, pto in zip(p_arr, p_arr[1:] + p_arr[:1]):
-            self.s(f"{pfrom}{pto}")
+    def poly(self, *names):
+        """Create Polygon based on name"""
+        for name in names:
+            p_arr = [self.p(p_name) for p_name in name]
+            for pfrom, pto in zip(p_arr, p_arr[1:] + p_arr[:1]):
+                self.s(f"{pfrom}{pto}")
 
     """~~~~~~~~"""
 
     def tri_med(self, tri, name):
         """Build median in existing triangle (end point should already exists)"""
         # create median segment
-        pfrom = self.p(self.get_intersection_point(tri, name))
+        pfrom = self.p(self.get_common_point(tri, name))
         across_seg = self.s("".join([i for i in tri if i != str(pfrom)]))
         for p in name:
             if self.p(p) in across_seg.get_all_points():
@@ -135,7 +143,7 @@ class Helper:
 
     def tri_angbi(self, tri, name):
         """Build Angle bisector in existing triangle (end point already exists)"""
-        pfrom = self.p(self.get_intersection_point(tri, name))
+        pfrom = self.p(self.get_common_point(tri, name))
         across_seg = self.s("".join([i for i in tri if i != str(pfrom)]))
         for p in name:
             if self.p(p) in across_seg.get_all_points():
@@ -156,7 +164,7 @@ class Helper:
 
     def tri_alt(self, tri, name):
         """Build Altitude in existing triangle (end point already exists)"""
-        pfrom = self.p(self.get_intersection_point(tri, name))
+        pfrom = self.p(self.get_common_point(tri, name))
         across_seg = self.s("".join([i for i in tri if i != str(pfrom)]))
 
         for p in name:
@@ -185,7 +193,7 @@ class Helper:
         self.s(name)
 
         # the midpoint in segment
-        pmid = self.p(self.get_intersection_point(name, self.s(side).midpoints))
+        pmid = self.p(self.get_common_point(name, self.s(side).midpoints))
         # append Equality of halves
         def eq_of_halves(h, side, pmid, name, tri):
             h.g().seg_equal_seg(
@@ -209,7 +217,7 @@ class Helper:
     """Init / Calc"""
 
     def inita(self):
-        """Call self.geo.init_angles"""
+        """Call self.geo.init_angles() & Perform all self.to_inita functions"""
         if not self.did_calc:
             self.g().init_angles()
         for f in self.to_inita:
@@ -217,6 +225,7 @@ class Helper:
         self.to_inita = []
 
     def inits(self):
+        """Call self.geo.init_segments() & Perform all self.to_inits functions"""
         if not self.did_calc:
             self.g().init_segments()
         for f in self.to_inits:
@@ -224,6 +233,7 @@ class Helper:
         self.to_inits = []
 
     def calc(self):
+        """Call self.geo.calc() & perform init"""
         self.inita()
         self.inits()
         self.g().calc(False, False)
@@ -247,30 +257,51 @@ class Helper:
 
         self.to_inits.append(partial(func, self, name, leng, reason))
 
-    def geta(self, name):
-        """Get angle value from geo by name"""
-        if not self.did_calc:
-            self.calc()
-        try:
-            return self.g().angles[self.a(name)]
-        except KeyError:
-            return sum(
-                [self.g().angles[x] for x in self.g().disassemble_angle(self.a(name))]
-            )
+    def geta(self, *names):
+        """Get angle(s) value(s) from geo by name"""
+        if len(names) == 0:
+            return None
 
-    def gets(self, name):
-        """Get Segment value from geo by name"""
         if not self.did_calc:
             self.calc()
-        try:
-            return self.g().get_rseg(self.s(name))
-        except KeyError:
-            return sum(
-                [
-                    self.g().get_rseg(x)
-                    for x in self.g().disassemble_segment(self.s(name))
-                ]
-            )
+
+        res = []
+        for name in names:
+            try:
+                res.append(self.g().angles[self.a(name)])
+            except KeyError:
+                res.append(
+                    sum(
+                        [
+                            self.g().angles[x]
+                            for x in self.g().disassemble_angle(self.a(name))
+                        ]
+                    )
+                )
+        return tuple(res) if len(res) > 1 else res[0]
+
+    def gets(self, *names):
+        """Get segment(s) value(s) from geo by name"""
+        if len(names) == 0:
+            return None
+
+        if not self.did_calc:
+            self.calc()
+
+        res = []
+        for name in names:
+            try:
+                res.append(self.g().get_rseg(self.s(name)))
+            except KeyError:
+                res.append(
+                    sum(
+                        [
+                            self.g().get_rseg(x)
+                            for x in self.g().disassemble_segment(self.s(name))
+                        ]
+                    )
+                )
+        return tuple(res) if len(res) > 1 else res[0]
 
     def equala(self, name1, name2, reason="given"):
         """Set angle name1 to be equal to name2"""
@@ -332,12 +363,10 @@ class Helper:
 
     """Other"""
 
-    def get_intersection_point(self, iter1, iter2):
+    def get_common_point(self, iter1, iter2):
         lst = list(
             set([self.p(i) for i in iter1]).intersection(
                 set([self.p(i) for i in iter2])
             )
         )
-        if len(lst) == 0:
-            return None
-        return lst[0]
+        return lst[0] if len(lst) > 0 else None
