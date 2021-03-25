@@ -88,24 +88,14 @@ class AbsSegment:
         )
 
     def get_subsegment(self, name):
-        """Get subsegment based on name (2 points segment)"""
-        p = [
-            list(filter(lambda x: x.name == name[i], self.get_all_points()))[0]
-            for i in range(2)
+        """Get subsegment based on name"""
+        furthest, closest = [
+            p for p in self.get_all_points() if p.name == name[0] or p.name == name[-1]
         ]
-        if p[0] == self.start:
-            return self.get_subsegment_to(p[1])
-        elif p[0] == self.end:
-            return self.get_subsegment_from(p[1])
-        elif p[1] == self.end or p[1] == self.start:
-            return self.get_subsegment(name[::-1])
-        else:
-            furthest, closest = p[0], p[1]
-            if self.get_all_points().index(furthest) < self.get_all_points().index(
-                closest
-            ):
-                furthest, closest = closest, furthest
-            return self.get_subsegment_to(furthest).get_subsegment_from(closest)
+
+        if self.get_all_points().index(furthest) < self.get_all_points().index(closest):
+            furthest, closest = closest, furthest
+        return self.get_subsegment_to(furthest).get_subsegment_from(closest)
 
     def are_inclusive(self, other):
         """Check if (self is subsegment of other) or (other is subsegment of self)"""

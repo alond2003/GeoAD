@@ -63,15 +63,22 @@ class Helper:
             return None
         res = []
         for name in names:
-            for pname in name:
-                self.p(pname)
-            maybe = AbsSegment(self.p(name[0]), self.p(name[-1]))
-            for seg in self.segments:
-                if seg.is_subsegment(maybe):
-                    return seg.get_subsegment(name)
-            self.segments.append(AbsSegment(self.p(name[0]), self.p(name[-1]), True))
-            self.segments[-1].set_midpoints(*[self.p(i) for i in name[1:-1]])
-            res.append(self.segments[-1])
+            if isinstance(name, AbsSegment):
+                res.append(name)
+            else:
+                for pname in name:
+                    self.p(pname)
+                maybe = AbsSegment(self.p(name[0]), self.p(name[-1]))
+                for seg in self.segments:
+                    if seg.is_subsegment(maybe):
+                        res.append(seg.get_subsegment(name))
+                        break
+                else:  # only executed if the inner loop did NOT break
+                    self.segments.append(
+                        AbsSegment(self.p(name[0]), self.p(name[-1]), True)
+                    )
+                    self.segments[-1].set_midpoints(*[self.p(i) for i in name[1:-1]])
+                    res.append(self.segments[-1])
         return tuple(res) if len(res) > 1 else res[0]
 
     def a(self, *names):
@@ -120,39 +127,43 @@ class Helper:
 
     """~~~~~~~~"""
 
+    def tri_inner_line(self, tri, name):
+        """Create inner line inside triangle, Return useful objects:
+        pfrom -- one of the triangle's vertex
+        pto -- a point from inner line that is on one of the triangle's sides
+        across_side -- the side of the triangle that is across pfrom
+        other_points -- the other triangle points that are not pfrom
+        """
+        # Create inner line
+        self.s(name)
+        # Get return values
+        pfrom = self.p(self.get_common_point(tri, name))
+        other_points = [self.p(pname) for pname in tri if pname != str(pfrom)]
+        across_side = self.s("".join([str(p) for p in other_points]))
+        pto = self.get_common_point(name, across_side.get_all_points())
+        return pfrom, pto, across_side, other_points
+
     def tri_med(self, tri, name):
         """Build median in existing triangle (end point should already exists)"""
-        # create median segment
-        pfrom = self.p(self.get_common_point(tri, name))
-        across_seg = self.s("".join([i for i in tri if i != str(pfrom)]))
-        for p in name:
-            if self.p(p) in across_seg.get_all_points():
-                pto = self.p(p)
-                break
-        self.s(name)
-        # set median to be the middle of the triangle side
+        # Create median segment
+        pfrom, pto, across_side, *_ = self.tri_inner_line(tri, name)
 
-        def func(h, across_seg, pto, pfrom, name, tri):
+        # Set median to be the middle of the triangle side
+        def func(h, across_side, pto, pfrom, name, tri):
             h.g().seg_equal_seg(
-                across_seg.get_subsegment_to(pto),
-                across_seg.get_subsegment_from(pto),
-                f"given that {name} is median to {str(across_seg)} in △{tri}",
+                across_side.get_subsegment_to(pto),
+                across_side.get_subsegment_from(pto),
+                f"given that {name} is median to {str(across_side)} in △{tri}",
             )
 
-        self.to_inits.append(partial(func, self, across_seg, pto, pfrom, name, tri))
+        self.to_inits.append(partial(func, self, across_side, pto, pfrom, name, tri))
 
     def tri_angbi(self, tri, name):
         """Build Angle bisector in existing triangle (end point already exists)"""
-        pfrom = self.p(self.get_common_point(tri, name))
-        across_seg = self.s("".join([i for i in tri if i != str(pfrom)]))
-        for p in name:
-            if self.p(p) in across_seg.get_all_points():
-                pto = self.p(p)
-                break
-        self.s(name)
+        # Create angle bisector
+        pfrom, pto, _, other_points = self.tri_inner_line(tri, name)
 
-        other_points = [self.p(i) for i in tri if i != str(pfrom)]
-
+        # Set the two angles as equals
         def func(h, other_points, pfrom, pto, name, tri):
             h.g().aang_equal_aang(
                 h.g().get_non_reflex_angle(other_points[0], pfrom, pto),
@@ -164,27 +175,14 @@ class Helper:
 
     def tri_alt(self, tri, name):
         """Build Altitude in existing triangle (end point already exists)"""
-        pfrom = self.p(self.get_common_point(tri, name))
-        across_seg = self.s("".join([i for i in tri if i != str(pfrom)]))
+        # Create altitude
+        *_, across_side, _ = self.tri_inner_line(tri, name)
 
-        for p in name:
-            if self.p(p) in across_seg.get_all_points():
-                pto = self.p(p)
-                break
-        self.s(name)
-
-        other_points = [self.p(i) for i in tri if i != str(pfrom)]
-
-        def func(h, pfrom, pto, other_points, name, across_seg, tri):
-            for i in range(2):
-                h.g().aang_equal_deg(
-                    h.g().get_non_reflex_angle(pfrom, pto, other_points[i]),
-                    90,
-                    f"given that {name} is an altitude to side {across_seg} in △{tri}",
-                )
-
-        self.to_inita.append(
-            partial(func, self, pfrom, pto, other_points, name, across_seg, tri)
+        # Set altitude to be perpendicular to across_side
+        self.perps(
+            across_side,
+            name,
+            f"given that {name} is an altitude to side {across_side} in △{tri}",
         )
 
     def tri_segbi(self, tri, name, side):
@@ -204,14 +202,11 @@ class Helper:
 
         self.to_inits.append(partial(eq_of_halves, self, side, pmid, name, tri))
 
-        # append perpendicularity of side and segbi
-        self.to_inita.append(
-            partial(
-                self.perps,
-                side,
-                name,
-                f"given that {name} is segment bisector to side {side} in △{tri}",
-            )
+        # set perpendicularity of side and segbi
+        self.perps(
+            side,
+            name,
+            f"given that {name} is segment bisector to side {side} in △{tri}",
         )
 
     """Init / Calc"""
