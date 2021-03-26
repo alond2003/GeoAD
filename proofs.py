@@ -245,14 +245,13 @@ def th7(debug=False):
         print(
             " + ".join(
                 map(
-                    lambda x: f"({str(x)})",
-                    [h.a("BAD"), h.a("ADC"), h.a("DCB"), h.a("CBA")],
+                    lambda x: f"({x})", [h.a("BAD"), h.a("ADC"), h.a("DCB"), h.a("CBA")]
                 )
             ),
             "=",
             " + ".join(
                 [
-                    f"({str(i.deg) if isinstance(i, RealAngle) else str(i)})"
+                    f"({i.deg if isinstance(i, RealAngle) else i})"
                     for i in [
                         h.geta("BAD"),
                         h.geta("ADC"),

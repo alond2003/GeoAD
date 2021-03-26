@@ -111,7 +111,7 @@ class Handler:
                 self.aang_equal_aang(
                     aangs[0][i],
                     aangs[1][i],
-                    f"Corresponding angles are equal between {str(p[0])} || {str(p[1])} and {str(t)}",
+                    f"Corresponding angles are equal between {p[0]} || {p[1]} and {t}",
                 )
 
             # זוויות מתחלפות
@@ -123,7 +123,7 @@ class Handler:
                 self.aang_equal_aang(
                     aangs[0][i],
                     aangs[1][coridx],
-                    f"alteranting angles are equal between {str(p[0])} || {str(p[1])} and {str(t)}",
+                    f"alteranting angles are equal between {p[0]} || {p[1]} and {t}",
                 )
 
             # זוויות חד צדדיות
@@ -135,7 +135,7 @@ class Handler:
                 self.aang_equal_deg(
                     [aangs[0][i], aangs[1][considx]],
                     Degree(False, 180),
-                    f"sum of consecutive angles between {str(p[0])} || {str(p[1])} and {str(t)}",
+                    f"sum of consecutive angles between {p[0]} || {p[1]} and {t}",
                 )
 
     def converse_angles_on_parallel_lines(self):
@@ -198,7 +198,7 @@ class Handler:
                 if sum(self.aconv[aangs[0][i]]) == sum(self.aconv[aangs[1][i]]):
                     self.set_parallel(
                         *p,
-                        f"{str(aangs[0][i])} = {sum(self.aconv[aangs[0][i]])} = {aangs[1][i]}, converse corresponding angles between {str(p[0])}, {str(p[1])} and traverse {str(t)}",
+                        f"{aangs[0][i]} = {sum(self.aconv[aangs[0][i]])} = {aangs[1][i]}, converse corresponding angles between {p[0]}, {p[1]} and traverse {t}",
                     )
 
             # זוויות מתחלפות
@@ -210,7 +210,7 @@ class Handler:
                 if sum(self.aconv[aangs[0][i]]) == sum(self.aconv[aangs[1][altidx]]):
                     self.set_parallel(
                         *p,
-                        f"{str(aangs[0][i])} = {sum(self.aconv[aangs[0][i]])} = {str(aangs[1][altidx])}, converse alternating angles between {str(p[0])}, {str(p[1])} and traverse {str(t)}",
+                        f"{aangs[0][i]} = {sum(self.aconv[aangs[0][i]])} = {aangs[1][altidx]}, converse alternating angles between {p[0]}, {p[1]} and traverse {t}",
                     )
 
             # זוויות חד צדדיות
@@ -222,7 +222,7 @@ class Handler:
                 if sum(self.aconv[aangs[0][i]]) == sum(self.aconv[aangs[1][considx]]):
                     self.set_parallel(
                         *p,
-                        f"{str(aangs[0][i])} = {sum(self.aconv[aangs[0][i]])} = {str(aangs[1][considx])}, converse consecutive angles between {str(p[0])}, {str(p[1])} and traverse {str(t)}",
+                        f"{aangs[0][i]} = {sum(self.aconv[aangs[0][i]])} = {aangs[1][considx]}, converse consecutive angles between {p[0]}, {p[1]} and traverse {t}",
                     )
 
     def angle_sum_in_triangle(self):
@@ -231,7 +231,7 @@ class Handler:
             self.aang_equal_deg(
                 t.aangs,
                 Degree(False, 180),
-                f"the sum of the interior angles of △{str(t)} is 180°",
+                f"the sum of the interior angles of △{t} is 180°",
             )
 
     def angle_sum_in_quadrilateral(self):
@@ -240,7 +240,7 @@ class Handler:
             self.aang_equal_deg(
                 q.aangs,
                 Degree(False, 360),
-                f"the sum of the interior angles in quadrilateral {str(q)} is 360°",
+                f"the sum of the interior angles in quadrilateral {q} is 360°",
             )
 
     def exterior_angle_in_triangle(self):
@@ -271,7 +271,7 @@ class Handler:
                 self.aang_equal_aang(
                     external_angle,
                     [tri.get_angle_from_point(p) for p in tri.points if p != start[1]],
-                    f"external angle to {str(tri.get_angle_from_point(start[1]))} in △{str(tri)}",
+                    f"external angle to {tri.get_angle_from_point(start[1])} in △{tri}",
                 )
             if end[0] != len(seg.get_all_points()) - 1:
                 external_angle = self.get_non_reflex_angle(
@@ -282,7 +282,7 @@ class Handler:
                 self.aang_equal_aang(
                     external_angle,
                     [tri.get_angle_from_point(p) for p in tri.points if p != end[1]],
-                    f"external angle to {str(tri.get_angle_from_point(end[1]))} in △{str(tri)}",
+                    f"external angle to {tri.get_angle_from_point(end[1])} in △{tri}",
                 )
 
     """ CALC """
@@ -585,7 +585,7 @@ class Handler:
                 Degree(False, {res[0][0]: 1}),
                 "=",
                 res[0][1],
-                f"(found var {str(Degree(False, {res[0][0]: 1}))})",
+                f"(found var {Degree(False, {res[0][0]: 1})})",
             )
 
             rem = []
@@ -607,7 +607,7 @@ class Handler:
                     "=",
                     preval,
                     "=",
-                    preval.__str__(res[0][0], f"({str(res[0][1])})"),
+                    preval.__str__(res[0][0], f"({res[0][1]})"),
                     "->",
                     aa,
                     "=",
@@ -734,7 +734,7 @@ class Handler:
                 Length(False, {res[0][0]: 1}),
                 "=",
                 res[0][1],
-                f"(found var {str(Length(False, {res[0][0]: 1}))})",
+                f"(found var {Length(False, {res[0][0]: 1})})",
             )
 
             rem = []
@@ -756,7 +756,7 @@ class Handler:
                     "=",
                     preval,
                     "=",
-                    preval.__str__(res[0][0], f"({str(res[0][1])})"),
+                    preval.__str__(res[0][0], f"({res[0][1]})"),
                     "->",
                     ss,
                     "=",
@@ -867,7 +867,7 @@ class Handler:
                 Degree(False, {res[0][0]: 1}),
                 "=",
                 res[0][1],
-                f"(found var {str(Degree(False, {res[0][0]: 1}))})",
+                f"(found var {Degree(False, {res[0][0]: 1})})",
             )
 
             # for all angles affected:
@@ -878,7 +878,7 @@ class Handler:
                     "=",
                     preval,
                     "=",
-                    preval.__str__(res[0][0], f"({str(res[0][1])})"),
+                    preval.__str__(res[0][0], f"({res[0][1]})"),
                     "->",
                     aa,
                     "=",
@@ -986,7 +986,7 @@ class Handler:
                 Length(False, {res[0][0]: 1}),
                 "=",
                 res[0][1],
-                f"(found var {str(Length(False, {res[0][0]: 1}))})",
+                f"(found var {Length(False, {res[0][0]: 1})})",
             )
 
             # for all angles affected:
@@ -997,7 +997,7 @@ class Handler:
                     "=",
                     preval,
                     "=",
-                    preval.__str__(res[0][0], f"({str(res[0][1])})"),
+                    preval.__str__(res[0][0], f"({res[0][1]})"),
                     "->",
                     ss,
                     "=",

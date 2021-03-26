@@ -188,7 +188,7 @@ class Expression:
 
     def __repr__(self):
         """Return <str(self)>"""
-        return f"<{str(self)}>"
+        return f"<{self}>"
 
     def __int__(self):
         """Return the value of the expression"""

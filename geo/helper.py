@@ -153,7 +153,7 @@ class Helper:
             h.g().seg_equal_seg(
                 across_side.get_subsegment_to(pto),
                 across_side.get_subsegment_from(pto),
-                f"given that {name} is median to {str(across_side)} in △{tri}",
+                f"given that {name} is median to {across_side} in △{tri}",
             )
 
         self.to_inits.append(partial(func, self, across_side, pto, pfrom, name, tri))
