@@ -195,12 +195,10 @@ class Handler:
             for i in range(4):
                 if aangs[0][i] is None or aangs[1][i] is None:
                     continue
-                if self.get_value_of_aang(aangs[0][i]) == self.get_value_of_aang(
-                    aangs[1][i]
-                ):
+                if sum(self.aconv[aangs[0][i]]) == sum(self.aconv[aangs[1][i]]):
                     self.set_parallel(
                         *p,
-                        f"{str(aangs[0][i])} = {str(self.get_value_of_aang(aangs[0][i]))} = {str(aangs[1][i])}, converse corresponding angles between {str(p[0])}, {str(p[1])} and traverse {str(t)}",
+                        f"{str(aangs[0][i])} = {sum(self.aconv[aangs[0][i]])} = {aangs[1][i]}, converse corresponding angles between {str(p[0])}, {str(p[1])} and traverse {str(t)}",
                     )
 
             # זוויות מתחלפות
@@ -209,12 +207,10 @@ class Handler:
                 altidx = (i + 2) % 4
                 if aangs[0][i] is None or aangs[1][altidx] is None:
                     continue
-                if self.get_value_of_aang(aangs[0][i]) == self.get_value_of_aang(
-                    aangs[1][altidx]
-                ):
+                if sum(self.aconv[aangs[0][i]]) == sum(self.aconv[aangs[1][altidx]]):
                     self.set_parallel(
                         *p,
-                        f"{str(aangs[0][i])} = {str(self.get_value_of_aang(aangs[0][i]))} = {str(aangs[1][altidx])}, converse alternating angles between {str(p[0])}, {str(p[1])} and traverse {str(t)}",
+                        f"{str(aangs[0][i])} = {sum(self.aconv[aangs[0][i]])} = {str(aangs[1][altidx])}, converse alternating angles between {str(p[0])}, {str(p[1])} and traverse {str(t)}",
                     )
 
             # זוויות חד צדדיות
@@ -223,12 +219,10 @@ class Handler:
                 considx = 3 - i
                 if aangs[0][i] is None or aangs[1][considx] is None:
                     continue
-                if self.get_value_of_aang(aangs[0][i]) == self.get_value_of_aang(
-                    aangs[1][considx]
-                ):
+                if sum(self.aconv[aangs[0][i]]) == sum(self.aconv[aangs[1][considx]]):
                     self.set_parallel(
                         *p,
-                        f"{str(aangs[0][i])} = {str(self.get_value_of_aang(aangs[0][i]))} = {str(aangs[1][considx])}, converse consecutive angles between {str(p[0])}, {str(p[1])} and traverse {str(t)}",
+                        f"{str(aangs[0][i])} = {sum(self.aconv[aangs[0][i]])} = {str(aangs[1][considx])}, converse consecutive angles between {str(p[0])}, {str(p[1])} and traverse {str(t)}",
                     )
 
     def angle_sum_in_triangle(self):
@@ -295,23 +289,28 @@ class Handler:
 
     def init_angles(self):
         """Init angles with 180 or variable"""
-        self.angles = dict(((i, None) for i in self.get_angles()))
-        for abs_ang in self.angles.keys():
+        self.rangles = dict(((i, None) for i in self.get_angles()))
+        for abs_ang in self.rangles.keys():
             if self.is_180_angle(abs_ang):
-                self.angles[abs_ang] = RealAngle.fromAbsAngle(
+                self.rangles[abs_ang] = RealAngle.fromAbsAngle(
                     abs_ang, Degree(False, d=180)
                 )
             else:
-                self.angles[abs_ang] = RealAngle.fromAbsAngle(abs_ang, Degree())
+                self.rangles[abs_ang] = RealAngle.fromAbsAngle(abs_ang, Degree())
+        self.aconv = Convertor(self.disassemble_angle, self.get_rang)
 
     def init_segments(self):
         """Init segments with length value"""
-        self.rsegments = sum(
+        rseg_list = sum(
             [RealSegment.fromSegment(i).get_all_subsegments() for i in self.segments],
             [],
         )
-        for i in self.rsegments:
-            i.set_value()
+        self.rsegments = {}
+        for rseg in rseg_list:
+            rseg.set_value()
+            self.rsegments[abs(rseg)] = rseg
+
+        self.sconv = Convertor(self.disassemble_segment, self.get_rseg)
 
     def calc(self, inita=True, inits=True):
         """Get information through theroms and given data"""
@@ -332,6 +331,46 @@ class Handler:
         # Degree.variable_reduction(*[i.deg for i in self.angles.values()])
         # print([str(i) for i in self.angles])
 
+    """ BASIC CONVERTOR METHODS"""
+
+    def disassemble_angle(self, ang):
+        """Return a list of all the elementary AbsAngles that are included in ang"""
+        ang = self.get_better_name_angle(ang)
+        sub_angles = self.get_angles_around_point(ang.vertex)
+        i = 0
+        found = False
+        while i < len(sub_angles):
+            if sub_angles[i].ray1 == ang.ray1:
+                found = True
+                break
+            i += 1
+
+        if not found:
+            raise Exception(
+                f"didn't found the ray of the given angle ({ang}) around the vertex ({ang.vertex.name})"
+            )
+
+        res = []
+        while sub_angles[i].ray1 != ang.ray2:
+            res.append(sub_angles[i])
+            i = (i + 1) % len(sub_angles)
+
+        return res
+
+    def disassemble_segment(self, seg):
+        """Return list of all SubSegments (all elementary AbsSegments that are included in seg)"""
+        seg = self.get_full_seg(seg.start, seg.end)
+        points = seg.get_all_points()
+        return [AbsSegment(*points[i : i + 2]) for i in range(len(points) - 1)]
+
+    def get_rang(self, aang):
+        """Return RealAngle from elementry AbsAngle"""
+        return self.rangles[aang]
+
+    def get_rseg(self, seg):
+        """Return RealSegment from elementry AbsSegment"""
+        return self.rsegments[seg]
+
     """ BASIC SEGMENT_CALC METHODS"""
 
     def get_full_seg(self, startpoint, endpoint):
@@ -342,24 +381,8 @@ class Handler:
                 return i.get_subsegment(startpoint.name + endpoint.name)
         return None
 
-    def disassemble_segment(self, seg):
-        """Return list of all SubSegments"""
-        seg = self.get_full_seg(seg.start, seg.end)
-        points = seg.get_all_points()
-        return [AbsSegment(*points[i : i + 2]) for i in range(len(points) - 1)]
-
     def is_elementry_seg(self, seg):
         return len(self.disassemble_segment(seg)) == 1
-
-    def get_rseg(self, seg):
-        """Return RealSegment from elementry AbsSegment"""
-        lst = [i for i in self.rsegments if seg == abs(i)]
-        if len(lst) == 0:
-            raise KeyError
-        return lst[0]
-
-    def get_value_of_aang(self, aang):
-        return sum([self.angles[a] for a in self.disassemble_angle(aang)])
 
     """ POLYGONS """
 
@@ -433,10 +456,7 @@ class Handler:
                     break
 
         aangs = aangs[argmax(counter)]
-        aconv = Convertor(self.disassemble_angle, lambda aang: self.angles[aang])
-        # aconv = Convertor(self.disassemble_angle, self.get_rang)
-        sconv = Convertor(self.disassemble_segment, self.get_rseg)
-        return Polygon(pointlist, sides, aangs, aconv, sconv)
+        return Polygon(pointlist, sides, aangs, self.aconv, self.sconv)
 
     def find_all_triangles(self):
         return [Triangle.fromPolygon(p) for p in self.find_all_polygons(3)]
@@ -464,7 +484,7 @@ class Handler:
                 sum([self.disassemble_angle(a) for a in aang], [])
                 for aang in [aang1, aang2]
             ]
-        rangs = [[self.angles[a] for a in l] for l in aangs]
+        rangs = [[self.rangles[a] for a in l] for l in aangs]
         if all(r.isknown() for r in rangs[0] + rangs[1]):
             return
 
@@ -591,7 +611,7 @@ class Handler:
                     "->",
                     aa,
                     "=",
-                    self.angles[aa].deg,
+                    self.rangles[aa].deg,
                 )
 
     def seg_equal_seg(self, seg1, seg2, reason="given"):
@@ -740,7 +760,7 @@ class Handler:
                     "->",
                     ss,
                     "=",
-                    self.angles[ss].leng,
+                    self.rsegments[ss].leng,
                 )
 
     def aang_equal_deg(self, aang, deg, reason="given"):
@@ -751,17 +771,17 @@ class Handler:
             mes += (
                 " + ".join([str(i) for i in aang]) + " = " + str(deg) + f" ({reason})\n"
             )
-            if not all([i in self.angles for i in aang]):
+            if not all([i in self.rangles for i in aang]):
                 aang = sum([self.disassemble_angle(i) for i in aang], [])
-            rangs = [self.angles[i] for i in aang]
+            rangs = [self.rangles[i] for i in aang]
             # print(" + ".join([str(i) for i in aang]), "=", deg, f"({reason})")
         else:
-            if aang in self.angles:
-                rangs = [self.angles[aang]]
+            if aang in self.rangles:
+                rangs = [self.rangles[aang]]
                 mes += str(aang) + " = " + str(deg) + f" ({reason})\n"
                 # print(aang, "=", deg, f"({reason})")
             else:
-                rangs = [self.angles[i] for i in self.disassemble_angle(aang)]
+                rangs = self.aconv[aang]
                 mes += (
                     str(deg)
                     + " = "
@@ -862,7 +882,7 @@ class Handler:
                     "->",
                     aa,
                     "=",
-                    self.angles[aa].deg,
+                    self.rangles[aa].deg,
                 )
 
     def seg_equal_leng(self, seg, leng, reason="given"):
@@ -998,20 +1018,20 @@ class Handler:
             del switchval.value[maxkey]
             # that means every (1 maxkey = switchval)
             res = [(maxkey, switchval)]
-            for ang in self.angles.values():
+            for ang in self.rangles.values():
                 pre = ang.deg.new_copy()
                 ang.deg.switch(maxkey, switchval)
                 if pre != ang.deg:  # if value did change
                     if (
                         rang
-                        == list(filter(lambda x: abs(ang) == x, self.angles.keys()))[0]
+                        == list(filter(lambda x: abs(ang) == x, self.rangles.keys()))[0]
                     ):  # if this is the main rang
                         res.insert(
                             1,
                             (
                                 pre,
                                 list(
-                                    filter(lambda x: abs(ang) == x, self.angles.keys())
+                                    filter(lambda x: abs(ang) == x, self.rangles.keys())
                                 )[0],
                             ),
                         )  # insert it first to res
@@ -1020,7 +1040,7 @@ class Handler:
                             (
                                 pre,
                                 list(
-                                    filter(lambda x: abs(ang) == x, self.angles.keys())
+                                    filter(lambda x: abs(ang) == x, self.rangles.keys())
                                 )[0],
                             )
                         )
@@ -1040,7 +1060,7 @@ class Handler:
             del switchval.value[maxkey]
             # that means every (1 maxkey = switchval)
             res = [(maxkey, switchval)]
-            for seg in self.rsegments:
+            for seg in self.rsegments.values():
                 pre = seg.leng.new_copy()
                 seg.leng.switch(maxkey, switchval)
                 if pre != seg.leng:
@@ -1082,14 +1102,14 @@ class Handler:
             a = ans[i]
             arr = self.disassemble_angle(a)
 
-            a_sum = sum([self.angles[aa] for aa in arr])
+            a_sum = sum(self.aconv[a])
             # if a is known to be less than 180, return a
             if a_sum.isknown() and a_sum < 180:
                 return a
             for ii in range(len(arr)):
                 for j in range(ii, len(arr)):
                     # if a contains a subsum that is >= 180, return the other ans
-                    a_sum = sum([self.angles[aa] for aa in arr[ii : (j + 1)]])
+                    a_sum = sum([self.rangles[aa] for aa in arr[ii : (j + 1)]])
                     if a_sum == 180 or all(
                         [val > 0 for key, val in (a_sum - 180).value.items()]
                     ):
@@ -1160,30 +1180,6 @@ class Handler:
         maybeline.set_midpoints(ang.vertex)
 
         return any(i.is_subsegment(maybeline) for i in self.segments)
-
-    def disassemble_angle(self, ang):
-        """Return a list of all the elementary AbsAngles that are included in ang"""
-        ang = self.get_better_name_angle(ang)
-        sub_angles = self.get_angles_around_point(ang.vertex)
-        i = 0
-        found = False
-        while i < len(sub_angles):
-            if sub_angles[i].ray1 == ang.ray1:
-                found = True
-                break
-            i += 1
-
-        if not found:
-            raise Exception(
-                f"didn't found the ray of the given angle ({ang}) around the vertex ({ang.vertex.name})"
-            )
-
-        res = []
-        while sub_angles[i].ray1 != ang.ray2:
-            res.append(sub_angles[i])
-            i = (i + 1) % len(sub_angles)
-
-        return res
 
     @staticmethod
     def circle_perm(lst):

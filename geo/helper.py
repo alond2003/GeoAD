@@ -262,17 +262,7 @@ class Helper:
 
         res = []
         for name in names:
-            try:
-                res.append(self.g().angles[self.a(name)])
-            except KeyError:
-                res.append(
-                    sum(
-                        [
-                            self.g().angles[x]
-                            for x in self.g().disassemble_angle(self.a(name))
-                        ]
-                    )
-                )
+            res.append(sum(self.g().aconv[self.a(name)]))
         return tuple(res) if len(res) > 1 else res[0]
 
     def gets(self, *names):
@@ -285,17 +275,7 @@ class Helper:
 
         res = []
         for name in names:
-            try:
-                res.append(self.g().get_rseg(self.s(name)))
-            except KeyError:
-                res.append(
-                    sum(
-                        [
-                            self.g().get_rseg(x)
-                            for x in self.g().disassemble_segment(self.s(name))
-                        ]
-                    )
-                )
+            res.append(sum(self.g().sconv[self.s(name)]))
         return tuple(res) if len(res) > 1 else res[0]
 
     def equala(self, name1, name2, reason="given"):
