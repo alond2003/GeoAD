@@ -23,6 +23,10 @@ class RealAngle(AbsAngle):
         else:
             raise TypeError(f"cannot set angle value to {type(val)}")
 
+    def get_value(self):
+        """Return self.deg"""
+        return self.deg
+
     def new_copy(self):
         """Return a new copy of this object"""
         return RealAngle(

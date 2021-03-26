@@ -22,6 +22,10 @@ class RealSegment(AbsSegment):
         else:
             raise TypeError(f"cannot set segment value to {type(val)}")
 
+    def get_value(self):
+        """Return self.leng"""
+        return self.leng
+
     def new_copy(self):
         """Return a new copy of this object"""
         return RealSegment(

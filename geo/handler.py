@@ -529,7 +529,7 @@ class Handler:
         unchanged_max_rang = max_rang.new_copy()
         plus_group = [i.new_copy() for i in plus_group]
         minus_group = [i.new_copy() for i in minus_group]
-        res = self.rang_equal_deg(max_rang, sum(plus_group) - sum(minus_group))
+        res = self.real_equal_exp(max_rang, sum(plus_group) - sum(minus_group))
         if len(res) <= 1:
             # print("*", end="")
             return
@@ -678,7 +678,7 @@ class Handler:
         unchanged_max_rseg = max_rseg.new_copy()
         plus_group = [i.new_copy() for i in plus_group]
         minus_group = [i.new_copy() for i in minus_group]
-        res = self.rseg_equal_leng(max_rseg, sum(plus_group) - sum(minus_group))
+        res = self.real_equal_exp(max_rseg, sum(plus_group) - sum(minus_group))
         if len(res) <= 1:
             # print("*", end="")
             return
@@ -814,7 +814,7 @@ class Handler:
         pre_calc_rangs = [i.new_copy() for i in rangs]
         changed_rang = max(rangs)
         unchanged_rang = changed_rang.new_copy()
-        res = self.rang_equal_deg(max(rangs), deg - (sum(rangs) - max(rangs)))
+        res = self.real_equal_exp(max(rangs), deg - (sum(rangs) - max(rangs)))
         if len(res) <= 1:
             # print("*", resend="")
             return
@@ -936,7 +936,7 @@ class Handler:
         pre_calc_rsegs = [i.new_copy() for i in rsegs]
         changed_rseg = max(rsegs)
         unchanged_rseg = changed_rseg.new_copy()
-        res = self.rseg_equal_leng(max(rsegs), leng - (sum(rsegs) - max(rsegs)))
+        res = self.real_equal_exp(max(rsegs), leng - (sum(rsegs) - max(rsegs)))
         if len(res) <= 1:
             # print("*", resend="")
             return
@@ -1004,71 +1004,46 @@ class Handler:
                     self.get_rseg(ss).leng,
                 )
 
-    def rang_equal_deg(self, rang, deg):
-        """Set ang to be deg, Return list of (preDeg,affected Aangs), list[0] = (varswitched.key,switchval)"""
-        if rang.deg is None:
-            rang.deg = deg
+    def real_equal_exp(self, real, exp):
+        """Set real to be exp, Return list of (preExp, affected Reals), list[0] = (varswitched.key,switchval)"""
+        # if real has no value, set it to be exp
+        if real.get_value() is None:
+            real.set_value(exp)
             return []
-        else:
-            switchval = deg - rang.deg
-            if switchval == 0:
-                return []
-            maxkey = max(switchval.value.keys())
-            switchval = switchval / (-switchval.value[maxkey])
-            del switchval.value[maxkey]
-            # that means every (1 maxkey = switchval)
-            res = [(maxkey, switchval)]
-            for ang in self.rangles.values():
-                pre = ang.deg.new_copy()
-                ang.deg.switch(maxkey, switchval)
-                if pre != ang.deg:  # if value did change
-                    if (
-                        rang
-                        == list(filter(lambda x: abs(ang) == x, self.rangles.keys()))[0]
-                    ):  # if this is the main rang
-                        res.insert(
-                            1,
-                            (
-                                pre,
-                                list(
-                                    filter(lambda x: abs(ang) == x, self.rangles.keys())
-                                )[0],
-                            ),
-                        )  # insert it first to res
-                    else:
-                        res.append(
-                            (
-                                pre,
-                                list(
-                                    filter(lambda x: abs(ang) == x, self.rangles.keys())
-                                )[0],
-                            )
-                        )
-            return res
+        # if real's value is the same as exp, we cannot continue
+        switch_val = exp - real.get_value()
+        if switch_val == 0:
+            return []
 
-    def rseg_equal_leng(self, rseg, leng):
-        """Set rseg to be length, Return list of (preLen, affected Segs), list[0] = (varswitched.key,switchval)"""
-        if rseg.leng is None:
-            rseg.leng = leng
-            return []
-        else:
-            switchval = leng - rseg.leng
-            if switchval == 0:
-                return []
-            maxkey = max(switchval.value.keys())
-            switchval = switchval / (-switchval.value[maxkey])
-            del switchval.value[maxkey]
-            # that means every (1 maxkey = switchval)
-            res = [(maxkey, switchval)]
-            for seg in self.rsegments.values():
-                pre = seg.leng.new_copy()
-                seg.leng.switch(maxkey, switchval)
-                if pre != seg.leng:
-                    if abs(rseg) == abs(seg):
-                        res.insert(1, (pre, abs(seg)))
-                    else:
-                        res.append((pre, abs(seg)))
-            return res
+        # choose key,value to switch in all reals
+        max_key = max(switch_val.value.keys())
+        switch_val = switch_val / (-switch_val.value[max_key])
+        del switch_val.value[max_key]
+        """example:
+            exp = real
+            3x = 7y
+            switch_val = exp - real = 3x-7y
+            switch_val = (3x-7y)/7, remove y -> y = 3/7x
+        """
+        # that means every (1 max_key = switch_val)
+        res = [(max_key, switch_val)]
+        if isinstance(real, RealAngle):
+            reals = self.rangles.values()
+        elif isinstance(real, RealSegment):  # else:
+            reals = self.rsegments.values()
+
+        for new_real in reals:
+            pre_val = new_real.get_value().new_copy()
+            # make the switch for new_real
+            new_real.get_value().switch(max_key, switch_val)
+            # if the value has changed as a result of the switch
+            if pre_val != new_real.get_value():
+                # if abs(new_real) is real, insert it at the front
+                if abs(new_real) == abs(real):
+                    res.insert(1, (pre_val, abs(real)))
+                else:
+                    res.append((pre_val, abs(new_real)))
+        return res
 
     def set_parallel(self, p1, p2, reason="given"):
         """Set p1 || p2 based on resaon"""
