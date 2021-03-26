@@ -98,9 +98,9 @@ def try_solve_problem_using_coor_system():
         AE = AB.get_subsegment("AE")
         CE = CD.get_subsegment("CE")
         AEC = AbsAngle(AE, E, CE)
-        geo.aang_equal_deg(AEC, 2 * x + 40, "known")
+        geo.abs_equal_exp(AEC, 2 * x + 40, "known")
         BED = AbsAngle(AB.get_subsegment("BE"), E, CD.get_subsegment("DE"))
-        geo.aang_equal_deg(BED, x + 90, "known")
+        geo.abs_equal_exp(BED, x + 90, "known")
         geo.calc(inita=False)
         print(x)
     """

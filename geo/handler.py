@@ -15,18 +15,27 @@ from geo.comp.convertor import Convertor
 
 
 class Handler:
+
+    MAX_CALC_CYCLES = 10
+
     def __init__(self, *points):
         """Create a Handler object, keep all Points and collect all Segments"""
         self.points = list(points)
 
         self.segments = list(set([l for p in self.points for _, l in p.lines]))
 
+        # a list of proof blocks, initialized every time calc is called
+        self.proof = None
+        # angle & segment convertors
+        # initalized in self.init_angles & self.init_segments respectively
+        self.aconv, self.sconv = None, None
+
     """ THEOREMS """
 
     def angle_sum_on_line(self):
         """_th1: the sum of 2 angles on a line is 180°"""
         for ang180, seg in self.find_all_180_angles():
-            self.aang_equal_deg(
+            self.abs_equal_exp(
                 ang180, Degree(False, 180), f"angle upon line {seg} is 180"
             )
 
@@ -48,7 +57,7 @@ class Handler:
         for p in self.points:
             parts = self.get_angles_around_point(p)
             if len(parts) != 0:
-                self.aang_equal_deg(
+                self.abs_equal_exp(
                     parts, Degree(False, 360), f"sum of angles around point {p}"
                 )
 
@@ -132,7 +141,7 @@ class Handler:
                 considx = 3 - i
                 if aangs[0][i] is None or aangs[1][considx] is None:
                     continue
-                self.aang_equal_deg(
+                self.abs_equal_exp(
                     [aangs[0][i], aangs[1][considx]],
                     Degree(False, 180),
                     f"sum of consecutive angles between {p[0]} || {p[1]} and {t}",
@@ -228,7 +237,7 @@ class Handler:
     def angle_sum_in_triangle(self):
         """_th6: The sum of the measures of the interior angles of a triangle is 180°"""
         for t in self.find_all_triangles():
-            self.aang_equal_deg(
+            self.abs_equal_exp(
                 t.aangs,
                 Degree(False, 180),
                 f"the sum of the interior angles of △{t} is 180°",
@@ -237,7 +246,7 @@ class Handler:
     def angle_sum_in_quadrilateral(self):
         """_th7: The sum of the measures of the interior angles of a Quadrilateral is 360°"""
         for q in self.find_all_quadrilateral():
-            self.aang_equal_deg(
+            self.abs_equal_exp(
                 q.aangs,
                 Degree(False, 360),
                 f"the sum of the interior angles in quadrilateral {q} is 360°",
@@ -312,157 +321,40 @@ class Handler:
 
         self.sconv = Convertor(self.disassemble_segment, self.get_rseg)
 
-    def calc(self, inita=True, inits=True):
+    def calc(self, inita=True, inits=True, print_proof=True, after_init=lambda: None):
         """Get information through theroms and given data"""
+        self.proof = []
         if inita:
             self.init_angles()
         if inits:
             self.init_segments()
 
+        after_init()
+
         # print(self.angles)
-        self.vertical_angles()
-        self.angle_sum_on_line()
-        self.angle_sum_in_triangle()
-        self.angle_sum_in_quadrilateral()
-        self.exterior_angle_in_triangle()
-        self.angles_on_parallel_lines()
-        self.converse_angles_on_parallel_lines()
-        self.angle_sum_around_point()
-        # Degree.variable_reduction(*[i.deg for i in self.angles.values()])
-        # print([str(i) for i in self.angles])
+        last_len = -1
+        for _ in range(self.MAX_CALC_CYCLES):
+            last_len = len(self.proof)
 
-    """ BASIC CONVERTOR METHODS"""
+            self.vertical_angles()
+            self.angle_sum_on_line()
+            self.angle_sum_in_triangle()
+            self.angle_sum_in_quadrilateral()
+            self.exterior_angle_in_triangle()
+            self.angles_on_parallel_lines()
+            self.converse_angles_on_parallel_lines()
+            self.angle_sum_around_point()
 
-    def disassemble_angle(self, ang):
-        """Return a list of all the elementary AbsAngles that are included in ang"""
-        ang = self.get_better_name_angle(ang)
-        sub_angles = self.get_angles_around_point(ang.vertex)
-        i = 0
-        found = False
-        while i < len(sub_angles):
-            if sub_angles[i].ray1 == ang.ray1:
-                found = True
+            if len(self.proof) == last_len:
                 break
-            i += 1
+            # Degree.variable_reduction(*[i.deg for i in self.angles.values()])
+            # print([str(i) for i in self.angles])
+        if print_proof:
+            self.print_proof()
 
-        if not found:
-            raise Exception(
-                f"didn't found the ray of the given angle ({ang}) around the vertex ({ang.vertex.name})"
-            )
-
-        res = []
-        while sub_angles[i].ray1 != ang.ray2:
-            res.append(sub_angles[i])
-            i = (i + 1) % len(sub_angles)
-
-        return res
-
-    def disassemble_segment(self, seg):
-        """Return list of all SubSegments (all elementary AbsSegments that are included in seg)"""
-        seg = self.get_full_seg(seg.start, seg.end)
-        points = seg.get_all_points()
-        return [AbsSegment(*points[i : i + 2]) for i in range(len(points) - 1)]
-
-    def get_rang(self, aang):
-        """Return RealAngle from elementry AbsAngle"""
-        return self.rangles[aang]
-
-    def get_rseg(self, seg):
-        """Return RealSegment from elementry AbsSegment"""
-        return self.rsegments[seg]
-
-    """ BASIC SEGMENT_CALC METHODS"""
-
-    def get_full_seg(self, startpoint, endpoint):
-        """Return AbsSegment from 2 points"""
-        maybeline = AbsSegment(startpoint, endpoint)
-        for i in self.segments:
-            if i.is_subsegment(maybeline):
-                return i.get_subsegment(startpoint.name + endpoint.name)
-        return None
-
-    def is_elementry_seg(self, seg):
-        return len(self.disassemble_segment(seg)) == 1
-
-    """ POLYGONS """
-
-    def find_all_polygons(self, num_of_sides):
-        """Return list of all polygons with num_of_sides sides"""
-        res = []
-        for point_list in itertools.combinations(self.points, num_of_sides):
-            for perm in self.circle_perm(point_list):
-                if self.is_pointlist_poly(list(perm)):
-                    res.append(self.create_poly_from_pointlist(list(perm)))
-        return res
-
-    def is_pointlist_poly(self, pointlist):
-        """Checks if pointlist is a polygon"""
-        sides = [
-            AbsSegment(pfrom, pto)
-            for pfrom, pto in zip(pointlist, pointlist[1:] + pointlist[:1])
-        ]
-
-        # if not (all segments exist) -> no poly
-        if not all(
-            [any([seg.is_subsegment(side) for seg in self.segments]) for side in sides]
-        ):
-            return False
-
-        # if (3 points on same line) -> no poly
-
-        sides = [self.get_full_seg(seg.start, seg.end) for seg in sides]
-        if any(
-            [
-                [p in seg.get_all_points() for p in pointlist].count(True) > 2
-                for seg in self.segments
-            ]
-        ):
-            return False
-        # if (non-neighbor sides intersect) -> no poly
-        if any(
-            [
-                side.get_intersection_point(non_adj_side) is not None
-                for side_idx, side in enumerate(sides)
-                for non_adj_idx, non_adj_side in enumerate(sides)
-                if non_adj_idx != side_idx
-                and non_adj_idx != (side_idx + 1) % len(sides)
-                and non_adj_idx != (side_idx - 1 + len(sides)) % len(sides)
-            ]
-        ):
-            return False
-        return True
-
-    def create_poly_from_pointlist(self, pointlist):
-        """Create Polygon from pointlist (pointlist is a polygon)"""
-        sides = [
-            self.get_full_seg(pfrom, pto)
-            for pfrom, pto in zip(pointlist, pointlist[1:] + pointlist[:1])
-        ]
-        # choose aangs based on most non-reflex angles
-        aangs = [[], []]
-        counter = [0, 0]
-        for pfrom, vertex, pto in zip(
-            pointlist[-1:] + pointlist[:-1], pointlist, pointlist[1:] + pointlist[:1]
-        ):
-            from_seg = self.get_full_seg(pfrom, vertex)
-            to_seg = self.get_full_seg(vertex, pto)
-
-            aangs[0].append(AbsAngle(from_seg, vertex, to_seg))
-            aangs[1].append(AbsAngle(to_seg, vertex, from_seg))
-            non_reflex_aang = self.get_non_reflex_angle(pfrom, vertex, pto)
-            for i in range(2):
-                if non_reflex_aang == aangs[i][-1]:
-                    counter[i] += 1
-                    break
-
-        aangs = aangs[argmax(counter)]
-        return Polygon(pointlist, sides, aangs, self.aconv, self.sconv)
-
-    def find_all_triangles(self):
-        return [Triangle.fromPolygon(p) for p in self.find_all_polygons(3)]
-
-    def find_all_quadrilateral(self):
-        return [Quadrilateral.fromPolygon(p) for p in self.find_all_polygons(4)]
+    def print_proof(self):
+        """Prints self.proof"""
+        print("\n---\n".join(self.proof))
 
     """ SET EQUAL/PARALLEL """
 
@@ -763,246 +655,107 @@ class Handler:
                     self.rsegments[ss].leng,
                 )
 
-    def aang_equal_deg(self, aang, deg, reason="given"):
-        """Assume (AbsAngle = deg) and act apon it"""
-        mes = "---\n"
-        # print("---")
-        if isinstance(aang, list):
-            mes += (
-                " + ".join([str(i) for i in aang]) + " = " + str(deg) + f" ({reason})\n"
-            )
-            if not all([i in self.rangles for i in aang]):
-                aang = sum([self.disassemble_angle(i) for i in aang], [])
-            rangs = [self.rangles[i] for i in aang]
-            # print(" + ".join([str(i) for i in aang]), "=", deg, f"({reason})")
+    def abs_equal_exp(self, aabs, exp, reason="given"):
+        """Assume (Abs = Exp) and act apon it"""
+        message = ""
+        reals = []
+
+        # if aabs is elementry
+        if not isinstance(aabs, list) and self.is_elementry(aabs):
+            reals = self.conv(aabs)
+            message += f"{aabs} = {exp} ({reason})\n"
         else:
-            if aang in self.rangles:
-                rangs = [self.rangles[aang]]
-                mes += str(aang) + " = " + str(deg) + f" ({reason})\n"
-                # print(aang, "=", deg, f"({reason})")
+            if not isinstance(aabs, list):
+                aabs = [aabs]
+            reals = sum([self.conv(a) for a in aabs], [])
+
+            message += (
+                f"{exp} = {' + '.join(map(str,aabs))} = "
+                f"{' + '.join(map(str,map(abs,reals)))} ({reason}"
+                f", the whole is the sum of its parts)\n"
+            )
+
+        # if we already know, there is no point to continue
+        if all([r.isknown() for r in reals]):
+            return
+
+        # the real that will be evaluated
+        eval_real = max(reals)
+        # a copy of eval_real
+        eval_real_copy = eval_real.new_copy()
+        # all reals accept eval_real
+        other_reals = [r for r in reals if abs(r) != abs(eval_real)]
+        # copy of other_reals
+        other_reals_copy = [r.new_copy() for r in other_reals]
+
+        # reduct to (eval_real = exp - sum(other_reals))
+        if len(other_reals) > 0:
+            if len(other_reals) == 1:
+                other_reals_sum = str(abs(other_reals[0]))
             else:
-                rangs = self.aconv[aang]
-                mes += (
-                    str(deg)
-                    + " = "
-                    + str(aang)
-                    + " = "
-                    + " + ".join([str(abs(i)) for i in rangs])
-                    + f" ({reason}, the whole is the sum of its parts)\n"
-                )
-                # print(deg, "=", aang, "=", " + ".join([str(abs(i)) for i in rangs]), f"({reason}, the whole is the sum of its parts)")
-        if all([i.isknown() for i in rangs]):
-            # print("*", end="")
-            return
-        if len(rangs) > 1:
-            mes += (
-                str(abs(max(rangs)))
-                + " = "
-                + str(deg)
-                + " - "
-                + (
-                    "("
-                    + " + ".join([str(abs(i)) for i in rangs if abs(i) != max(rangs)])
-                    + ")"
-                    if len(rangs) > 2
-                    else str(abs(min(rangs)))
-                )
-                + f" (same)\n"
-            )
-            # print(str(abs(max(rangs))), "=", deg, "-", "(" + " + ".join([str(abs(i)) for i in rangs if i != max(rangs)]) + ")" if len(rangs) > 2 else str(abs(min(rangs))), f"(same)")
+                other_reals_sum = f"({' + '.join(map(str,map(abs,other_reals)))})"
+            message += f"{abs(eval_real)} = {exp} - {other_reals_sum} (same)\n"
 
-        pre_calc_rangs = [i.new_copy() for i in rangs]
-        changed_rang = max(rangs)
-        unchanged_rang = changed_rang.new_copy()
-        res = self.real_equal_exp(max(rangs), deg - (sum(rangs) - max(rangs)))
+        res = self.real_equal_exp(eval_real, exp - sum(other_reals))
+
         if len(res) <= 1:
-            # print("*", resend="")
-            return
-        print(mes, end="")
-        # trying to exterminate unnecesory printing (eval same as calc same as reason)
-        if len(res) == 2 and len(rangs) == 1:
-            return
-        if len(res) == 2 and changed_rang == deg - (
-            sum(pre_calc_rangs) - unchanged_rang
-        ):
-            # print הצבה and final value
-            print(
-                str(abs(changed_rang)),
-                "=",
-                deg,
-                "- ("
-                + " + ".join(
-                    [str(i.deg) for i in pre_calc_rangs if abs(i) != unchanged_rang]
-                )
-                + ")"
-                if len(rangs) > 2 or len(min(pre_calc_rangs).deg.value.keys()) > 1
-                else ("-" + str(min(pre_calc_rangs).deg) if len(rangs) == 2 else ""),
-                f"(eval)",
-                end=" ",
-            )
-            print("->", str(abs(changed_rang)), "=", changed_rang.deg, "(calc)")
+            return  # nothing has been discovered
+        if len(res) == 2 and len(other_reals) == 0:
+            pass  # skip unnecessary printing
         else:
-
-            # print הצבה and צמצום and find var
-            print(
-                unchanged_rang.deg,
-                "=",
-                deg,
-                "- ("
-                + " + ".join(
-                    [str(i.deg) for i in pre_calc_rangs if abs(i) != unchanged_rang]
-                )
-                + ")"
-                if len(rangs) > 2 or len(min(pre_calc_rangs).deg.value.keys()) > 1
-                else ("-" + str(min(pre_calc_rangs).deg) if len(rangs) == 2 else ""),
-                f"(eval)",
+            # - (sum(other_reals))
+            minus_other_reals_copy_sum = ""
+            should_add_parentheses = len(other_reals_copy) > 1 or (
+                len(other_reals_copy) == 1
+                and len(other_reals_copy[0].get_value().value.keys()) > 1
             )
-            print(
-                unchanged_rang.deg,
-                "=",
-                deg - sum((i for i in pre_calc_rangs if abs(i) != unchanged_rang)),
-                f"(same)",
-            )
-            print(
-                Degree(False, {res[0][0]: 1}),
-                "=",
-                res[0][1],
-                f"(found var {Degree(False, {res[0][0]: 1})})",
-            )
-
-            # for all angles affected:
-            for preval, aa in res[1:]:
-                # print: abs(ang) = proven = הצבה -> abs(ang) = ang
-                print(
-                    aa,
-                    "=",
-                    preval,
-                    "=",
-                    preval.__str__(res[0][0], f"({res[0][1]})"),
-                    "->",
-                    aa,
-                    "=",
-                    self.rangles[aa].deg,
+            should_not_add_parentheses = len(other_reals) == 1
+            if should_add_parentheses:
+                # add parentheses
+                minus_other_reals_copy_sum = (
+                    f" - ("
+                    f"{' + '.join([str(r.get_value()) for r in other_reals_copy])}"
+                    f")"
                 )
 
-    def seg_equal_leng(self, seg, leng, reason="given"):
-        """Assume (Segment = leng) and act apon it"""
-        mes = "---\n"
-        # print("---")
-        if isinstance(seg, list):
-            mes += (
-                " + ".join([str(i) for i in seg]) + " = " + str(leng) + f" ({reason})\n"
-            )
-            if not all([self.is_elementry_seg(i) for i in seg]):
-                seg = sum([self.disassemble_segment(i) for i in seg], [])
-            rsegs = [self.get_rseg(i) for i in seg]
-            # print(" + ".join([str(i) for i in aang]), "=", deg, f"({reason})")
-        else:
-            if self.is_elementry_seg(seg):
-                rsegs = [self.get_rseg(seg)]
-                mes += str(seg) + " = " + str(leng) + f" ({reason})\n"
-                # print(aang, "=", deg, f"({reason})")
+            elif should_not_add_parentheses:
+                # no parentheses
+                minus_other_reals_copy_sum = f" -{other_reals_copy[0].get_value()}"
+
+            # check for other repercussions
+            if len(res) == 2 and eval_real == exp - sum(other_reals_copy):
+                # no other repercussions from switching
+
+                # message += evaluation -> final value
+                message += (
+                    f"{abs(eval_real)} = {exp}{minus_other_reals_copy_sum} (eval)"
+                    f" -> {abs(eval_real)} = {eval_real.get_value()} (calc)\n"
+                )
             else:
-                rsegs = [self.get_rseg(i) for i in self.disassemble_segment(seg)]
-                mes += (
-                    str(leng)
-                    + " = "
-                    + str(seg)
-                    + " = "
-                    + " + ".join([str(abs(i)) for i in rsegs])
-                    + f" ({reason}, the whole is the sum of its parts)\n"
-                )
-                # print(deg, "=", aang, "=", " + ".join([str(abs(i)) for i in rangs]), f"({reason}, the whole is the sum of its parts)")
-        if all([i.isknown() for i in rsegs]):
-            # print("*", end="")
-            return
-        if len(rsegs) > 1:
-            mes += (
-                str(abs(max(rsegs)))
-                + " = "
-                + str(leng)
-                + " - "
-                + (
-                    "("
-                    + " + ".join([str(abs(i)) for i in rsegs if abs(i) != max(rsegs)])
-                    + ")"
-                    if len(rsegs) > 2
-                    else str(abs(min(rsegs)))
-                )
-                + f" (same)\n"
-            )
-            # print(str(abs(max(rangs))), "=", deg, "-", "(" + " + ".join([str(abs(i)) for i in rangs if i != max(rangs)]) + ")" if len(rangs) > 2 else str(abs(min(rangs))), f"(same)")
+                # there are other repercussions from switching
 
-        pre_calc_rsegs = [i.new_copy() for i in rsegs]
-        changed_rseg = max(rsegs)
-        unchanged_rseg = changed_rseg.new_copy()
-        res = self.real_equal_exp(max(rsegs), leng - (sum(rsegs) - max(rsegs)))
-        if len(res) <= 1:
-            # print("*", resend="")
-            return
-        print(mes, end="")
-        if len(res) == 2 and changed_rseg == leng - (
-            sum(pre_calc_rsegs) - unchanged_rseg
-        ):
-            # print הצבה and final value
-            print(
-                str(abs(changed_rseg)),
-                "=",
-                leng,
-                "- ("
-                + " + ".join(
-                    [str(i.leng) for i in pre_calc_rsegs if abs(i) != unchanged_rseg]
+                # message += evaluation (eval)
+                message += (
+                    f"{eval_real_copy.get_value()} = {exp}{minus_other_reals_copy_sum}"
+                    f" (eval)\n"
                 )
-                + ")"
-                if len(rsegs) > 2 or len(min(pre_calc_rsegs).leng.value.keys()) > 1
-                else ("-" + str(min(pre_calc_rsegs).leng) if len(rsegs) == 2 else ""),
-                f"(eval)",
-                end=" ",
-            )
-            print("->", str(abs(changed_rseg)), "=", changed_rseg.leng, "(calc)")
-        else:
-
-            # print הצבה and צמצום and find var
-            print(
-                unchanged_rseg.leng,
-                "=",
-                leng,
-                "- ("
-                + " + ".join(
-                    [str(i.leng) for i in pre_calc_rsegs if abs(i) != unchanged_rseg]
+                # message += reduction (same)
+                message += (
+                    f"{eval_real_copy.get_value()} = "
+                    f"{exp - sum(other_reals_copy)} (same)\n"
                 )
-                + ")"
-                if len(rsegs) > 2 or len(min(pre_calc_rsegs).leng.value.keys()) > 1
-                else ("-" + str(min(pre_calc_rsegs).leng) if len(rsegs) == 2 else ""),
-                f"(eval)",
-            )
-            print(
-                unchanged_rseg.leng,
-                "=",
-                leng - sum((i for i in pre_calc_rsegs if abs(i) != unchanged_rseg)),
-                f"(same)",
-            )
-            print(
-                Length(False, {res[0][0]: 1}),
-                "=",
-                res[0][1],
-                f"(found var {Length(False, {res[0][0]: 1})})",
-            )
-
-            # for all angles affected:
-            for preval, ss in res[1:]:
-                # print: abs(ang) = proven = הצבה -> abs(ang) = ang
-                print(
-                    ss,
-                    "=",
-                    preval,
-                    "=",
-                    preval.__str__(res[0][0], f"({res[0][1]})"),
-                    "->",
-                    ss,
-                    "=",
-                    self.get_rseg(ss).leng,
-                )
+                # message += (var = found) (found var)
+                var_found = Degree(False, {res[0][0]: 1})
+                message += f"{var_found} = {res[0][1]} (found var {var_found})\n"
+                # for all reals affected
+                for pre_exp, r in res[1:]:
+                    # message += (abs = proven = eval -> abs = final)
+                    message += (
+                        f"{r} = {pre_exp} = "
+                        f"{pre_exp.__str__(res[0][0],f'({res[0][1]})')}"
+                        f" -> {r} = {sum(self.conv(r))}\n"
+                    )
+        self.proof.append(message)
 
     def real_equal_exp(self, real, exp):
         """Set real to be exp, Return list of (preExp, affected Reals), list[0] = (varswitched.key,switchval)"""
@@ -1047,19 +800,160 @@ class Handler:
 
     def set_parallel(self, p1, p2, reason="given"):
         """Set p1 || p2 based on resaon"""
-        print("---")
-        p1 = [
-            s
-            for s in self.segments
-            if p1.start in s.get_all_points() and p1.end in s.get_all_points()
-        ][0]
-        p2 = [
-            s
-            for s in self.segments
-            if p2.start in s.get_all_points() and p2.end in s.get_all_points()
-        ][0]
+        for s in self.segments:
+            if s.is_subsegment(p1):
+                p1 = s
+            if s.is_subsegment(p2):
+                p2 = s
+
         p1.set_parallel(p2)
-        print(f"{str(p1)} || {str(p2)} ({reason})")
+        self.proof.append(f"{str(p1)} || {str(p2)} ({reason})")
+
+    """ GENERIC REAL/ABS METHODS"""
+
+    def conv(self, aabs):
+        """Convert abs to real using aconv/sconv"""
+        if isinstance(aabs, AbsAngle):
+            return self.aconv[aabs]
+        if isinstance(aabs, AbsSegment):
+            return self.sconv[aabs]
+
+    def is_elementry(self, aabs):
+        """Return if aabs is elementry angle/segment"""
+        return len(self.conv(aabs)) == 1
+
+    """ BASIC CONVERTOR METHODS"""
+
+    def disassemble_angle(self, ang):
+        """Return a list of all the elementary AbsAngles that are included in ang"""
+        ang = self.get_better_name_angle(ang)
+        sub_angles = self.get_angles_around_point(ang.vertex)
+        i = 0
+        found = False
+        while i < len(sub_angles):
+            if sub_angles[i].ray1 == ang.ray1:
+                found = True
+                break
+            i += 1
+
+        if not found:
+            raise Exception(
+                f"didn't found the ray of the given angle ({ang}) around the vertex ({ang.vertex.name})"
+            )
+
+        res = []
+        while sub_angles[i].ray1 != ang.ray2:
+            res.append(sub_angles[i])
+            i = (i + 1) % len(sub_angles)
+
+        return res
+
+    def disassemble_segment(self, seg):
+        """Return list of all SubSegments (all elementary AbsSegments that are included in seg)"""
+        seg = self.get_full_seg(seg.start, seg.end)
+        points = seg.get_all_points()
+        return [AbsSegment(*points[i : i + 2]) for i in range(len(points) - 1)]
+
+    def get_rang(self, aang):
+        """Return RealAngle from elementry AbsAngle"""
+        return self.rangles[aang]
+
+    def get_rseg(self, seg):
+        """Return RealSegment from elementry AbsSegment"""
+        return self.rsegments[seg]
+
+    """ POLYGONS """
+
+    def find_all_polygons(self, num_of_sides):
+        """Return list of all polygons with num_of_sides sides"""
+        res = []
+        for point_list in itertools.combinations(self.points, num_of_sides):
+            for perm in self.circle_perm(point_list):
+                if self.is_pointlist_poly(list(perm)):
+                    res.append(self.create_poly_from_pointlist(list(perm)))
+        return res
+
+    def is_pointlist_poly(self, pointlist):
+        """Checks if pointlist is a polygon"""
+        sides = [
+            AbsSegment(pfrom, pto)
+            for pfrom, pto in zip(pointlist, pointlist[1:] + pointlist[:1])
+        ]
+
+        # if not (all segments exist) -> no poly
+        if not all(
+            [any([seg.is_subsegment(side) for seg in self.segments]) for side in sides]
+        ):
+            return False
+
+        # if (3 points on same line) -> no poly
+
+        sides = [self.get_full_seg(seg.start, seg.end) for seg in sides]
+        if any(
+            [
+                [p in seg.get_all_points() for p in pointlist].count(True) > 2
+                for seg in self.segments
+            ]
+        ):
+            return False
+        # if (non-neighbor sides intersect) -> no poly
+        if any(
+            [
+                side.get_intersection_point(non_adj_side) is not None
+                for side_idx, side in enumerate(sides)
+                for non_adj_idx, non_adj_side in enumerate(sides)
+                if non_adj_idx != side_idx
+                and non_adj_idx != (side_idx + 1) % len(sides)
+                and non_adj_idx != (side_idx - 1 + len(sides)) % len(sides)
+            ]
+        ):
+            return False
+        return True
+
+    def create_poly_from_pointlist(self, pointlist):
+        """Create Polygon from pointlist (pointlist is a polygon)"""
+        sides = [
+            self.get_full_seg(pfrom, pto)
+            for pfrom, pto in zip(pointlist, pointlist[1:] + pointlist[:1])
+        ]
+        # choose aangs based on most non-reflex angles
+        aangs = [[], []]
+        counter = [0, 0]
+        for pfrom, vertex, pto in zip(
+            pointlist[-1:] + pointlist[:-1], pointlist, pointlist[1:] + pointlist[:1]
+        ):
+            from_seg = self.get_full_seg(pfrom, vertex)
+            to_seg = self.get_full_seg(vertex, pto)
+
+            aangs[0].append(AbsAngle(from_seg, vertex, to_seg))
+            aangs[1].append(AbsAngle(to_seg, vertex, from_seg))
+            non_reflex_aang = self.get_non_reflex_angle(pfrom, vertex, pto)
+            for i in range(2):
+                if non_reflex_aang == aangs[i][-1]:
+                    counter[i] += 1
+                    break
+
+        aangs = aangs[argmax(counter)]
+        return Polygon(pointlist, sides, aangs, self.aconv, self.sconv)
+
+    def find_all_triangles(self):
+        return [Triangle.fromPolygon(p) for p in self.find_all_polygons(3)]
+
+    def find_all_quadrilateral(self):
+        return [Quadrilateral.fromPolygon(p) for p in self.find_all_polygons(4)]
+
+    """ BASIC SEGMENT_CALC METHODS"""
+
+    def get_full_seg(self, startpoint, endpoint):
+        """Return AbsSegment from 2 points"""
+        maybeline = AbsSegment(startpoint, endpoint)
+        for i in self.segments:
+            if i.is_subsegment(maybeline):
+                return i.get_subsegment(startpoint.name + endpoint.name)
+        return None
+
+    def is_elementry_seg(self, seg):
+        return len(self.disassemble_segment(seg)) == 1
 
     """ BASIC ABS_ANGLE METOHDS """
 

@@ -257,13 +257,13 @@ def p353_e29():
     return (h.geta("BEC"),), (90,)
 
 
-# print(ans := p350_e11())
+# print(ans := p353_e27())
 # print(ans[0] == ans[1])
 print(all((check_prob(prob) for prob in [i for i in dir() if i.startswith("p")])))
 # for prob in [i for i in dir() if i.startswith("p")]:
-#     print("#"*100)
+#     print("#" * 100)
 #     print("\t\t\t\t", prob)
-#     print("#"*100)
+#     print("#" * 100)
 #     if not check_prob(prob):
 #         print(prob, "is wrong")
 #         break

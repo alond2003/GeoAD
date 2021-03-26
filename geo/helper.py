@@ -212,17 +212,20 @@ class Helper:
     """Init / Calc"""
 
     def inita(self):
-        """Call self.geo.init_angles() & Perform all self.to_inita functions"""
+        """Call self.geo.init_angles() if needed"""
         if not self.did_calc:
             self.g().init_angles()
+
+    def inits(self):
+        """Call self.geo.init_segments()"""
+        if not self.did_calc:
+            self.g().init_segments()
+
+    def to_init(self):
+        """Perform all self.to_inita/to_inits functions"""
         for f in self.to_inita:
             f()
         self.to_inita = []
-
-    def inits(self):
-        """Call self.geo.init_segments() & Perform all self.to_inits functions"""
-        if not self.did_calc:
-            self.g().init_segments()
         for f in self.to_inits:
             f()
         self.to_inits = []
@@ -231,7 +234,7 @@ class Helper:
         """Call self.geo.calc() & perform init"""
         self.inita()
         self.inits()
-        self.g().calc(False, False)
+        self.g().calc(False, False, after_init=self.to_init)
         self.did_calc = True
 
     """Set/Get/Equal Expressions"""
@@ -240,15 +243,15 @@ class Helper:
         """Set value of angle in geo to deg"""
 
         def func(h, name, deg, reason):
-            h.g().aang_equal_deg(h.a(name), deg, reason)
+            h.g().abs_equal_exp(h.a(name), deg, reason)
 
         self.to_inita.append(partial(func, self, name, deg, reason))
 
     def sets(self, name, leng, reason="given"):
         """Set value of segment in geo to leng"""
 
-        def func(h, name, deg, reason):
-            h.g().seg_equal_leng(h.s(name), leng, reason)
+        def func(h, name, leng, reason):
+            h.g().abs_equal_exp(h.s(name), leng, reason)
 
         self.to_inits.append(partial(func, self, name, leng, reason))
 
