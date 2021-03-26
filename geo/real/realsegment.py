@@ -22,7 +22,7 @@ class RealSegment(AbsSegment):
         else:
             raise TypeError(f"cannot set segment value to {type(val)}")
 
-    def get_value(self):
+    def get_expression(self):
         """Return self.leng"""
         return self.leng
 

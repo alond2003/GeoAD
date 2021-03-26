@@ -23,7 +23,7 @@ class RealAngle(AbsAngle):
         else:
             raise TypeError(f"cannot set angle value to {type(val)}")
 
-    def get_value(self):
+    def get_expression(self):
         """Return self.deg"""
         return self.deg
 

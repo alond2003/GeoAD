@@ -707,20 +707,20 @@ class Handler:
             minus_other_reals_copy_sum = ""
             should_add_parentheses = len(other_reals_copy) > 1 or (
                 len(other_reals_copy) == 1
-                and len(other_reals_copy[0].get_value().value.keys()) > 1
+                and len(other_reals_copy[0].get_expression().value.keys()) > 1
             )
             should_not_add_parentheses = len(other_reals) == 1
             if should_add_parentheses:
                 # add parentheses
                 minus_other_reals_copy_sum = (
                     f" - ("
-                    f"{' + '.join([str(r.get_value()) for r in other_reals_copy])}"
+                    f"{' + '.join([str(r.get_expression()) for r in other_reals_copy])}"
                     f")"
                 )
 
             elif should_not_add_parentheses:
                 # no parentheses
-                minus_other_reals_copy_sum = f" -{other_reals_copy[0].get_value()}"
+                minus_other_reals_copy_sum = f" -{other_reals_copy[0].get_expression()}"
 
             # check for other repercussions
             if len(res) == 2 and eval_real == exp - sum(other_reals_copy):
@@ -729,19 +729,19 @@ class Handler:
                 # message += evaluation -> final value
                 message += (
                     f"{abs(eval_real)} = {exp}{minus_other_reals_copy_sum} (eval)"
-                    f" -> {abs(eval_real)} = {eval_real.get_value()} (calc)\n"
+                    f" -> {abs(eval_real)} = {eval_real.get_expression()} (calc)\n"
                 )
             else:
                 # there are other repercussions from switching
 
                 # message += evaluation (eval)
                 message += (
-                    f"{eval_real_copy.get_value()} = {exp}{minus_other_reals_copy_sum}"
+                    f"{eval_real_copy.get_expression()} = {exp}{minus_other_reals_copy_sum}"
                     f" (eval)\n"
                 )
                 # message += reduction (same)
                 message += (
-                    f"{eval_real_copy.get_value()} = "
+                    f"{eval_real_copy.get_expression()} = "
                     f"{exp - sum(other_reals_copy)} (same)\n"
                 )
                 # message += (var = found) (found var)
@@ -760,11 +760,11 @@ class Handler:
     def real_equal_exp(self, real, exp):
         """Set real to be exp, Return list of (preExp, affected Reals), list[0] = (varswitched.key,switchval)"""
         # if real has no value, set it to be exp
-        if real.get_value() is None:
+        if real.get_expression() is None:
             real.set_value(exp)
             return []
         # if real's value is the same as exp, we cannot continue
-        switch_val = exp - real.get_value()
+        switch_val = exp - real.get_expression()
         if switch_val == 0:
             return []
 
@@ -786,11 +786,11 @@ class Handler:
             reals = self.rsegments.values()
 
         for new_real in reals:
-            pre_val = new_real.get_value().new_copy()
+            pre_val = new_real.get_expression().new_copy()
             # make the switch for new_real
-            new_real.get_value().switch(max_key, switch_val)
+            new_real.get_expression().switch(max_key, switch_val)
             # if the value has changed as a result of the switch
-            if pre_val != new_real.get_value():
+            if pre_val != new_real.get_expression():
                 # if abs(new_real) is real, insert it at the front
                 if abs(new_real) == abs(real):
                     res.insert(1, (pre_val, abs(real)))
