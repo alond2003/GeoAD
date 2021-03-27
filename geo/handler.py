@@ -18,14 +18,19 @@ class Handler:
 
     MAX_CALC_CYCLES = 10
 
+    # Theorem dictionary that maps theorem number to function
+    THEOREM_DICT = {}
+
     def __init__(self, *points):
         """Create a Handler object, keep all Points and collect all Segments"""
-        self.points = list(points)
+        Handler.initialize_therem_dict()
 
+        self.points = list(points)
         self.segments = list(set([l for p in self.points for _, l in p.lines]))
 
         # a list of proof blocks, initialized every time calc is called
         self.proof = None
+
         # angle & segment convertors
         # initalized in self.init_angles & self.init_segments respectively
         self.aconv, self.sconv = None, None
@@ -321,7 +326,14 @@ class Handler:
 
         self.sconv = Convertor(self.disassemble_segment, self.get_rseg)
 
-    def calc(self, inita=True, inits=True, print_proof=True, after_init=lambda: None):
+    def calc(
+        self,
+        inita=True,
+        inits=True,
+        print_proof=True,
+        after_init=lambda: None,
+        use_theorems=None,
+    ):
         """Get information through theroms and given data"""
         self.proof = []
         if inita:
@@ -336,14 +348,12 @@ class Handler:
         for _ in range(self.MAX_CALC_CYCLES):
             last_len = len(self.proof)
 
-            self.vertical_angles()
-            self.angle_sum_on_line()
-            self.angle_sum_in_triangle()
-            self.angle_sum_in_quadrilateral()
-            self.exterior_angle_in_triangle()
-            self.angles_on_parallel_lines()
-            self.converse_angles_on_parallel_lines()
-            self.angle_sum_around_point()
+            if use_theorems is None:
+                for th in self.THEOREM_DICT.keys():
+                    self.apply_theorem(th)
+            else:
+                for th in use_theorems:
+                    self.apply_theorem(th)
 
             if len(self.proof) == last_len:
                 break
@@ -351,6 +361,11 @@ class Handler:
             # print([str(i) for i in self.angles])
         if print_proof:
             self.print_proof()
+
+    def apply_theorem(self, th):
+        """Apply Theorom th"""
+        therorem_func = self.THEOREM_DICT[th]
+        therorem_func(self)
 
     def print_proof(self):
         """Prints self.proof"""
@@ -805,6 +820,22 @@ class Handler:
         maybeline.set_midpoints(ang.vertex)
 
         return any(i.is_subsegment(maybeline) for i in self.segments)
+
+    @classmethod
+    def initialize_therem_dict(cls):
+        """Initialize THEOREM_DICT if needed"""
+        if cls.THEOREM_DICT != {}:
+            return
+        cls.THEOREM_DICT = {
+            1: cls.angle_sum_on_line,
+            2: cls.vertical_angles,
+            3: cls.angle_sum_around_point,
+            4: cls.angles_on_parallel_lines,
+            5: cls.converse_angles_on_parallel_lines,
+            6: cls.angle_sum_in_triangle,
+            7: cls.angle_sum_in_quadrilateral,
+            8: cls.exterior_angle_in_triangle,
+        }
 
     @staticmethod
     def circle_perm(lst):
