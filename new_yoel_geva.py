@@ -1,5 +1,3 @@
-from tqdm import tqdm
-
 from geo.problemcollection import ProblemCollection
 from geo.helper import Helper
 from geo.real.expression import Degree
@@ -7,6 +5,8 @@ from geo.filehandler import print_points_from_file as _pggb
 
 
 class YoelGevaProblems(ProblemCollection):
+    """ Problems from Yoel Geva, Part A, 10th garde class"""
+
     @classmethod
     def all(cls):
         ans = []
