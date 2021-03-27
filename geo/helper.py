@@ -230,11 +230,11 @@ class Helper:
             f()
         self.to_inits = []
 
-    def calc(self, print_proof=True):
+    def calc(self, print_proof=True, use_theorems=None):
         """Call self.geo.calc() & perform init"""
         self.inita()
         self.inits()
-        self.g().calc(False, False, print_proof, self.to_init)
+        self.g().calc(False, False, print_proof, self.to_init, use_theorems)
         self.did_calc = True
 
     """Set/Get/Equal Expressions"""

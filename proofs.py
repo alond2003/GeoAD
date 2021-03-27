@@ -1,5 +1,6 @@
 from geo.problemcollection import ProblemCollection
 from geo.filehandler import print_points_from_file as _pggb
+from geo.helper import Helper
 
 # http://mathbitsnotebook.com/JuniorMath/Geometry/GEORules.html
 
@@ -292,8 +293,66 @@ class ProofCollection(ProblemCollection):
     @staticmethod
     def th1(print_proof=False):
         """_ax1 & _ax2 -> _th1"""
+        h = Helper()
+        h.ps_from_file(
+            r"C:\Users\alond\Documents\School\AvodatGemer\AvodatGemerCode\ggb_files\th1.ggb"
+        )
+        h.s("ACB", "CD")
+        h.calc(print_proof, use_theorems=[])
+        # by ax1, ∢ACB = 180°
+        ACB = h.a("ACB")
+        # by ax2, ∢ACB is the sum of its parts
+        parts = h.g().disassemble_angle(ACB)
+        # therefore, we know sum(parts) = 180
+        if print_proof:
+            print(f"ACB = 180, {ACB} = {' + '.join(map(str,parts))}")
+            print(f"⇓")
+            print(f"{' + '.join(map(str,parts))} = 180")
+
         return None, None
+
+    @staticmethod
+    def th2(print_proof=False):
+        """_th1 -> _th2"""
+        h = Helper()
+        h.ps_from_file(
+            r"C:\Users\alond\Documents\School\AvodatGemer\AvodatGemerCode\ggb_files\th2.ggb"
+        )
+        h.s("AEB", "CED")
+        h.calc(print_proof, use_theorems=[1])
+        if print_proof:
+            print(f"{h.a('AEC')} = {h.geta('AEC')}, {h.a('BED')} = {h.geta('BED')}")
+            print(f"⇓")
+            print(f"{h.a('AEC')} = {h.a('BED')}")
+        return (h.geta("AEC") == h.geta("BED"),), (True,)
+
+    @staticmethod
+    def th3(print_proof=False):
+        """_th1 -> _th3"""
+        h = Helper()
+        h.ps_from_file(
+            r"C:\Users\alond\Documents\School\AvodatGemer\AvodatGemerCode\ggb_files\th3.ggb"
+        )
+        h.s("AEB", "CED")
+        h.calc(print_proof, use_theorems=[1])
+        E = h.p("E")
+        aangs_around_E = h.g().get_angles_around_point(E)
+        sum_aangs_around_E = sum(h.geta(*aangs_around_E))
+        if print_proof:
+            print(
+                " + ".join(map(str, aangs_around_E)),
+                "=",
+                " + ".join(map(str, h.geta(*aangs_around_E))),
+                "=",
+                sum_aangs_around_E,
+            )
+            print("⇓")
+            print(" + ".join(map(str, aangs_around_E)), "=", sum_aangs_around_E)
+
+        return (sum_aangs_around_E,), (360,)
+        # return sum(h.geta(*h.g().get_angles_around_point(h.p("E")))))
 
 
 if __name__ == "__main__":
     ProofCollection.check_all()
+    # ProofCollection.th3(True)
