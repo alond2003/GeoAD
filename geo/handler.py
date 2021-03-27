@@ -50,7 +50,7 @@ class Handler:
                     self.is_180_angle(AbsAngle(a1.ray2, p, a2.ray2))
                     or self.is_180_angle(AbsAngle(a2.ray2, p, a1.ray2))
                 ):
-                    self.aang_equal_aang(a1, a2, "vertical angles")
+                    self.abs_equal_abs(a1, a2, "vertical angles")
 
     def angle_sum_around_point(self):
         """_th3: all angles around a point sum up to 360°"""
@@ -117,7 +117,7 @@ class Handler:
             for i in range(4):
                 if aangs[0][i] is None or aangs[1][i] is None:
                     continue
-                self.aang_equal_aang(
+                self.abs_equal_abs(
                     aangs[0][i],
                     aangs[1][i],
                     f"Corresponding angles are equal between {p[0]} || {p[1]} and {t}",
@@ -129,7 +129,7 @@ class Handler:
                 coridx = (i + 2) % 4
                 if aangs[0][i] is None or aangs[1][coridx] is None:
                     continue
-                self.aang_equal_aang(
+                self.abs_equal_abs(
                     aangs[0][i],
                     aangs[1][coridx],
                     f"alteranting angles are equal between {p[0]} || {p[1]} and {t}",
@@ -277,7 +277,7 @@ class Handler:
                     start[1],
                     [p for p in tri.points if p not in side.get_all_points()][0],
                 )
-                self.aang_equal_aang(
+                self.abs_equal_abs(
                     external_angle,
                     [tri.get_angle_from_point(p) for p in tri.points if p != start[1]],
                     f"external angle to {tri.get_angle_from_point(start[1])} in △{tri}",
@@ -288,7 +288,7 @@ class Handler:
                     end[1],
                     [p for p in tri.points if p not in side.get_all_points()][0],
                 )
-                self.aang_equal_aang(
+                self.abs_equal_abs(
                     external_angle,
                     [tri.get_angle_from_point(p) for p in tri.points if p != end[1]],
                     f"external angle to {tri.get_angle_from_point(end[1])} in △{tri}",
@@ -354,306 +354,62 @@ class Handler:
 
     def print_proof(self):
         """Prints self.proof"""
-        print("\n---\n".join(self.proof))
+        print("---\n".join(self.proof))
 
     """ SET EQUAL/PARALLEL """
 
-    def aang_equal_aang(self, aang1, aang2, reason="given"):
-        """Assume AbsAngle1 = AbsAngle2 and act apon it"""
-        mes = "---\n"
-        # print("---")
-        if not (isinstance(aang1, list) or isinstance(aang2, list)):
-            aangs = [self.disassemble_angle(a) for a in [aang1, aang2]]
-            mes += f"{aang1} = {aang2} ({reason})\n"
-            # print(aang1, "=", aang2)
-        else:
-            if not isinstance(aang1, list):
-                aang1 = [aang1]
-            if not isinstance(aang2, list):
-                aang2 = [aang2]
-            mes += f"{' + '.join(map(str,aang1))} = {' + '.join(map(str,aang2))} ({reason})\n"
-            aangs = [
-                sum([self.disassemble_angle(a) for a in aang], [])
-                for aang in [aang1, aang2]
-            ]
-        rangs = [[self.rangles[a] for a in l] for l in aangs]
-        if all(r.isknown() for r in rangs[0] + rangs[1]):
-            return
+    def abs_equal_abs(self, abs1, abs2, reason="given"):
+        """Assume Abs1=Abs2 and act apon it"""
+        message = ""
+        abs_arr = [abs1, abs2]
+        abs_sum_strs = [None, None]
+        for i in range(2):
+            if not isinstance(abs_arr[i], list):
+                abs_arr[i] = [abs_arr[i]]
+            abs_sum_strs[i] = " + ".join(map(str, abs_arr[i]))
 
-        if len(aangs[0]) + len(aangs[1]) > 2 or (
-            (isinstance(aang1, list) and len(aang1) != len(aangs[0]))
-            or (isinstance(aang2, list) and len(aang2) != len(aangs[1]))
-        ):
-            mes += (
-                " + ".join(map(str, aangs[0]))
-                + " = "
-                + " + ".join(map(str, aangs[1]))
-                + "\n"
-            )
-            # print(" + ".join(aangs[0]), "=", " + ".join(aangs[1]))
-        max_rang = max(*rangs[0], *rangs[1])
-        minus_group, plus_group = rangs
-        if abs(max_rang) in aangs[1]:
-            minus_group, plus_group = plus_group, minus_group
-        minus_group = [i for i in minus_group if abs(i) != max_rang]
-        if not (len(rangs[0]) == 1 and rangs[0][0] == abs(max_rang)):
+        message += f"{abs_sum_strs[0]} = {abs_sum_strs[1]} ({reason})\n"
 
-            mes += (
-                str(abs(max_rang))
-                + " = "
-                + " + ".join([str(abs(i)) for i in plus_group])
-                + (
-                    "- "
-                    + (
-                        f"({' + '.join([str(abs(i)) for i in minus_group])})"
-                        if len(minus_group) > 1
-                        or len(minus_group[0].deg.value.keys()) > 1
-                        else str(abs(minus_group[0]))
-                    )
-                    if len(minus_group) > 0
-                    else ""
-                )
-                + "\n"
+        reals = [sum([self.conv(a) for a in abs_lst], []) for abs_lst in abs_arr]
+        # if some angles were not elementry
+        if sum([len(lst) for lst in reals]) > sum([len(lst) for lst in abs_arr]):
+            message += " = ".join(
+                [" + ".join([str(abs(r)) for r in reals[i]]) for i in range(2)]
             )
-            # print(abs(max_rang), "=", " + ".join([str(abs(i)) for i in plus_group]), ("- " + (f"({' + '.join([str(abs(i)) for i in minus_group])})" if len(minus_group) > 1 else str(abs(minus_group[0]))) if len(minus_group) > 0 else ""))
+            message += " \n"
 
-        # pre_calc_rangs = [i.new_copy() for i in rangs]
-        unchanged_max_rang = max_rang.new_copy()
-        plus_group = [i.new_copy() for i in plus_group]
-        minus_group = [i.new_copy() for i in minus_group]
-        res = self.real_equal_exp(max_rang, sum(plus_group) - sum(minus_group))
-        if len(res) <= 1:
-            # print("*", end="")
-            return
-        print(mes, end="")
-        if len(res) == 2 and max_rang == sum(plus_group) - sum(minus_group):
-            # print הצבה and final value
-            print(
-                abs(max_rang),
-                "=",
-                " + ".join([str(i.deg) for i in plus_group]),
-                (
-                    "- "
-                    + (
-                        f"({' + '.join([str(i.deg) for i in minus_group])})"
-                        if len(minus_group) > 1
-                        or len(minus_group[0].deg.value.keys()) > 1
-                        else str(minus_group[0].deg)
-                    )
-                    if len(minus_group) > 0
-                    else ""
-                ),
-                "(eval)",
-                end=" ",
-            )
-            print("->", abs(max_rang), "=", max_rang.deg, "(calc)")
-        else:
-
-            # print הצבה and צמצום and find var
-            print(
-                unchanged_max_rang.deg,
-                "=",
-                " + ".join([str(i.deg) for i in plus_group]),
-                (
-                    "- "
-                    + (
-                        f"({' + '.join([str(i.deg) for i in minus_group])})"
-                        if len(minus_group) > 1
-                        or len(minus_group[0].deg.value.keys()) > 1
-                        else str(minus_group[0].deg)
-                    )
-                    if len(minus_group) > 0
-                    else ""
-                ),
-                "(eval)",
-            )
-            print(
-                unchanged_max_rang.deg,
-                "=",
-                sum(plus_group) - sum(minus_group),
-                f"(same)",
-            )
-            print(
-                Degree(False, {res[0][0]: 1}),
-                "=",
-                res[0][1],
-                f"(found var {Degree(False, {res[0][0]: 1})})",
+        max_real = max(*reals[0], *reals[1])
+        if abs(max_real) in reals[0]:
+            minus_group, plus_group = reals
+        else:  # elif abs(max_real) in reals[1]:
+            plus_group, minus_group = reals
+        minus_group = [r for r in minus_group if abs(r) != max_real]
+        if len(minus_group) > 0:
+            message += (
+                f"{abs(max_real)} = {' + '.join([str(abs(r)) for r in plus_group])}"
+                f" - ({' + '.join([str(abs(r)) for r in minus_group])})\n"
             )
 
-            rem = []
-            for pre, aa in res[1:]:
-                if aa in aangs[0] or aa in aangs[1]:
-                    res.insert(1, (pre, aa))
-                    rem.append((pre, aa))
-            for x, y in rem:
-                for k in range(len(res) - 1, 0, -1):
-                    if res[k] == (x, y):
-                        res.pop(k)
-                        break
+        message += (
+            f"{abs(max_real)} = "
+            f"{' + '.join([str(r.get_expression()) for r in plus_group])}"
+        )
 
-            # for all angles affected:
-            for preval, aa in res[1:]:
-                # print: abs(ang) = proven = הצבה -> abs(ang) = ang
-                print(
-                    aa,
-                    "=",
-                    preval,
-                    "=",
-                    preval.__str__(res[0][0], f"({res[0][1]})"),
-                    "->",
-                    aa,
-                    "=",
-                    self.rangles[aa].deg,
-                )
-
-    def seg_equal_seg(self, seg1, seg2, reason="given"):
-        """Assume Segment1 = Segment2 and act apon it"""
-        mes = "---\n"
-        # print("---")
-        if not (isinstance(seg1, list) or isinstance(seg2, list)):
-            segs = [self.disassemble_segment(s) for s in [seg1, seg2]]
-            mes += f"{seg1} = {seg2} ({reason})\n"
-            # print(aang1, "=", aang2)
-        else:
-            if not isinstance(seg1, list):
-                seg1 = [seg1]
-            if not isinstance(seg2, list):
-                seg2 = [seg2]
-            mes += f"{' + '.join(map(str,seg1))} = {' + '.join(map(str,seg2))} ({reason})\n"
-            segs = [
-                sum([self.disassemble_segment(a) for a in seg], [])
-                for seg in [seg1, seg2]
-            ]
-        rsegs = [[self.get_rseg(s) for s in l] for l in segs]
-        if all(r.isknown() for r in rsegs[0] + rsegs[1]):
-            return
-
-        if (
-            len(segs[0]) + len(segs[1]) > 2
-            and (not isinstance(seg1, list) or len(seg1) != len(segs[0]))
-            and (not isinstance(seg2, list) or len(seg2) != len(segs[1]))
-        ):
-            mes += (
-                " + ".join(map(str, segs[0]))
-                + " = "
-                + " + ".join(map(str, segs[1]))
-                + "\n"
+        should_add_parentheses = len(minus_group) > 1 or (
+            len(minus_group) == 1
+            and len(minus_group[0].get_expression().value.keys()) > 1
+        )
+        should_not_add_parentheses = len(minus_group) == 1
+        if should_add_parentheses:
+            message += (
+                f" - ({' + '.join([str(r.get_expression()) for r in minus_group])})"
             )
-            # print(" + ".join(aangs[0]), "=", " + ".join(aangs[1]))
-        max_rseg = max(*rsegs[0], *rsegs[1])
-        minus_group, plus_group = rsegs
-        if abs(max_rseg) in segs[1]:
-            minus_group, plus_group = plus_group, minus_group
-        minus_group = [i for i in minus_group if abs(i) != max_rseg]
-        if not (len(rsegs[0]) == 1 and rsegs[0][0] == abs(max_rseg)):
+        elif should_not_add_parentheses:
+            message += f"- {minus_group[0].get_expression()}"
 
-            mes += (
-                str(abs(max_rseg))
-                + " = "
-                + " + ".join([str(abs(i)) for i in plus_group])
-                + (
-                    "- "
-                    + (
-                        f"({' + '.join([str(abs(i)) for i in minus_group])})"
-                        if len(minus_group) > 1
-                        or len(minus_group[0].deg.value.keys()) > 1
-                        else str(abs(minus_group[0]))
-                    )
-                    if len(minus_group) > 0
-                    else ""
-                )
-                + "\n"
-            )
-            # print(abs(max_rang), "=", " + ".join([str(abs(i)) for i in plus_group]), ("- " + (f"({' + '.join([str(abs(i)) for i in minus_group])})" if len(minus_group) > 1 else str(abs(minus_group[0]))) if len(minus_group) > 0 else ""))
-
-        # pre_calc_rangs = [i.new_copy() for i in rangs]
-        unchanged_max_rseg = max_rseg.new_copy()
-        plus_group = [i.new_copy() for i in plus_group]
-        minus_group = [i.new_copy() for i in minus_group]
-        res = self.real_equal_exp(max_rseg, sum(plus_group) - sum(minus_group))
-        if len(res) <= 1:
-            # print("*", end="")
-            return
-        print(mes, end="")
-        if len(res) == 2 and max_rseg == sum(plus_group) - sum(minus_group):
-            # print הצבה and final value
-            print(
-                abs(max_rseg),
-                "=",
-                " + ".join([str(i.leng) for i in plus_group]),
-                (
-                    "- "
-                    + (
-                        f"({' + '.join([str(i.leng) for i in minus_group])})"
-                        if len(minus_group) > 1
-                        or len(minus_group[0].deg.value.keys()) > 1
-                        else str(minus_group[0].leng)
-                    )
-                    if len(minus_group) > 0
-                    else ""
-                ),
-                "(eval)",
-                end=" ",
-            )
-            print("->", abs(max_rseg), "=", max_rseg.leng, "(calc)")
-        else:
-
-            # print הצבה and צמצום and find var
-            print(
-                unchanged_max_rseg.leng,
-                "=",
-                " + ".join([str(i.leng) for i in plus_group]),
-                (
-                    "- "
-                    + (
-                        f"({' + '.join([str(i.leng) for i in minus_group])})"
-                        if len(minus_group) > 1
-                        or len(minus_group[0].deg.value.keys()) > 1
-                        else str(minus_group[0].leng)
-                    )
-                    if len(minus_group) > 0
-                    else ""
-                ),
-                "(eval)",
-            )
-            print(
-                unchanged_max_rseg.leng,
-                "=",
-                sum(plus_group) - sum(minus_group),
-                f"(same)",
-            )
-            print(
-                Length(False, {res[0][0]: 1}),
-                "=",
-                res[0][1],
-                f"(found var {Length(False, {res[0][0]: 1})})",
-            )
-
-            rem = []
-            for pre, ss in res[1:]:
-                if ss in segs[0] or ss in segs[1]:
-                    res.insert(1, (pre, ss))
-                    rem.append((pre, ss))
-            for x, y in rem:
-                for k in range(len(res) - 1, 0, -1):
-                    if res[k] == (x, y):
-                        res.pop(k)
-                        break
-
-            # for all segments affected:
-            for preval, ss in res[1:]:
-                # print: abs(ang) = proven = הצבה -> abs(ang) = ang
-                print(
-                    ss,
-                    "=",
-                    preval,
-                    "=",
-                    preval.__str__(res[0][0], f"({res[0][1]})"),
-                    "->",
-                    ss,
-                    "=",
-                    self.rsegments[ss].leng,
-                )
+        message += " (eval)\n"
+        self.abs_equal_exp(abs(max_real), sum(plus_group) - sum(minus_group))
+        self.proof[-1] = message + self.proof[-1]
 
     def abs_equal_exp(self, aabs, exp, reason="given"):
         """Assume (Abs = Exp) and act apon it"""
@@ -807,7 +563,7 @@ class Handler:
                 p2 = s
 
         p1.set_parallel(p2)
-        self.proof.append(f"{str(p1)} || {str(p2)} ({reason})")
+        self.proof.append(f"{str(p1)} || {str(p2)} ({reason})\n")
 
     """ GENERIC REAL/ABS METHODS"""
 

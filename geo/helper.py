@@ -150,7 +150,7 @@ class Helper:
 
         # Set median to be the middle of the triangle side
         def func(h, across_side, pto, pfrom, name, tri):
-            h.g().seg_equal_seg(
+            h.g().abs_equal_abs(
                 across_side.get_subsegment_to(pto),
                 across_side.get_subsegment_from(pto),
                 f"given that {name} is median to {across_side} in △{tri}",
@@ -165,7 +165,7 @@ class Helper:
 
         # Set the two angles as equals
         def func(h, other_points, pfrom, pto, name, tri):
-            h.g().aang_equal_aang(
+            h.g().abs_equal_abs(
                 h.g().get_non_reflex_angle(other_points[0], pfrom, pto),
                 h.g().get_non_reflex_angle(other_points[1], pfrom, pto),
                 f"given that {name} is angle bisector of angle {h.g().get_non_reflex_angle(other_points[0],pfrom,other_points[1])} in △{tri}",
@@ -194,7 +194,7 @@ class Helper:
         pmid = self.p(self.get_common_point(name, self.s(side).midpoints))
         # append Equality of halves
         def eq_of_halves(h, side, pmid, name, tri):
-            h.g().seg_equal_seg(
+            h.g().abs_equal_abs(
                 h.s(side).get_subsegment_to(pmid),
                 h.s(side).get_subsegment_from(pmid),
                 f"given that {name} is segment bisector to side {side} in △{tri}",
@@ -230,11 +230,11 @@ class Helper:
             f()
         self.to_inits = []
 
-    def calc(self):
+    def calc(self, print_proof=True):
         """Call self.geo.calc() & perform init"""
         self.inita()
         self.inits()
-        self.g().calc(False, False, after_init=self.to_init)
+        self.g().calc(False, False, print_proof, self.to_init)
         self.did_calc = True
 
     """Set/Get/Equal Expressions"""
@@ -285,7 +285,7 @@ class Helper:
         """Set angle name1 to be equal to name2"""
 
         def func(h, name, deg, reason):
-            h.g().aang_equal_aang(h.a(name1), h.a(name2), reason)
+            h.g().abs_equal_abs(h.a(name1), h.a(name2), reason)
 
         self.to_inita.append(partial(func, self, name1, name2, reason))
 
@@ -293,7 +293,7 @@ class Helper:
         """Set seg name1 to be equal to name2"""
 
         def func(h, name, deg, reason):
-            h.g().seg_equal_seg(h.s(name1), h.s(name2), reason)
+            h.g().abs_equal_abs(h.s(name1), h.s(name2), reason)
 
         self.to_inita.append(partial(func, self, name1, name2, reason))
 
