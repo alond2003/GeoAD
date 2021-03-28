@@ -18,9 +18,16 @@ class ProblemCollection:
         """Check all problem functions from class"""
         problems = tqdm(cls.all())
         for prob in problems:
-            if not ProblemCollection.check_prob(prob, print_proof):
+            try:
+                is_solved = ProblemCollection.check_prob(prob, print_proof)
+                if not is_solved:
+                    problems.close()
+                    print("Error in prob", prob)
+                    break
+            except Exception as e:
                 problems.close()
-                print("Error in prob", prob)
+                print(e)
+                print("Error in problem", prob)
                 break
         else:
             print("All tests are valid!")

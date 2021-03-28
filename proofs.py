@@ -1,6 +1,7 @@
 from geo.problemcollection import ProblemCollection
 from geo.filehandler import print_points_from_file as _pggb
 from geo.helper import Helper
+from geo.real.expression import Degree
 
 # http://mathbitsnotebook.com/JuniorMath/Geometry/GEORules.html
 
@@ -19,264 +20,10 @@ _th2: Two vertical angles are equal
 _th3: All angles around a point sum up to 360°
 _th4: Corresponding angles are equal and the sum of two consecutive interior angles is 180° (2pl&t)
 _th5: Converse of angles between parallel lines (alternate interior / corresponding / consecutive) 
-_th6: Tgit he sum of the measures of the interior angles of a triangle is 180°
+_th6: The sum of the measures of the interior angles of a triangle is 180°
 _th7: The sum of the measures of the interior angles of a Quadrilateral is 360°
 _th8: The size of an exterior angle at a vertex of a triangle equals the sum of the sizes of the interior angles at the other two vertices of the triangle
 """
-
-'''
-    def th1(debug=False):
-        """_ax1 & _ax2 -> _th1"""
-        # Create line AB, C point on AB, CD line from C
-        A, B, C, D = Point.createPoints("A", "B", "C", "D")
-        AB = AbsSegment(A, B, True)
-        AB.set_midpoints(C)
-        CD = AbsSegment(C, D, True)
-        # Create Angle ACD
-        AC = AB.get_subsegment_to(C)
-        ACD = AbsAngle(AC, C, CD)
-        # Create Angle DCB
-        CB = AB.get_subsegment_from(C)
-        DCB = AbsAngle(CD, C, CB)
-        # Prove the sum of the angles is equal to 180°
-        geo = Handler(A, B, C, D)
-        geo.angles_calc()
-        print(geo.angles[ACD], "+", geo.angles[DCB], "=", geo.angles[ACD] + geo.angles[DCB])
-        if debug:
-            print(geo.angles)
-
-
-    def th2(debug=False):
-        """_th1 -> _th2"""
-        # Create lines AB and CD, E is their intersection point
-        A, B, C, D, E = Point.createPoints("A", "B", "C", "D", "E")
-        AB = AbsSegment(A, B, True)
-        AB.set_midpoints(E)
-        CD = AbsSegment(C, D, True)
-        CD.set_midpoints(E)
-        # Create Angle AEC
-        AE = AB.get_subsegment_to(E)
-        CE = CD.get_subsegment_to(E)
-        AEC = AbsAngle(AE, E, CE)
-        # Create Angle BED
-        EB = AB.get_subsegment_from(E)
-        ED = CD.get_subsegment_from(E)
-        BED = AbsAngle(EB, E, ED)
-        # Prove the 2 vertical Angles are equal
-        geo = Handler(A, B, C, D, E)
-        geo.angles_calc()
-        print(geo.angles[AEC], "=", geo.angles[BED])
-        if debug:
-            print(geo.angles)
-
-
-    def th3(debug=False):
-        """_th1 -> _th3"""
-        # Create lines AB and CD, E is their intersection point
-        A, B, C, D, E = Point.createPoints("A", "B", "C", "D", "E")
-        AB = AbsSegment(A, B, True)
-        AB.set_midpoints(E)
-        CD = AbsSegment(C, D, True)
-        CD.set_midpoints(E)
-        # Create the 4 angles around point E
-        AE = AB.get_subsegment_to(E)
-        CE = CD.get_subsegment_to(E)
-        AEC = AbsAngle(AE, E, CE)
-        EB = AB.get_subsegment_from(E)
-        CEB = AbsAngle(CE, E, EB)
-        ED = CD.get_subsegment_from(E)
-        BED = AbsAngle(EB, E, ED)
-        DEA = AbsAngle(ED, E, AE)
-        # Prove the sum of all point around point E is 360°
-        geo = Handler(A, B, C, D, E)
-        geo.angles_calc()
-        print(
-            geo.angles[AEC],
-            "+",
-            geo.angles[CEB],
-            "+",
-            geo.angles[BED],
-            "+",
-            geo.angles[DEA],
-            "=",
-            geo.angles[AEC] + geo.angles[CEB] + geo.angles[BED] + geo.angles[DEA],
-        )
-        if debug:
-            print(geo.angles)
-
-
-    def th4(debug=False):
-        """_th1 & _ax3 -> _th4"""
-        # Create AB||CD, GFEH transversal: E ∈ AB, F ∈ CD
-        A, B, C, D, E, F, G, H = Point.createPoints(8)
-        AB = AbsSegment(A, B, True)
-        AB.set_midpoints(E)
-        CD = AbsSegment(C, D, True)
-        CD.set_midpoints(F)
-        GH = AbsSegment(G, H, True)
-        GH.set_midpoints(F, E)
-        AB.set_parallel(CD)
-        # Corresponding [מתאימות] angles example (AEG & CFG)
-        AE = AB.get_subsegment_to(E)
-        GE = GH.get_subsegment_to(E)
-        AEG = AbsAngle(AE, E, GE)
-        CF = CD.get_subsegment_to(F)
-        GF = GH.get_subsegment_to(F)
-        CFG = AbsAngle(CF, F, GF)
-        # Consecutive interior [חד צדדיות] angles example (GEB & DFH)
-        EB = AB.get_subsegment_from(E)
-        GEB = AbsAngle(GE, E, EB)
-        FD = CD.get_subsegment_from(F)
-        FH = GH.get_subsegment_from(F)
-        DFH = AbsAngle(FD, F, FH)
-        geo = Handler(A, B, C, D, E, F, G, H)
-        geo.angles_calc()
-        # Prove that corresponding angles are equal
-        print(geo.angles[AEG], "=", geo.angles[CFG], end=", ")
-        # Prove that the sum of 2 consecutive interior angles is 180°
-        print(geo.angles[GEB], "+", geo.angles[DFH], "=", geo.angles[GEB] + geo.angles[DFH])
-        if debug:
-            print(geo.angles)
-
-
-    def th5(debug=False):
-        """_ax3 + _th3 -> _th5 (proof by contradiction)"""
-        # 3 part Proof:
-        # 1. Converse alternate interior angles (proof by contradiction)
-        # 2. Converse corresponding angles (proof based on 1)
-        # 3. Converse consecutive interior angles (proof based on 1)
-
-        """ 1. Prove Converse Alternate Interior angles """
-        # Need to prove that AB || CD, based on equal alternate interior angles
-        h = Helper()
-        # Traverse GH (E in AB, F in CD)
-        h.s("GEFH")
-        # AB
-        h.s("BEA")
-        # CD
-        h.s("DFC")
-        # assume CD is not parallel to AB
-        # therefore there must be a different parallel to CD that goes through E
-        # That parallel is IJ
-        h.s("IEJ")
-        h.paras("IJ", "DC")
-        # it is given that BEH == CFG
-        h.equala("BEH", "CFG")
-        # let's calc
-        h.calc()
-        # we get that BEI is zero
-        if debug:
-            print(h.geta("BEI"))
-        # therefore IJ and therefore our assumption was wrong
-        # Thus, AB || CD
-        yield "AB || CD (proof by contradiction)"
-
-        if debug:
-            print("\n", "------------------------------------------\n" * 3)
-
-        """ 2. Prove Converse equal corresponding angles """
-        # Need to prove that AB || CD, based on equal corresponding angles
-        h = Helper()
-        # AB
-        h.s("AEB")
-        # CD
-        h.s("CFD")
-        # Traverse GH (E in AB, F in CD)
-        h.s("GEFH")
-        # it is given that GFD == GEB
-        h.equala("GFD", "GEB")
-        # lets see if GFD == HEA
-        if debug:
-            print(h.geta("GFD"), h.geta("HEA"))
-        # because they are a pair of equal alternate interior angles, AB || CD (as was proven in 1)
-        yield "AB || CD (proof by Converse Alternate Interior Angles)"
-
-        if debug:
-            print("\n", "------------------------------------------\n" * 3)
-
-        """ 3. Prove converse consecutive interior angles """
-        # Need to prove that AB || CD, based on consecutive interior angles
-        h = Helper()
-        # AB
-        h.s("AEB")
-        # CD
-        h.s("CFD")
-        # Traverse GH (E in AB, F in CD)
-        h.s("GEFH")
-        # it is given that GFD + BEH == 180
-        x = Degree.given("x")
-        h.seta("GFD", x)
-        h.seta("BEH", 180 - x)
-        # lets see if GFD == HEA
-        if debug:
-            print(h.geta("GFD"), h.geta("HEA"))
-        # because they are a pair of equal alternate interior angles, AB || CD (as was proven in 1)
-        yield "AB || CD (proof by Converse Alternate Interior Angles)"
-
-
-    def th6(debug=False):
-        """_ax3 + _th1 -> _th6"""
-        h = Helper()
-        h.s("CA", "CB", "ECD", "BA")
-        # h.inita()
-        # print(h.g().angles)
-        # h.g().
-        # h.s("DCE", "CB", "CA", "AB")
-        h.paras("DCE", "AB")
-        if debug:
-            h.calc()
-            print(h.g().angles)
-            print([str(i) for i in h.g().find_all_triangles()])
-        return h.geta("BAC") + h.geta("ACB") + h.geta("CBA") == 180
-
-
-    def th7(debug=False):
-        """_ax2 + _th6 -> _th7"""
-        h = Helper()
-        h.poly("ABCD")
-        h.poly_diag("ABCD", "AC")
-        if debug:
-            h.calc()
-            print(h.g().angles)
-            print(
-                " + ".join(
-                    map(
-                        lambda x: f"({x})", [h.a("BAD"), h.a("ADC"), h.a("DCB"), h.a("CBA")]
-                    )
-                ),
-                "=",
-                " + ".join(
-                    [
-                        f"({i.deg if isinstance(i, RealAngle) else i})"
-                        for i in [
-                            h.geta("BAD"),
-                            h.geta("ADC"),
-                            h.geta("DCB"),
-                            h.geta("CBA"),
-                        ]
-                    ]
-                ),
-                "=",
-                sum([h.geta("BAD"), h.geta("ADC"), h.geta("DCB"), h.geta("CBA")]),
-            )
-        return sum([h.geta("BAD"), h.geta("ADC"), h.geta("DCB"), h.geta("CBA")]) == 360
-
-
-    def th8(debug=False):
-        """_th1 + _th6 -> _th8"""
-        h = Helper()
-        # h.s("BC", "AB", "ACD")
-        h.tri("ABC")
-        h.conts("AC", "ACD")
-        if debug:
-            h.calc()
-            print(h.g().segments)
-            print(h.g().angles)
-        return h.geta("BAC"), h.geta("CBA"), h.geta("BCD")
-
-
-    print(list(th5(True)))
-'''
 
 
 class ProofCollection(ProblemCollection):
@@ -352,7 +99,213 @@ class ProofCollection(ProblemCollection):
         return (sum_aangs_around_E,), (360,)
         # return sum(h.geta(*h.g().get_angles_around_point(h.p("E")))))
 
+    @staticmethod
+    def th4(print_proof=False):
+        """_th1 & _ax3 -> _th4"""
+
+        """example of types of angles:
+                             /
+                            /
+                         8 / 7
+            --------------/------
+                       5 / 6
+                        /
+                       /
+                    4 / 3
+            ---------/-------
+                  1 / 2
+                   /
+                  /
+            5 = 3 (alternate interior angles)
+            1 = 5 (Corresponding angles)
+            3+6 = 180° (consecutive interior angles)
+        """
+
+        h = Helper()
+        h.ps_from_file(
+            r"C:\Users\alond\Documents\School\AvodatGemer\AvodatGemerCode\ggb_files\th4.ggb"
+        )
+        h.s("AEB", "CFD", "HEFG")
+        h.paras("AB", "CD")
+        # ax3 - set ∢GEA = ∢HFD (alternate interior angles, AB || CD, HEFG traversal)
+        h.equala("GEA", "HFD")
+        h.calc(print_proof, use_theorems=[1, 2, 3])
+        # Corresponding angles example (GEA & GFC)
+        corresponding = h.geta("GEA") == h.geta("GFC")
+        # Consecutive interior angles example (BEG & HFD)
+        consecutive = h.geta("BEG") + h.geta("HFD") == 180
+        if print_proof:
+            print(f"{h.a('GEA')} = {h.geta('GEA')}, {h.a('GFC')} = {h.geta('GFC')}")
+            print("⇓")
+            print(f"{h.a('GEA')} = {h.a('GFC')} (corresponding)")
+            print()
+            print(
+                f"{h.a('BEG')} + {h.a('HFD')} = ({h.geta('BEG')}) + ({h.geta('HFD')}) = {sum(h.geta('BEG','HFD'))}"
+            )
+            print("⇓")
+            print(f"{h.a('BEG')} + {h.a('HFD')} = 180 (consecutive)")
+
+        return (corresponding, consecutive), (True, True)
+
+    @staticmethod
+    def th5(print_proof=False):
+        """_ax3 + _th4 -> _th5 (proof by contradiction)
+        3 part Proof:
+        1. Converse alternate interior angles (proof by contradiction)
+        2. Converse corresponding angles (proof based on 1)
+        3. Converse consecutive interior angles (proof based on 1)
+        """
+        # READ: https://en.wikipedia.org/wiki/Playfair%27s_axiom
+
+        ans = [[], []]
+
+        """ 1. Prove Converse Alternate Interior angles """
+        # We Need to prove that AB || CD, based on equal alternate interior angles
+        h = Helper()
+        h.ps_from_file(
+            r"C:\Users\alond\Documents\School\AvodatGemer\AvodatGemerCode\ggb_files\th5_1.ggb"
+        )
+        h.s("AEB", "CFD", "HEFG")
+        # Assume CD is not parallel to AB
+        # Therefore, there must be a different parallel to CD that goes through E
+        # That parallel is IJ
+        h.s("IEJ")
+        h.paras("IJ", "CD")
+        # It is given that BEG == CFH
+        h.equala("BEG", "CFH")
+        # Let's calc
+        h.calc(print_proof, use_theorems=[1, 2, 3, 4])
+        # We get that BEJ is zero
+        ans[0].append(h.geta("BEJ") == 0)
+        ans[1].append(True)
+        # Therefore IJ is the same as AB
+        # And therefore our assumption that AB is not parallel to CD was wrong
+        # Thus, AB || CD
+        if print_proof:
+            print(f"{h.a('BEJ')} = {h.geta('BEJ')})")
+            print(f"⇓")
+            print(f"(IJ is the same as CD) -> AB || CD")
+
+            print("\n")
+
+        """ 2. Prove Converse equal corresponding angles """
+        # We need to prove that AB || CD, based on equal corresponding angles
+        h = Helper()
+        h.ps_from_file(
+            r"C:\Users\alond\Documents\School\AvodatGemer\AvodatGemerCode\ggb_files\th5_2.ggb"
+        )
+        h.s("AEB", "CFD", "HEFG")
+        # it is given that HEB == HFD
+        h.equala("HEB", "HFD")
+        # lets see if GEA == HFD
+        h.calc(print_proof, use_theorems=[1, 2, 3, 4])
+        ans[0].append(h.geta("GEA") == h.geta("HFD"))
+        ans[1].append(True)
+        # because they are a pair of equal alternate interior angles, AB || CD (as was proven in 1)
+        if print_proof:
+            print(f"{h.a('GEA')} = {h.geta('GEA')} = {h.geta('HFD')} = {h.a('HFD')}")
+            print(f"⇓")
+            print(f"AB || CD (Converse alternate interior angles - proven before)")
+
+            print("\n")
+
+        """ 3. Prove converse consecutive interior angles """
+        # We need to prove that AB || CD, based on consecutive interior angles
+        h = Helper()
+        h.ps_from_file(
+            r"C:\Users\alond\Documents\School\AvodatGemer\AvodatGemerCode\ggb_files\th5_3.ggb"
+        )
+        h.s("AEB", "CFD", "HEFG")
+        # it is given that BEG + HFD == 180
+        x = h.given(Degree, "x")
+        h.seta("BEG", x)
+        h.seta("HFD", 180 - x)
+        # lets see if GEA == HFD
+        h.calc(print_proof, use_theorems=[1, 2, 3, 4])
+        ans[0].append(h.geta("GEA") == h.geta("HFD"))
+        ans[1].append(True)
+        # because they are a pair of equal alternate interior angles, AB || CD (as was proven in 1)
+        if print_proof:
+            print(f"{h.a('GEA')} = {h.geta('GEA')} = {h.geta('HFD')} = {h.a('HFD')}")
+            print(f"⇓")
+            print(f"AB || CD (Converse alternate interior angles - proven before)")
+
+        return tuple(ans[0]), tuple(ans[1])
+
+    @staticmethod
+    def th6(print_proof=False):
+        """_ax3 + _th1 -> _th6"""
+
+        h = Helper()
+        h.ps_from_file(
+            r"C:\Users\alond\Documents\School\AvodatGemer\AvodatGemerCode\ggb_files\th6.ggb"
+        )
+        h.tri("ABC")
+        h.s("DCE")
+        h.paras("AB", "DE")
+        h.calc(print_proof, use_theorems=[1, 2, 3, 4, 5])
+        if print_proof:
+            print(
+                f"{h.a('CAB')} + {h.a('ABC')} + {h.a('BCA')} = ({h.geta('CAB')}) + ({h.geta('ABC')}) + ({h.geta('BCA')})",
+                f"= {sum(h.geta('CAB', 'ABC', 'BCA'))}",
+            )
+            print(f"⇓")
+            print(f"sum of angles in △ABC is 180°")
+
+        return (sum(h.geta("CAB", "ABC", "BCA")),), (180,)
+
+    @staticmethod
+    def th7(print_proof=False):
+        """_ax2 + _th6 -> _th7"""
+        h = Helper()
+        h.ps_from_file(
+            r"C:\Users\alond\Documents\School\AvodatGemer\AvodatGemerCode\ggb_files\th7.ggb"
+        )
+        h.poly("ABCD")
+        h.s("AC")
+        h.calc(print_proof, use_theorems=[1, 2, 3, 4, 5, 6])
+        if print_proof:
+            print(
+                " + ".join(map(str, h.a("BAD", "ADC", "DCB", "CBA"))),
+                "=",
+                f"({') + ('.join(map(str, h.geta('BAD', 'ADC', 'DCB', 'CBA')))})",
+                "=",
+                sum(h.geta("BAD", "ADC", "DCB", "CBA")),
+            )
+            print(f"⇓")
+            print(f"sum of angles in ▱ ABCD is 360°")
+
+        return (sum(h.geta("BAD", "ADC", "DCB", "CBA")),), (360,)
+
+    @staticmethod
+    def th8(print_proof=False):
+        """_th1 + _th6 -> _th8"""
+        h = Helper()
+        h.ps_from_file(
+            r"C:\Users\alond\Documents\School\AvodatGemer\AvodatGemerCode\ggb_files\th8.ggb"
+        )
+        h.tri("ACB")
+        h.conts("AC", "ACD")
+        h.calc(print_proof, use_theorems=range(1, 8))
+        if print_proof:
+            print(
+                f"{h.a('BCD')} = {h.geta('BCD')},",
+                f"{h.a('BAC')} + {h.a('CBA')} = ({h.geta('BAC')}) + ({h.geta('CBA')})",
+                f"= {sum(h.geta('BAC','CBA'))}",
+            )
+            print(f"⇓")
+            print(f"{h.a('BCD')} = {h.a('BAC')} + {h.a('CBA')}")
+
+        return (h.geta("BCD") == sum(h.geta("BAC", "CBA")),), (True,)
+
+    # @staticmethod
+    # def _thn(print_proof=False):
+
+    #     h = Helper()
+    #     h.ps_from_file()
+    #     _pggb()
+
 
 if __name__ == "__main__":
     ProofCollection.check_all()
-    # ProofCollection.th3(True)
+    # print(ProofCollection.th8(True))

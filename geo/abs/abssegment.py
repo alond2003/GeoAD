@@ -155,12 +155,20 @@ class AbsSegment:
             return (arctan + 180 + 360) % 360
         return (arctan + 360) % 360
 
-    def better_direction(self):
-        """Reverse segment if needed (for min slope angle)"""
+    def better_direction(self, base_angle_direction=0):
+        """Reverse segment if needed (closest direction to base_angle)"""
         slope_ang = self.get_slope_angle()
         self.reverse()
         new_slope_ang = self.get_slope_angle()
-        if new_slope_ang > slope_ang:
+        new_ang_dist = min(
+            (base_angle_direction - new_slope_ang + 360) % 360,
+            (new_slope_ang - base_angle_direction + 360) % 360,
+        )
+        old_ang_dist = min(
+            (base_angle_direction - slope_ang + 360) % 360,
+            (slope_ang - base_angle_direction + 360) % 360,
+        )
+        if new_ang_dist > old_ang_dist:
             self.reverse()
 
     def is_valid(self):
@@ -190,7 +198,10 @@ class AbsSegment:
 
     def __hash__(self):
         """Used for set(Segment)"""
-        return hash(tuple(self.get_all_points()))
+        # added reverse so that seg, seg.reverse() will have the same hash
+        return hash(tuple(self.get_all_points())) + hash(
+            tuple(self.get_all_points()[::-1])
+        )
 
     def __eq__(self, other):
         """Check Segment == Segment"""

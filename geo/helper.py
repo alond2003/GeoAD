@@ -303,8 +303,13 @@ class Helper:
         og = self.s(og)
         if new.index(str(og.start)) > new.index(str(og.end)):
             new = new[::-1]
-        new_p = [self.p(i) for i in new]
-        og.update_midpoints(*new_p[1:-1])
+        if og.start.name == new[0] and og.end.name == new[-1]:
+            new_p = [self.p(i) for i in new]
+            og.update_midpoints(*new_p[1:-1])
+        else:
+            for point in og.get_all_points():
+                point.remove_line(og)
+            self.s(new)
 
     def perps(self, seg1, seg2, reason="given"):
         """Set segments to be perpendicular"""

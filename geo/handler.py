@@ -86,8 +86,8 @@ class Handler:
                 p[0], p[1] = p[1], p[0]
                 tp[0], tp[1] = tp[1], tp[0]
             # make sure both p are the same direction
-            for s in p:
-                s.better_direction()
+            p[0].better_direction()
+            p[1].better_direction(p[0].get_slope_angle())
 
             aangs = [[], []]
             for i in range(2):
@@ -423,11 +423,11 @@ class Handler:
             message += f"- {minus_group[0].get_expression()}"
 
         message += " (eval)\n"
-        self.abs_equal_exp(abs(max_real), sum(plus_group) - sum(minus_group))
-        self.proof[-1] = message + self.proof[-1]
+        if self.abs_equal_exp(abs(max_real), sum(plus_group) - sum(minus_group)):
+            self.proof[-1] = message + self.proof[-1]
 
     def abs_equal_exp(self, aabs, exp, reason="given"):
-        """Assume (Abs = Exp) and act apon it"""
+        """Assume (Abs = Exp) and act apon it. Return if new data was found"""
         message = ""
         reals = []
 
@@ -448,7 +448,7 @@ class Handler:
 
         # if we already know, there is no point to continue
         if all([r.isknown() for r in reals]):
-            return
+            return False
 
         # the real that will be evaluated
         eval_real = max(reals)
@@ -470,7 +470,7 @@ class Handler:
         res = self.real_equal_exp(eval_real, exp - sum(other_reals))
 
         if len(res) <= 1:
-            return  # nothing has been discovered
+            return False  # nothing has been discovered
         if len(res) == 2 and len(other_reals) == 0:
             pass  # skip unnecessary printing
         else:
@@ -527,6 +527,7 @@ class Handler:
                         f" -> {r} = {sum(self.conv(r))}\n"
                     )
         self.proof.append(message)
+        return True
 
     def real_equal_exp(self, real, exp):
         """Set real to be exp, Return list of (preExp, affected Reals), list[0] = (varswitched.key,switchval)"""

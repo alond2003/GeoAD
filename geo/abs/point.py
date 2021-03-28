@@ -30,6 +30,15 @@ class Point:
         # sort self.lines by slope_angle
         self.lines.sort(key=lambda t: -t[0].get_slope_angle(self))
 
+    def remove_line(self, *lines):
+        """Remove line or lines from self.lines"""
+        rm_idxs = []
+        for idx, (_, line) in enumerate(self.lines):
+            if line in lines:
+                rm_idxs.append(idx)
+        for idx in rm_idxs[::-1]:
+            del self.lines[idx]
+
     def __str__(self):
         """Return the point's name"""
         return self.name
