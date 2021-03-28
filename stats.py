@@ -19,4 +19,4 @@ def stats(path=os.getcwd()):
     return ans
 
 
-print(stats())
+print("Total:", stats())
