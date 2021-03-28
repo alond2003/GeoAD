@@ -117,7 +117,6 @@ class Handler:
                     else:
                         aangs[i].append(None)
 
-            # זוויות מתאימות
             # Corresponding angles
             for i in range(4):
                 if aangs[0][i] is None or aangs[1][i] is None:
@@ -128,7 +127,6 @@ class Handler:
                     f"Corresponding angles are equal between {p[0]} || {p[1]} and {t}",
                 )
 
-            # זוויות מתחלפות
             # alternate angles
             for i in range(4):
                 coridx = (i + 2) % 4
@@ -140,7 +138,6 @@ class Handler:
                     f"alteranting angles are equal between {p[0]} || {p[1]} and {t}",
                 )
 
-            # זוויות חד צדדיות
             # consecutive angles
             for i in range(4):
                 considx = 3 - i
@@ -204,7 +201,6 @@ class Handler:
                     else:
                         aangs[i].append(None)
 
-            # זוויות מתאימות
             # Corresponding angles
             for i in range(4):
                 if aangs[0][i] is None or aangs[1][i] is None:
@@ -215,7 +211,6 @@ class Handler:
                         f"{aangs[0][i]} = {sum(self.aconv[aangs[0][i]])} = {aangs[1][i]}, converse corresponding angles between {p[0]}, {p[1]} and traverse {t}",
                     )
 
-            # זוויות מתחלפות
             # alternate angles
             for i in range(4):
                 altidx = (i + 2) % 4
@@ -227,7 +222,6 @@ class Handler:
                         f"{aangs[0][i]} = {sum(self.aconv[aangs[0][i]])} = {aangs[1][altidx]}, converse alternating angles between {p[0]}, {p[1]} and traverse {t}",
                     )
 
-            # זוויות חד צדדיות
             # consecutive angles
             for i in range(4):
                 considx = 3 - i

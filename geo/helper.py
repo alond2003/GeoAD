@@ -1,11 +1,3 @@
-# Guidelines:
-# זוויות הן עם כיוון השעון
-# ישרים מקבילים באותו כיוון
-# סדר רציץ של קווים היוצאים\העוברים בנקודה עם כיוון השעון (going through: to, from)
-# זווית מעל 180 אחרונה בסדר הקווים בנקודה
-# צלעות במצולע הן נגד כיוון השעון
-# first build everything then assign value
-
 import itertools
 from geo.abs.abssegment import AbsSegment
 from geo.abs.absangle import AbsAngle
