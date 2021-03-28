@@ -84,7 +84,7 @@ def try_solve_problem_using_coor_system():
 
 def ggb_test():
 
-    path = r"C:\Users\alond\Documents\School\AvodatGemer\AvodatGemerCode\ggb_test\geogebra-export.ggb"
+    path = r"ggb_test\geogebra-export.ggb"
     from time import perf_counter
 
     start = perf_counter()

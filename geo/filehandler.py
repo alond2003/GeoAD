@@ -54,7 +54,7 @@ def get_points_from_file(path, temp_folder_path="temp_ggb"):
 
 
 def print_points_from_file(
-    path=r"C:\Users\alond\Documents\School\AvodatGemer\AvodatGemerCode\ggb_test\test.ggb",
+    path=r"ggb_test\test.ggb",
     temp_folder_path="temp_ggb",
 ):
     """Print Point names, xs and ys"""
