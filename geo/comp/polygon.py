@@ -20,3 +20,25 @@ class Polygon:
 
     def __repr__(self):
         return str(self)
+
+
+class Quadrilateral(Polygon):
+    def __repr__(self):
+        return "▱" + str(self)
+
+    @classmethod
+    def fromPolygon(cls, poly):
+        return Quadrilateral(
+            poly.points, poly.sides, poly.aangs, poly.aconv, poly.sconv
+        )
+
+
+class Triangle(Polygon):
+    def __repr__(self):
+        return "△" + str(self)
+
+    @classmethod
+    def fromPolygon(cls, poly):
+        return Triangle(
+            poly.points, poly.sides, poly.aangs, poly.aconv, poly.sconv
+        )

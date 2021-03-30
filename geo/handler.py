@@ -8,9 +8,7 @@ from geo.real.realsegment import RealSegment
 from geo.real.realangle import RealAngle
 from geo.real.expression import Degree
 from geo.real.expression import Length
-from geo.comp.polygon import Polygon
-from geo.comp.triangle import Triangle
-from geo.comp.quadrilateral import Quadrilateral
+from geo.comp.polygon import Polygon, Triangle, Quadrilateral
 from geo.comp.convertor import Convertor
 
 
