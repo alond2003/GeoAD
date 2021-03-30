@@ -1,4 +1,4 @@
-from numpy import argmax
+from numpy import argmax, argmin
 import itertools
 
 from geo.abs.point import Point
@@ -741,13 +741,31 @@ class Handler:
 
             aangs[0].append(AbsAngle(from_seg, vertex, to_seg))
             aangs[1].append(AbsAngle(to_seg, vertex, from_seg))
-            non_reflex_aang = self.get_non_reflex_angle(pfrom, vertex, pto)
-            for i in range(2):
-                if non_reflex_aang == aangs[i][-1]:
-                    counter[i] += 1
-                    break
 
-        aangs = aangs[argmax(counter)]
+        if len(pointlist) < 6:
+            for aang in aangs[0]:
+                pfrom = aang.get_start_point()
+                vertex = aang.vertex
+                pto = aang.get_end_point()
+                non_reflex_aang = self.get_non_reflex_angle(pfrom, vertex, pto)
+                if non_reflex_aang == aang:
+                    counter[0] += 1
+                else:
+                    counter[1] += 1
+
+            # polygon with n sides has a maximum of (n-3) reflex angles
+            aangs = aangs[argmax(counter)]
+        else:
+            slope_angle_sums = [0, 0]
+            for i in range(2):
+                slope_angle_sums[i] = sum(
+                    [
+                        aang.get_angle_size_from_coordinates()
+                        for aang in aangs[i]
+                    ]
+                )
+            aangs = aangs[argmin(slope_angle_sums)]
+
         return Polygon(pointlist, sides, aangs, self.aconv, self.sconv)
 
     def find_all_triangles(self):
@@ -758,7 +776,7 @@ class Handler:
             Quadrilateral.from_polygon(p) for p in self.find_all_polygons(4)
         ]
 
-    """ BASIC SEGMENT_CALC METHODS"""
+    """ BASIC ABS_SEGMENT METHODS"""
 
     def get_full_seg(self, startpoint, endpoint):
         """Return AbsSegment from 2 points"""
