@@ -47,7 +47,9 @@ class Handler:
     def vertical_angles(self):
         """_th2: 2 vertical angles are equal"""
         for p in self.points:
-            for a1, a2 in itertools.combinations(self.get_angles_around_point(p), 2):
+            for a1, a2 in itertools.combinations(
+                self.get_angles_around_point(p), 2
+            ):
                 if (
                     self.is_180_angle(AbsAngle(a1.ray1, p, a2.ray1))
                     or self.is_180_angle(AbsAngle(a2.ray1, p, a1.ray1))
@@ -81,8 +83,13 @@ class Handler:
         ]
 
         for *p, t in parallels_transversal:
-            tp = [t.get_intersection_point(p[0]), t.get_intersection_point(p[1])]
-            if t.get_all_points().index(tp[0]) > t.get_all_points().index(tp[1]):
+            tp = [
+                t.get_intersection_point(p[0]),
+                t.get_intersection_point(p[1]),
+            ]
+            if t.get_all_points().index(tp[0]) > t.get_all_points().index(
+                tp[1]
+            ):
                 p[0], p[1] = p[1], p[0]
                 tp[0], tp[1] = tp[1], tp[0]
             # make sure both p are the same direction
@@ -166,8 +173,13 @@ class Handler:
         for *p, t in pos_parallels_transversal:
             if p[0].is_parallel(p[1]):
                 continue
-            tp = [t.get_intersection_point(p[0]), t.get_intersection_point(p[1])]
-            if t.get_all_points().index(tp[0]) > t.get_all_points().index(tp[1]):
+            tp = [
+                t.get_intersection_point(p[0]),
+                t.get_intersection_point(p[1]),
+            ]
+            if t.get_all_points().index(tp[0]) > t.get_all_points().index(
+                tp[1]
+            ):
                 p[0], p[1] = p[1], p[0]
                 tp[0], tp[1] = tp[1], tp[0]
             # make sure both p are the same direction
@@ -216,7 +228,9 @@ class Handler:
                 altidx = (i + 2) % 4
                 if aangs[0][i] is None or aangs[1][altidx] is None:
                     continue
-                if sum(self.aconv[aangs[0][i]]) == sum(self.aconv[aangs[1][altidx]]):
+                if sum(self.aconv[aangs[0][i]]) == sum(
+                    self.aconv[aangs[1][altidx]]
+                ):
                     self.set_parallel(
                         *p,
                         f"{aangs[0][i]} = {sum(self.aconv[aangs[0][i]])} = {aangs[1][altidx]}, converse alternating angles between {p[0]}, {p[1]} and traverse {t}",
@@ -227,7 +241,9 @@ class Handler:
                 considx = 3 - i
                 if aangs[0][i] is None or aangs[1][considx] is None:
                     continue
-                if sum(self.aconv[aangs[0][i]]) == sum(self.aconv[aangs[1][considx]]):
+                if sum(self.aconv[aangs[0][i]]) == sum(
+                    self.aconv[aangs[1][considx]]
+                ):
                     self.set_parallel(
                         *p,
                         f"{aangs[0][i]} = {sum(self.aconv[aangs[0][i]])} = {aangs[1][considx]}, converse consecutive angles between {p[0]}, {p[1]} and traverse {t}",
@@ -274,22 +290,34 @@ class Handler:
                 external_angle = self.get_non_reflex_angle(
                     seg.start,
                     start[1],
-                    [p for p in tri.points if p not in side.get_all_points()][0],
+                    [p for p in tri.points if p not in side.get_all_points()][
+                        0
+                    ],
                 )
                 self.abs_equal_abs(
                     external_angle,
-                    [tri.get_angle_from_point(p) for p in tri.points if p != start[1]],
+                    [
+                        tri.get_angle_from_point(p)
+                        for p in tri.points
+                        if p != start[1]
+                    ],
                     f"external angle to {tri.get_angle_from_point(start[1])} in △{tri}",
                 )
             if end[0] != len(seg.get_all_points()) - 1:
                 external_angle = self.get_non_reflex_angle(
                     seg.end,
                     end[1],
-                    [p for p in tri.points if p not in side.get_all_points()][0],
+                    [p for p in tri.points if p not in side.get_all_points()][
+                        0
+                    ],
                 )
                 self.abs_equal_abs(
                     external_angle,
-                    [tri.get_angle_from_point(p) for p in tri.points if p != end[1]],
+                    [
+                        tri.get_angle_from_point(p)
+                        for p in tri.points
+                        if p != end[1]
+                    ],
                     f"external angle to {tri.get_angle_from_point(end[1])} in △{tri}",
                 )
 
@@ -304,13 +332,18 @@ class Handler:
                     abs_ang, Degree(False, d=180)
                 )
             else:
-                self.rangles[abs_ang] = RealAngle.fromAbsAngle(abs_ang, Degree())
+                self.rangles[abs_ang] = RealAngle.fromAbsAngle(
+                    abs_ang, Degree()
+                )
         self.aconv = Convertor(self.disassemble_angle, self.get_rang)
 
     def init_segments(self):
         """Init segments with length value"""
         rseg_list = sum(
-            [RealSegment.fromSegment(i).get_all_subsegments() for i in self.segments],
+            [
+                RealSegment.fromSegment(i).get_all_subsegments()
+                for i in self.segments
+            ],
             [],
         )
         self.rsegments = {}
@@ -337,7 +370,9 @@ class Handler:
 
         after_init()
 
-        # print(self.angles)
+        if print_proof:
+            print(self.rangles)
+
         last_len = -1
         for _ in range(self.MAX_CALC_CYCLES):
             last_len = len(self.proof)
@@ -379,9 +414,13 @@ class Handler:
 
         message += f"{abs_sum_strs[0]} = {abs_sum_strs[1]} ({reason})\n"
 
-        reals = [sum([self.conv(a) for a in abs_lst], []) for abs_lst in abs_arr]
+        reals = [
+            sum([self.conv(a) for a in abs_lst], []) for abs_lst in abs_arr
+        ]
         # if some angles were not elementry
-        if sum([len(lst) for lst in reals]) > sum([len(lst) for lst in abs_arr]):
+        if sum([len(lst) for lst in reals]) > sum(
+            [len(lst) for lst in abs_arr]
+        ):
             message += " = ".join(
                 [" + ".join([str(abs(r)) for r in reals[i]]) for i in range(2)]
             )
@@ -410,14 +449,14 @@ class Handler:
         )
         should_not_add_parentheses = len(minus_group) == 1
         if should_add_parentheses:
-            message += (
-                f" - ({' + '.join([str(r.get_expression()) for r in minus_group])})"
-            )
+            message += f" - ({' + '.join([str(r.get_expression()) for r in minus_group])})"
         elif should_not_add_parentheses:
             message += f"- {minus_group[0].get_expression()}"
 
         message += " (eval)\n"
-        if self.abs_equal_exp(abs(max_real), sum(plus_group) - sum(minus_group)):
+        if self.abs_equal_exp(
+            abs(max_real), sum(plus_group) - sum(minus_group)
+        ):
             self.proof[-1] = message + self.proof[-1]
 
     def abs_equal_exp(self, aabs, exp, reason="given"):
@@ -458,7 +497,9 @@ class Handler:
             if len(other_reals) == 1:
                 other_reals_sum = str(abs(other_reals[0]))
             else:
-                other_reals_sum = f"({' + '.join(map(str,map(abs,other_reals)))})"
+                other_reals_sum = (
+                    f"({' + '.join(map(str,map(abs,other_reals)))})"
+                )
             message += f"{abs(eval_real)} = {exp} - {other_reals_sum} (same)\n"
 
         res = self.real_equal_exp(eval_real, exp - sum(other_reals))
@@ -485,7 +526,9 @@ class Handler:
 
             elif should_not_add_parentheses:
                 # no parentheses
-                minus_other_reals_copy_sum = f" -{other_reals_copy[0].get_expression()}"
+                minus_other_reals_copy_sum = (
+                    f" -{other_reals_copy[0].get_expression()}"
+                )
 
             # check for other repercussions
             if len(res) == 2 and eval_real == exp - sum(other_reals_copy):
@@ -511,7 +554,9 @@ class Handler:
                 )
                 # message += (var = found) (found var)
                 var_found = Degree(False, {res[0][0]: 1})
-                message += f"{var_found} = {res[0][1]} (found var {var_found})\n"
+                message += (
+                    f"{var_found} = {res[0][1]} (found var {var_found})\n"
+                )
                 # for all reals affected
                 for pre_exp, r in res[1:]:
                     # message += (abs = proven = eval -> abs = final)
@@ -648,7 +693,10 @@ class Handler:
 
         # if not (all segments exist) -> no poly
         if not all(
-            [any([seg.is_subsegment(side) for seg in self.segments]) for side in sides]
+            [
+                any([seg.is_subsegment(side) for seg in self.segments])
+                for side in sides
+            ]
         ):
             return False
 
@@ -686,7 +734,9 @@ class Handler:
         aangs = [[], []]
         counter = [0, 0]
         for pfrom, vertex, pto in zip(
-            pointlist[-1:] + pointlist[:-1], pointlist, pointlist[1:] + pointlist[:1]
+            pointlist[-1:] + pointlist[:-1],
+            pointlist,
+            pointlist[1:] + pointlist[:1],
         ):
             from_seg = self.get_full_seg(pfrom, vertex)
             to_seg = self.get_full_seg(vertex, pto)
@@ -727,7 +777,9 @@ class Handler:
         """Return non reflex angle based on 3 points"""
         ans = [
             AbsAngle(
-                self.get_full_seg(pfrom, vertex), vertex, self.get_full_seg(vertex, pto)
+                self.get_full_seg(pfrom, vertex),
+                vertex,
+                self.get_full_seg(vertex, pto),
             )
         ]
         ans.append(AbsAngle(ans[0].ray2, vertex, ans[0].ray1))
@@ -757,12 +809,17 @@ class Handler:
         """Return a list of all the elementary AbsAngles around a point"""
         if len(p.lines) == 0:
             return []
-        elif len(p.lines) == 1 and p in (p.lines[0][0].start, p.lines[0][0].end):
+        elif len(p.lines) == 1 and p in (
+            p.lines[0][0].start,
+            p.lines[0][0].end,
+        ):
             return []
 
         rays = [line for line, _ in p.lines]
 
-        return [AbsAngle(r1, p, r2) for r1, r2 in zip(rays, rays[1:] + rays[:1])]
+        return [
+            AbsAngle(r1, p, r2) for r1, r2 in zip(rays, rays[1:] + rays[:1])
+        ]
 
     def get_angles(self):
         """Return a list of all the elementary AbsAngles"""
@@ -799,10 +856,20 @@ class Handler:
         for l in self.segments:
             for p in l.midpoints:
                 res.append(
-                    (AbsAngle(l.get_subsegment_to(p), p, l.get_subsegment_from(p)), l)
+                    (
+                        AbsAngle(
+                            l.get_subsegment_to(p), p, l.get_subsegment_from(p)
+                        ),
+                        l,
+                    )
                 )
                 res.append(
-                    (AbsAngle(l.get_subsegment_from(p), p, l.get_subsegment_to(p)), l)
+                    (
+                        AbsAngle(
+                            l.get_subsegment_from(p), p, l.get_subsegment_to(p)
+                        ),
+                        l,
+                    )
                 )
         return res
 

@@ -3,3 +3,4 @@ __pycache__/
 .vscode/
 testy.py
 beautify.py
+highlight_me.py

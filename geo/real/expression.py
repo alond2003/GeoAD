@@ -58,7 +58,10 @@ class Expression:
             del self.value[key]
         # convert float keys to int when needed
         for key in self.value:
-            if isinstance(self.value[key], float) and self.value[key].is_integer():
+            if (
+                isinstance(self.value[key], float)
+                and self.value[key].is_integer()
+            ):
                 self.value[key] = int(self.value[key])
 
     def isknown(self):
@@ -203,7 +206,10 @@ class Expression:
         if isinstance(other, (int, float, dict)):
             return self < type(self)(False, other)
         if isinstance(other, type(self)):
-            return sorted(list(self.value.keys())) < sorted(list(other.value.keys()))
+            return (
+                sorted(list(self.value.keys()))[::-1]
+                < sorted(list(other.value.keys()))[::-1]
+            )
         return NotImplemented
 
     def __eq__(self, other):
@@ -211,7 +217,11 @@ class Expression:
         if isinstance(other, (int, float)):
             if other == 0 and len(self.value) == 0:
                 return True
-            return len(self.value) == 1 and 0 in self.value and self.value[0] == other
+            return (
+                len(self.value) == 1
+                and 0 in self.value
+                and self.value[0] == other
+            )
         elif isinstance(other, (type(self), dict)):
             return self - other == 0
         else:
@@ -247,6 +257,7 @@ class Expression:
 
     @classmethod
     def given(cls, *symbols):
+        """Returns Expression(s) with the given symbol(s)"""
         res = []
         for symbol in symbols:
             d = cls(False, {})
@@ -255,9 +266,7 @@ class Expression:
             cls.next_given_idx += 1
             d.watch()
             res.append(d)
-        if len(res) == 1:
-            return res[0]
-        return tuple(res)
+        return tuple(res) if len(res) > 1 else res[0]
 
     @classmethod
     def reset_all(cls):

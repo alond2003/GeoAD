@@ -137,7 +137,11 @@ class YoelGevaProblems(ProblemCollection):
     @staticmethod
     def p351_e17(print_proof=True):
         h = Helper()
-        h.ps("ABCDEN", [0.0, 6.0, 0.0, 3.0, 3.0, 2.1], [4.0, 0.0, 0.0, 0.0, 2.0, 1.4])
+        h.ps(
+            "ABCDEN",
+            [0.0, 6.0, 0.0, 3.0, 3.0, 2.1],
+            [4.0, 0.0, 0.0, 0.0, 2.0, 1.4],
+        )
         h.tri("ABC")
         h.conts("BC", "BDC")
         h.conts("AB", "AEB")
@@ -152,7 +156,9 @@ class YoelGevaProblems(ProblemCollection):
     def p352_e19(print_proof=True):
         h = Helper()
         h.ps(
-            "ABCDEO", [3.0, 0.0, 6.0, 3.0, 4.488, 3.0], [4.0, 0.0, 0.0, 0.0, 2.016, 2.0]
+            "ABCDEO",
+            [3.0, 0.0, 6.0, 3.0, 4.488, 3.0],
+            [4.0, 0.0, 0.0, 0.0, 2.016, 2.0],
         )
         h.tri("ABC")
         h.conts("BC", "BDC")
@@ -162,7 +168,11 @@ class YoelGevaProblems(ProblemCollection):
         h.sets("BD", 6)
         h.sets("AC", 8)
         h.calc(print_proof)
-        return (h.gets("CE"), h.gets("BC"), h.geta("BCA") + h.geta("EOD")), (4, 12, 180)
+        return (h.gets("CE"), h.gets("BC"), h.geta("BCA") + h.geta("EOD")), (
+            4,
+            12,
+            180,
+        )
 
     @staticmethod
     def p352_e23(print_proof=True):
@@ -223,7 +233,9 @@ class YoelGevaProblems(ProblemCollection):
     @staticmethod
     def p353_e27(print_proof=True):
         h = Helper()
-        h.ps("ABCDE", [0, 0, 6, 4, 2.4], [4, 0, 0, 4, 2.4])
+        # _pggb(r"ggb_test\p353_e27.ggb")
+        h.ps_from_file(r"ggb_test\p353_e27.ggb")
+        # h.ps("ABCDE", [0, 0, 6, 4, 2.4], [4, 0, 0, 4, 2.4])
         h.s("AB", "BC", "CEA", "AD", "DEB")
         h.paras("AD", "BC")
         h.seta("DAC", 42)
@@ -266,7 +278,8 @@ class YoelGevaProblems(ProblemCollection):
 if __name__ == "__main__":
     # check all
     YoelGevaProblems.check_all()
-    # print(ans := YoelGevaProblems.p352_e19())
+    # print(ans := YoelGevaProblems.p353_e27())
+
     # print(ans[0] == ans[1])
     # print(all((check_prob(prob) for prob in [i for i in dir() if i.startswith("p")])))
     # print(YoelGevaProblems.all())

@@ -32,8 +32,8 @@ def test_segment_ordering_inside_point_lines_arr():
 
     print(E.lines)
     print(len(E.lines))
-    for line, _ in E.lines:
-        print(f"{line} {(line.get_slope_angle(E))}")
+    for line, og in E.lines:
+        print(f"({line}, {og}) {(line.get_slope_angle(E))}")
 
     """
     A B C
@@ -93,6 +93,6 @@ def ggb_test():
     print(end - start)
 
 
-# test_segment_ordering_inside_point_lines_arr()
+test_segment_ordering_inside_point_lines_arr()
 # try_solve_problem_using_coor_system()
 ggb_test()

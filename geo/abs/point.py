@@ -1,12 +1,12 @@
 class Point:
 
-    nextId = 0
+    next_id = 0
 
     def __init__(self, name, x=None, y=None):
         """Create a new point"""
         self.name = name
-        self.id = Point.nextId
-        Point.nextId += 1
+        self.id = Point.next_id
+        Point.next_id += 1
         self.lines = []
 
         self.x = x
@@ -14,7 +14,6 @@ class Point:
 
     def add_line(self, *lines):
         """Add line or lines that the point is on"""
-
         for line in lines:
             if self in line.midpoints:
                 # split the segment into 2 segments (self is an endpoint to both)
