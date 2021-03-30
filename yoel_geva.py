@@ -277,8 +277,8 @@ class YoelGevaProblems(ProblemCollection):
 
 if __name__ == "__main__":
     # check all
-    YoelGevaProblems.check_all()
-    # print(ans := YoelGevaProblems.p353_e27())
+    # YoelGevaProblems.check_all()
+    print(ans := YoelGevaProblems.p353_e27())
 
     # print(ans[0] == ans[1])
     # print(all((check_prob(prob) for prob in [i for i in dir() if i.startswith("p")])))
