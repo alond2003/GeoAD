@@ -27,7 +27,7 @@ class Quadrilateral(Polygon):
         return "▱" + str(self)
 
     @classmethod
-    def fromPolygon(cls, poly):
+    def from_polygon(cls, poly):
         return Quadrilateral(
             poly.points, poly.sides, poly.aangs, poly.aconv, poly.sconv
         )
@@ -38,7 +38,7 @@ class Triangle(Polygon):
         return "△" + str(self)
 
     @classmethod
-    def fromPolygon(cls, poly):
+    def from_polygon(cls, poly):
         return Triangle(
             poly.points, poly.sides, poly.aangs, poly.aconv, poly.sconv
         )

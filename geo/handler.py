@@ -326,11 +326,11 @@ class Handler:
         self.rangles = dict(((i, None) for i in self.get_angles()))
         for abs_ang in self.rangles.keys():
             if self.is_180_angle(abs_ang):
-                self.rangles[abs_ang] = RealAngle.fromAbsAngle(
+                self.rangles[abs_ang] = RealAngle.from_absangle(
                     abs_ang, Degree(False, d=180)
                 )
             else:
-                self.rangles[abs_ang] = RealAngle.fromAbsAngle(
+                self.rangles[abs_ang] = RealAngle.from_absangle(
                     abs_ang, Degree()
                 )
         self.aconv = Convertor(self.disassemble_angle, self.get_rang)
@@ -339,7 +339,7 @@ class Handler:
         """Init segments with length value"""
         rseg_list = sum(
             [
-                RealSegment.fromSegment(i).get_all_subsegments()
+                RealSegment.from_abssegment(i).get_all_subsegments()
                 for i in self.segments
             ],
             [],
@@ -751,10 +751,12 @@ class Handler:
         return Polygon(pointlist, sides, aangs, self.aconv, self.sconv)
 
     def find_all_triangles(self):
-        return [Triangle.fromPolygon(p) for p in self.find_all_polygons(3)]
+        return [Triangle.from_polygon(p) for p in self.find_all_polygons(3)]
 
     def find_all_quadrilateral(self):
-        return [Quadrilateral.fromPolygon(p) for p in self.find_all_polygons(4)]
+        return [
+            Quadrilateral.from_polygon(p) for p in self.find_all_polygons(4)
+        ]
 
     """ BASIC SEGMENT_CALC METHODS"""
 

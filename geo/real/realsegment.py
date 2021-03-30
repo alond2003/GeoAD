@@ -99,6 +99,6 @@ class RealSegment(AbsSegment):
         return int(self.leng)
 
     @classmethod
-    def fromSegment(cls, seg, leng=None):
+    def from_abssegment(cls, seg, leng=None):
         """Create a RealSegment based on Segment"""
         return RealSegment(*seg.get_all_points(), leng=leng)

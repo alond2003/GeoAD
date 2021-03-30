@@ -97,6 +97,6 @@ class RealAngle(AbsAngle):
         return int(self.deg)
 
     @classmethod
-    def fromAbsAngle(cls, absang, deg=None):
+    def from_absangle(cls, absang, deg=None):
         """Create a RealAngle based on an AbsAngle"""
         return RealAngle(absang.ray1, absang.vertex, absang.ray2, deg)
