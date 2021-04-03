@@ -39,6 +39,4 @@ class Triangle(Polygon):
 
     @classmethod
     def from_polygon(cls, poly):
-        return Triangle(
-            poly.points, poly.sides, poly.aangs, poly.aconv, poly.sconv
-        )
+        return Triangle(poly.points, poly.sides, poly.aangs, poly.aconv, poly.sconv)

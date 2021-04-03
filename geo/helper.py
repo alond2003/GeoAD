@@ -292,6 +292,7 @@ class Helper:
     """Segments"""
 
     def conts(self, og, new):
+        """Continue AbsSegment og to new"""
         og = self.s(og)
         if new.index(str(og.start)) > new.index(str(og.end)):
             new = new[::-1]

@@ -58,9 +58,7 @@ class AbsSegment:
         """Return subsegment from point (containing all the midpoints in between)"""
         if point in self.midpoints:
             res = AbsSegment(point, self.end)
-            res.set_midpoints(
-                *self.midpoints[self.midpoints.index(point) + 1 :]
-            )
+            res.set_midpoints(*self.midpoints[self.midpoints.index(point) + 1 :])
             res.parallel = self.parallel
             return res
         elif point == self.start:
@@ -87,14 +85,10 @@ class AbsSegment:
     def get_subsegment(self, name):
         """Get subsegment based on name"""
         furthest, closest = [
-            p
-            for p in self.get_all_points()
-            if p.name == name[0] or p.name == name[-1]
+            p for p in self.get_all_points() if p.name == name[0] or p.name == name[-1]
         ]
 
-        if self.get_all_points().index(furthest) < self.get_all_points().index(
-            closest
-        ):
+        if self.get_all_points().index(furthest) < self.get_all_points().index(closest):
             furthest, closest = closest, furthest
         return self.get_subsegment_to(furthest).get_subsegment_from(closest)
 
@@ -114,9 +108,7 @@ class AbsSegment:
         """Return the intersection point or None if there isn't any"""
         if self.is_parallel(other):
             return None
-        lst = list(
-            set(self.get_all_points()).intersection(set(other.get_all_points()))
-        )
+        lst = list(set(self.get_all_points()).intersection(set(other.get_all_points())))
         if len(lst) == 0:
             return None
         return lst[0]

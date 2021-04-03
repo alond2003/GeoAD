@@ -58,10 +58,7 @@ class Expression:
             del self.value[key]
         # convert float keys to int when needed
         for key in self.value:
-            if (
-                isinstance(self.value[key], float)
-                and self.value[key].is_integer()
-            ):
+            if isinstance(self.value[key], float) and self.value[key].is_integer():
                 self.value[key] = int(self.value[key])
 
     def isknown(self):
@@ -217,11 +214,7 @@ class Expression:
         if isinstance(other, (int, float)):
             if other == 0 and len(self.value) == 0:
                 return True
-            return (
-                len(self.value) == 1
-                and 0 in self.value
-                and self.value[0] == other
-            )
+            return len(self.value) == 1 and 0 in self.value and self.value[0] == other
         elif isinstance(other, (type(self), dict)):
             return self - other == 0
         else:

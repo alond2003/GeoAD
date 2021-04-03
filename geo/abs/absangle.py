@@ -10,15 +10,11 @@ class AbsAngle:
 
     def get_start_point(self):
         """Return the startpoint of ray1"""
-        return (
-            self.ray1.start if self.ray1.end == self.vertex else self.ray1.end
-        )
+        return self.ray1.start if self.ray1.end == self.vertex else self.ray1.end
 
     def get_end_point(self):
         """Return the endpoint of ray2"""
-        return (
-            self.ray2.start if self.ray2.end == self.vertex else self.ray2.end
-        )
+        return self.ray2.start if self.ray2.end == self.vertex else self.ray2.end
 
     def get_minimized_absangle(self):
         """Return an AbsAngle with the smallest rays possible (common for all same angles)"""

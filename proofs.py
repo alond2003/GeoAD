@@ -50,7 +50,7 @@ class ProofCollection(ProblemCollection):
         parts = h.g().disassemble_angle(ACB)
         # therefore, we know sum(parts) = 180
         if print_proof:
-            print(f"ACB = 180, {ACB} = {' + '.join(map(str,parts))}")
+            print(f"{ACB} = 180, {ACB} = {' + '.join(map(str,parts))}")
             print(f"⇓")
             print(f"{' + '.join(map(str,parts))} = 180")
 
@@ -64,9 +64,7 @@ class ProofCollection(ProblemCollection):
         h.s("AEB", "CED")
         h.calc(print_proof, use_theorems=[1])
         if print_proof:
-            print(
-                f"{h.a('AEC')} = {h.geta('AEC')}, {h.a('BED')} = {h.geta('BED')}"
-            )
+            print(f"{h.a('AEC')} = {h.geta('AEC')}, {h.a('BED')} = {h.geta('BED')}")
             print(f"⇓")
             print(f"{h.a('AEC')} = {h.a('BED')}")
         return (h.geta("AEC") == h.geta("BED"),), (True,)
@@ -85,7 +83,7 @@ class ProofCollection(ProblemCollection):
             print(
                 " + ".join(map(str, aangs_around_E)),
                 "=",
-                " + ".join(map(str, h.geta(*aangs_around_E))),
+                f"({') + ('.join(map(str, h.geta(*aangs_around_E)))})",
                 "=",
                 sum_aangs_around_E,
             )
@@ -93,7 +91,6 @@ class ProofCollection(ProblemCollection):
             print(" + ".join(map(str, aangs_around_E)), "=", sum_aangs_around_E)
 
         return (sum_aangs_around_E,), (360,)
-        # return sum(h.geta(*h.g().get_angles_around_point(h.p("E")))))
 
     @staticmethod
     def th4(print_proof=False):
@@ -129,9 +126,7 @@ class ProofCollection(ProblemCollection):
         # Consecutive interior angles example (BEG & HFD)
         consecutive = h.geta("BEG") + h.geta("HFD") == 180
         if print_proof:
-            print(
-                f"{h.a('GEA')} = {h.geta('GEA')}, {h.a('GFC')} = {h.geta('GFC')}"
-            )
+            print(f"{h.a('GEA')} = {h.geta('GEA')}, {h.a('GFC')} = {h.geta('GFC')}")
             print("⇓")
             print(f"{h.a('GEA')} = {h.a('GFC')} (corresponding)")
             print()
@@ -151,7 +146,6 @@ class ProofCollection(ProblemCollection):
         2. Converse corresponding angles (proof based on 1)
         3. Converse consecutive interior angles (proof based on 1)
         """
-        # READ: https://en.wikipedia.org/wiki/Playfair%27s_axiom
 
         ans = [[], []]
 
@@ -195,13 +189,9 @@ class ProofCollection(ProblemCollection):
         ans[1].append(True)
         # because they are a pair of equal alternate interior angles, AB || CD (as was proven in 1)
         if print_proof:
-            print(
-                f"{h.a('GEA')} = {h.geta('GEA')} = {h.geta('HFD')} = {h.a('HFD')}"
-            )
+            print(f"{h.a('GEA')} = {h.geta('GEA')} = {h.geta('HFD')} = {h.a('HFD')}")
             print(f"⇓")
-            print(
-                f"AB || CD (Converse alternate interior angles - proven before)"
-            )
+            print(f"AB || CD (Converse alternate interior angles - proven before)")
 
             print("\n")
 
@@ -220,13 +210,9 @@ class ProofCollection(ProblemCollection):
         ans[1].append(True)
         # because they are a pair of equal alternate interior angles, AB || CD (as was proven in 1)
         if print_proof:
-            print(
-                f"{h.a('GEA')} = {h.geta('GEA')} = {h.geta('HFD')} = {h.a('HFD')}"
-            )
+            print(f"{h.a('GEA')} = {h.geta('GEA')} = {h.geta('HFD')} = {h.a('HFD')}")
             print(f"⇓")
-            print(
-                f"AB || CD (Converse alternate interior angles - proven before)"
-            )
+            print(f"AB || CD (Converse alternate interior angles - proven before)")
 
         return tuple(ans[0]), tuple(ans[1])
 
@@ -289,15 +275,3 @@ class ProofCollection(ProblemCollection):
             print(f"{h.a('BCD')} = {h.a('BAC')} + {h.a('CBA')}")
 
         return (h.geta("BCD") == sum(h.geta("BAC", "CBA")),), (True,)
-
-    # @staticmethod
-    # def _thn(print_proof=False):
-
-    #     h = Helper()
-    #     h.ps_from_file()
-    #     _pggb()
-
-
-if __name__ == "__main__":
-    # ProofCollection.check_all()
-    print(ProofCollection.th6(True))

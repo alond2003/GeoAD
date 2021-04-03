@@ -2,7 +2,7 @@ class UnionFind:
     def __init__(self):
         """Init self to a set by itself"""
         self.par = self
-        self.rank = 1
+        self.rank = 0
 
     def find(self):
         """Return the root of self and do path compression"""
@@ -12,17 +12,16 @@ class UnionFind:
 
     def union(self, other):
         """Union the sets of self and other (by rank)"""
-        if self.find() == other.find():
+        x, y = self.find(), other.find()
+        if x == y:
             return
-        if self.find().rank > other.find().rank:
-            other.find().par = self.find()
-        elif other.find().rank > self.find().rank:
-            self.find().par = other.find()
-        else:
-            self.find().par = other
-            other.find().rank += 1
+        if x.rank < y.rank:
+            x, y = y, x
+        # now x.rank >= y.rank
+        y.par = x
+        if x.rank == y.rank:
+            x.rank += 1
 
     def is_same(self, other):
         """Check if self and other are in the same set"""
         return self.find() == other.find()
-
