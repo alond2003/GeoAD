@@ -1,3 +1,5 @@
+"""geo/real/realsegment.py"""
+
 from geo.abs.abssegment import AbsSegment
 from geo.real.expression import Length
 from functools import total_ordering

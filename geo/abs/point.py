@@ -1,3 +1,6 @@
+"""geo/abs/point.py"""
+
+
 class Point:
 
     next_id = 0

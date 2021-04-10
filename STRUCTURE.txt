@@ -1,0 +1,39 @@
+GeoAD/
+├── STRUCTURE.txt
+├── geo
+│   ├── __init__.py
+│   ├── abs
+│   │   ├── __init__.py
+│   │   ├── point.py
+│   │   ├── abssegment.py
+│   │   └── absangle.py
+│   ├── alg
+│   │   ├── __init__.py
+│   │   └── unionfind.py
+│   ├── real
+│   │   ├── __init__.py
+│   │   ├── expression.py
+│   │   ├── realsegment.py
+│   │   └── realangle.py
+│   ├── comp
+│   │   ├── __init__.py
+│   │   ├── convertor.py
+│   │   └── polygon.py
+│   ├── filehandler.py
+│   ├── handler.py
+│   ├── helper.py
+│   └── problemcollection.py 
+├── ggb_files
+│   ├── th1.ggb
+│   ├── th2.ggb
+│   ├── th3.ggb
+│   ├── th4.ggb
+│   ├── th5_1.ggb
+│   ├── th5_2.ggb
+│   ├── th5_3.ggb
+│   ├── th6.ggb
+│   ├── th7.ggb
+│   └── th8.ggb
+├── proofs.py
+├── yoel_geva.py
+└── main.py

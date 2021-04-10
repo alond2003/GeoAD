@@ -1,3 +1,5 @@
+"""yoel_geva.py"""
+
 from geo.problemcollection import ProblemCollection
 from geo.helper import Helper
 from geo.real.expression import Degree
@@ -223,9 +225,7 @@ class YoelGevaProblems(ProblemCollection):
     @staticmethod
     def p353_e27(print_proof=True):
         h = Helper()
-        h.ps_from_file(r"ggb_test\p353_e27.ggb")
-        # can also be written as:
-        # h.ps("ABCDE", [0, 0, 6, 4, 2.4], [4, 0, 0, 4, 2.4])
+        h.ps("ABCDE", [0, 0, 6, 4, 2.4], [4, 0, 0, 4, 2.4])
         h.s("AB", "BC", "CEA", "AD", "DEB")
         h.paras("AD", "BC")
         h.seta("DAC", 42)

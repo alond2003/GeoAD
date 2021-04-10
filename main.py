@@ -1,3 +1,5 @@
+"""main.py"""
+
 from yoel_geva import YoelGevaProblems
 from proofs import ProofCollection
 

@@ -1,3 +1,5 @@
+"""geo/abs/abssegment.py"""
+
 import math
 
 from geo.alg.unionfind import UnionFind

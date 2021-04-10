@@ -1,3 +1,6 @@
+"""geo/alg/unionfind.py"""
+
+
 class UnionFind:
     def __init__(self):
         """Init self to a set by itself"""

@@ -1,3 +1,5 @@
+"""geo/handler.py"""
+
 from numpy import argmax, argmin
 import itertools
 

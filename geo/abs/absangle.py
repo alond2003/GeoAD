@@ -1,3 +1,5 @@
+"""geo/abs/absangle.py"""
+
 from geo.abs.abssegment import AbsSegment
 
 

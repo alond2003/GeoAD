@@ -1,3 +1,5 @@
+"""geo/filehandler.py"""
+
 import zipfile
 import os
 

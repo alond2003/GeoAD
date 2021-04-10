@@ -1,3 +1,5 @@
+"""geo/helper.py"""
+
 import itertools
 from geo.abs.abssegment import AbsSegment
 from geo.abs.absangle import AbsAngle

@@ -1,3 +1,5 @@
+"""proofs.py"""
+
 from geo.problemcollection import ProblemCollection
 from geo.filehandler import print_points_from_file as _pggb
 from geo.helper import Helper

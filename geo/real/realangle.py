@@ -1,3 +1,5 @@
+"""geo/real/realangle.py"""
+
 from geo.abs.abssegment import AbsSegment
 from geo.abs.absangle import AbsAngle
 from geo.real.expression import Degree

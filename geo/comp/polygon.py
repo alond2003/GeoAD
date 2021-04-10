@@ -1,3 +1,6 @@
+"""geo/comp/polygon.py"""
+
+
 class Polygon:
     def __init__(self, points, sides, aangs, aconv, sconv):
         """Init points, sides, and angles"""

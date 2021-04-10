@@ -1,3 +1,6 @@
+"""geo/comp/convertor.py"""
+
+
 class Convertor:
     def __init__(self, tolist, get):
         self.tolist = tolist
