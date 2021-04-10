@@ -2,7 +2,7 @@
 Advanced Geometric Descriptor - geometry problem solver with the "argument-explanation" method.
 ## How to use it?
 ### Create the problem with GeoGebra
-Draw your geometry problem (no need to be exact, just a rough drawing). The program can import your points coordinates from GeoGebra, so you wouldn't have to type it manually.
+Draw your geometry problem (no need to be exact, just a rough drawing). The program can import your points coordinates from GeoGebra, so you wouldn't have to type it manually.  
 [GeoGebra website](https://www.geogebra.org/calculator)
 ![GeoGebra example](images/geogebra_example.png)
 ### Download drawing from GeoGebra
