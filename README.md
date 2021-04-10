@@ -6,7 +6,7 @@ Draw your geometry problem (no need to be exact, just a rough drawing). The prog
 [GeoGebra website](https://www.geogebra.org/calculator)
 ![GeoGebra example](images/geogebra_example.png)
 ### Download drawing from GeoGebra
-In order to import your points' coordinates, download .ggb file from GeoGebra.
+In order to import your points' coordinates, download .ggb file from GeoGebra.  
 ![save GeoGebra to ggb file](images/save_to_ggb.png)
 ### Add problem data with python code
 Use the Helper object to code your problem data and call `Helper.calc()` in order to solve your problem.
